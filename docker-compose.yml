@@ -25,18 +25,17 @@ services:
     image: new-api:local
     container_name: new-api
     restart: always
+    network_mode: host                # ← 关键：使用宿主机网络
     command: --log-dir /app/logs
-    ports:
-      - "3000:3000"
+    # ports 在 host 模式下不需要（容器直接监听宿主机端口）
     volumes:
       - ./data:/data
       - ./logs:/app/logs
-    extra_hosts:                      # 允许容器访问宿主机服务
-      - "host.docker.internal:host-gateway"
     environment:
-      - SQL_DSN=postgresql://newapi:KLkxwftyYy4r@host.docker.internal:5432/new-api # ⚠️ IMPORTANT: Change the password in production! Using host.docker.internal to access host PostgreSQL
-      # - SQL_DSN=root:123456@tcp(host.docker.internal:3306)/new-api  # Point to host MySQL, uncomment if using MySQL
-      - REDIS_CONN_STRING=redis://host.docker.internal:6379 # ⚠️ IMPORTANT: Change the password in production! Using host.docker.internal to access host Redis
+      # localhost 现在真正指向宿主机，可直接访问宿主机上的服务
+      - SQL_DSN=postgresql://newapi:KLkxwftyYy4r@localhost:5432/new-api # ⚠️ IMPORTANT: Change the password in production! Using host network to access host PostgreSQL
+      # - SQL_DSN=root:123456@tcp(localhost:3306)/new-api  # Point to host MySQL, uncomment if using MySQL
+      - REDIS_CONN_STRING=redis://localhost:6379 # ⚠️ IMPORTANT: Change the password in production! Using host network to access host Redis
       - TZ=Asia/Shanghai
       - ERROR_LOG_ENABLED=true # 是否启用错误日志记录 (Whether to enable error log recording)
       - BATCH_UPDATE_ENABLED=true  # 是否启用批量更新 (Whether to enable batch update)
@@ -49,19 +48,14 @@ services:
 #      - UMAMI_WEBSITE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Umami 网站 ID (Umami Website ID)
 #      - UMAMI_SCRIPT_URL=https://analytics.umami.is/script.js  # Umami 脚本 URL，默认为官方地址 (Umami Script URL, defaults to official URL)
 
-    # No depends_on needed when using local Redis and PostgreSQL
-    networks:
-      - new-api-network
+    # No depends_on needed when using host network + local services
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Local Redis and PostgreSQL are used, so no container services needed
+  # Local Redis and PostgreSQL are used on the host
+  # With network_mode: host, the container can access them via localhost
   # Make sure Redis is running on localhost:6379
   # Make sure PostgreSQL is running on localhost:5432
-
-networks:
-  new-api-network:
-    driver: bridge
