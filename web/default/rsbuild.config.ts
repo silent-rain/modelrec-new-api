@@ -90,6 +90,7 @@ export default defineConfig(({ envMode }) => {
     },
     tools: {
       rspack: {
+        parallelism: 2, 
         plugins: [
           tanstackRouter({
             target: 'react',
