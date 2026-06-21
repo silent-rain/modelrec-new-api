@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="sk-fohCbrX6gl4LkzPhftbOUgGNtyx0JGBe0rRXZcds8l6Lm3xU",  # 平台颁发的令牌
-    base_url="http://localhost:3000/v1"
+    api_key="sk-kXY7NiE2adr63WgsuSVTHl3GTTB9bB3pC5hJLhlHtcYGuIl0",  # 平台颁发的令牌
+    base_url="http://47.121.128.119/v1"
 )
 
 # 流式请求
