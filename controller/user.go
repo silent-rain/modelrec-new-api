@@ -43,7 +43,19 @@ func Login(c *gin.Context) {
 	}
 	username := loginRequest.Username
 	password := loginRequest.Password
-	if username == "" || password == "" {
+	if username == "" {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+
+	// 手机号登录：用户名为手机号格式，密码为验证码或为空
+	if isValidPhone(username) {
+		handlePhoneLogin(c, username, password)
+		return
+	}
+
+	// 原有用户名/邮箱+密码登录
+	if password == "" {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
 	}
@@ -156,6 +168,74 @@ func setupLogin(user *model.User, c *gin.Context) {
 	})
 }
 
+// handlePhoneLogin 手机号登录：调用微服务验证验证码，验证通过后登录
+func handlePhoneLogin(c *gin.Context, phone string, code string) {
+	// 1. 验证码不能为空
+	if code == "" {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+
+	// 2. 调用微服务验证验证码
+	valid, err := common.VerifySMSCode(phone, code)
+	if err != nil || !valid {
+		if err != nil {
+			common.ApiError(c, err)
+		} else {
+			common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		}
+		return
+	}
+
+	// 3. 查找用户
+	user, err := model.GetUserByPhone(phone)
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgUserNotExists)
+		return
+	}
+
+	// 4. 检查用户状态
+	if user.Status != common.UserStatusEnabled {
+		common.ApiErrorI18n(c, i18n.MsgAuthUserBanned)
+		return
+	}
+
+	// 5. 检查是否启用2FA
+	if model.IsTwoFAEnabled(user.Id) {
+		session := sessions.Default(c)
+		session.Set("pending_username", user.Username)
+		session.Set("pending_user_id", user.Id)
+		err := session.Save()
+		if err != nil {
+			common.ApiErrorI18n(c, i18n.MsgUserSessionSaveFailed)
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": i18n.T(c, i18n.MsgUserRequire2FA),
+			"success": true,
+			"data": map[string]interface{}{
+				"require_2fa": true,
+			},
+		})
+		return
+	}
+
+	setupLogin(user, c)
+}
+
+// isValidPhone 验证手机号格式（纯数字，6-15位）
+func isValidPhone(phone string) bool {
+	if len(phone) < 6 || len(phone) > 15 {
+		return false
+	}
+	for _, ch := range phone {
+		if ch < '0' || ch > '9' {
+			return false
+		}
+	}
+	return true
+}
+
 func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
@@ -190,10 +270,12 @@ func Register(c *gin.Context) {
 	}
 	if err := common.Validate.Struct(&user); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgUserInputInvalid, map[string]any{"Error": err.Error()})
+		common.SysLog(fmt.Sprintf("Register validation failed: %v", err))
 		return
 	}
-	if common.EmailVerificationEnabled {
-		if user.Email == "" || user.VerificationCode == "" {
+	// 邮箱验证：仅当用户提供邮箱时才验证（手机号注册不需要邮箱验证）
+	if common.EmailVerificationEnabled && user.Email != "" {
+		if user.VerificationCode == "" {
 			common.ApiErrorI18n(c, i18n.MsgUserEmailVerificationRequired)
 			return
 		}
@@ -202,6 +284,40 @@ func Register(c *gin.Context) {
 			return
 		}
 	}
+
+	// 手机号注册验证
+	if user.Phone != "" {
+		if !isValidPhone(user.Phone) {
+			common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+			common.SysLog(fmt.Sprintf("Phone registration failed: invalid phone format %s", user.Phone))
+			return
+		}
+		// 调用微服务验证验证码
+		if user.VerificationCode == "" {
+			common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+			common.SysLog("Phone registration failed: verification code is empty")
+			return
+		}
+		valid, err := common.VerifySMSCode(user.Phone, user.VerificationCode)
+		if err != nil || !valid {
+			if err != nil {
+				common.ApiError(c, err)
+			} else {
+				common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+			}
+			common.SysLog(fmt.Sprintf("Phone registration failed: SMS verification failed, phone=%s, code=%s, error=%v, valid=%v", 
+				user.Phone, user.VerificationCode, err, valid))
+			return
+		}
+		// 检查手机号是否已被注册
+		if model.IsPhoneAlreadyTaken(user.Phone) {
+			common.ApiErrorI18n(c, i18n.MsgUserExists)
+			common.SysLog(fmt.Sprintf("Phone registration failed: phone %s already registered", user.Phone))
+			return
+		}
+		user.PhoneVerified = true
+	}
+
 	exist, err := model.CheckUserExistOrDeleted(user.Username, user.Email)
 	if err != nil {
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
@@ -223,6 +339,11 @@ func Register(c *gin.Context) {
 	}
 	if common.EmailVerificationEnabled {
 		cleanUser.Email = user.Email
+	}
+	// 保存手机号（如果提供了手机号）
+	if user.Phone != "" {
+		cleanUser.Phone = user.Phone
+		cleanUser.PhoneVerified = user.PhoneVerified
 	}
 	if err := cleanUser.Insert(inviterId); err != nil {
 		common.ApiError(c, err)
@@ -884,6 +1005,7 @@ func CreateUser(c *gin.Context) {
 	}
 	if err := common.Validate.Struct(&user); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgUserInputInvalid, map[string]any{"Error": err.Error()})
+		common.SysLog(fmt.Sprintf("Register validation failed: %v", err))
 		return
 	}
 	if user.DisplayName == "" {

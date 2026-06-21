@@ -21,6 +21,8 @@ var (
 	LogDir       = flag.String("log-dir", "./logs", "specify the log directory")
 )
 
+var SMSAuthBaseURL string // 短信微服务基础URL，从 .env 中 SMS_AUTH_BASE_URL 读取
+
 func printHelp() {
 	fmt.Println("NewAPI(Based OneAPI) " + Version + " - The next-generation LLM gateway and AI asset management system supports multiple languages.")
 	fmt.Println("Original Project: OneAPI by JustSong - https://github.com/songquanpeng/one-api")
@@ -100,6 +102,7 @@ func InitEnv() {
 
 	// Initialize variables with GetEnvOrDefault
 	SyncFrequency = GetEnvOrDefault("SYNC_FREQUENCY", 60)
+	SMSAuthBaseURL = GetEnvOrDefaultString("SMS_AUTH_BASE_URL", "http://127.0.0.1:8080")
 	BatchUpdateInterval = GetEnvOrDefault("BATCH_UPDATE_INTERVAL", 5)
 	RelayTimeout = GetEnvOrDefault("RELAY_TIMEOUT", 0)
 	RelayIdleConnTimeout = GetEnvOrDefault("RELAY_IDLE_CONN_TIMEOUT", 90)
