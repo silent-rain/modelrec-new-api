@@ -39,6 +39,8 @@ export interface RegisterPayload {
   verification_code?: string
   aff_code?: string
   turnstile?: string
+  phone_number?: string              // 新增
+  phone_verification_code?: string   // 新增
 }
 
 export interface PasswordResetPayload {

@@ -34,6 +34,8 @@ export const registerFormSchema = z
   .object({
     username: z.string().min(1, 'Please enter your username'),
     email: z.string().optional(),
+    phone_number: z.string().optional(),  // 新增
+    phone_verification_code: z.string().optional(),  // 新增
     password: z
       .string()
       .min(1, 'Please enter your password')
@@ -79,3 +81,6 @@ export const PASSWORD_RESET_COUNTDOWN = 30 // seconds
 // ============================================================================
 
 export const OAUTH_BIND_STORAGE_KEY = 'oauth:binding:result'
+
+// 在文件末尾添加倒计时常量
+export const SMS_VERIFICATION_COUNTDOWN = 60 // seconds

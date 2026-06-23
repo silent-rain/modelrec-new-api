@@ -45,6 +45,7 @@ import { OAuthProviders } from '@/features/auth/components/oauth-providers'
 import { registerFormSchema } from '@/features/auth/constants'
 import { useAuthRedirect } from '@/features/auth/hooks/use-auth-redirect'
 import { useEmailVerification } from '@/features/auth/hooks/use-email-verification'
+import { useSmsVerification } from '@/features/auth/hooks/use-sms-verification'  // 新增
 import { useTurnstile } from '@/features/auth/hooks/use-turnstile'
 import {
   getAffiliateCode,
@@ -58,6 +59,7 @@ export function SignUpForm({
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
+  const [smsVerificationCode, setSmsVerificationCode] = useState('')  // 新增
   const [agreedToLegal, setAgreedToLegal] = useState(false)
   const [wechatCode, setWeChatCode] = useState('')
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
@@ -83,10 +85,23 @@ export function SignUpForm({
     validateTurnstile,
   })
 
+  // 新增短信验证 Hook
+  const {
+    isSending: isSendingSms,
+    secondsLeft: smsSecondsLeft,
+    isActive: isSmsActive,
+    sendCode: sendSms,
+  } = useSmsVerification({
+    turnstileToken,
+    validateTurnstile,
+  })
+
   const form = useForm<z.infer<typeof registerFormSchema>>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
       username: '',
+      phone_number: '',  // 新增
+      phone_verification_code: '',  // 新增
       email: '',
       password: '',
       confirmPassword: '',
@@ -152,6 +167,20 @@ export function SignUpForm({
       }
     }
 
+    // 新增：验证短信验证码
+    if (data.phone_number && smsVerificationCode) {
+      try {
+        const verifyRes = await verifySmsCode(data.phone_number, smsVerificationCode)
+        if (!verifyRes?.success) {
+          toast.error(verifyRes?.message || t('Invalid SMS verification code'))
+          return
+        }
+      } catch (_error) {
+        toast.error(t('Failed to verify SMS code'))
+        return
+      }
+    }
+
     if (!validateTurnstile()) return
 
     setIsLoading(true)
@@ -161,6 +190,8 @@ export function SignUpForm({
         password: data.password,
         email: data.email || undefined,
         verification_code: verificationCode || undefined,
+        phone_number: data.phone_number || undefined,  // 新增
+        phone_verification_code: smsVerificationCode || undefined,  // 新增
         aff_code: getAffiliateCode(),
         turnstile: turnstileToken,
       })
@@ -333,6 +364,61 @@ export function SignUpForm({
             </div>
           </>
         )}
+
+        {/* SMS Verification Section */}
+        <div className='mt-4 space-y-4'>
+          {/* Phone Number Field */}
+          <FormField
+            control={form.control}
+            name='phone_number'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('Phone number')}</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder={t('Enter your phone number')} 
+                    type='tel'
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* SMS Verification Code Field */}
+          <div className='flex items-end gap-2'>
+            <div className='flex-1'>
+              <Input
+                placeholder={t('SMS verification code')}
+                value={smsVerificationCode}
+                onChange={(e) => setSmsVerificationCode(e.target.value)}
+              />
+            </div>
+            <Button
+              variant='outline'
+              type='button'
+              disabled={
+                isLoading ||
+                isSendingSms ||
+                isSmsActive ||
+                !form.watch('phone_number') ||
+                !turnstileReady
+              }
+              onClick={async () => {
+                await sendSms(form.watch('phone_number') || '')
+              }}
+            >
+              {isSmsActive ? (
+                t('Resend ({{seconds}}s)', { seconds: smsSecondsLeft })
+              ) : isSendingSms ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                t('Send SMS code')
+              )}
+            </Button>
+          </div>
+        </div>
 
         {/* Turnstile */}
         {isTurnstileEnabled && (
