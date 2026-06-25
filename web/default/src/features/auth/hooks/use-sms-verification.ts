@@ -63,21 +63,30 @@ export function useSmsVerification(options?: UseSmsVerificationOptions) {
     setIsSending(true)
     try {
       const res = await sendSmsCode(phoneNumber, undefined, undefined, options?.turnstileToken)
-      if (res?.success) {
+      // 后端返回 {code:0, message:"ok", data:{success:true, message:"..."}}
+      // 以 code===0 为成功判定，同时兼容 {success:true} 格式
+      const isSuccess = res?.code === 0 || res?.success === true
+      if (isSuccess) {
         startCountdown()
         toast.success(i18next.t('SMS verification code sent'))
         return true
       }
       toast.error(
-        res?.message || i18next.t('Failed to send SMS verification code')
+        res?.message || res?.data?.message || i18next.t('Failed to send SMS verification code')
       )
       return false
-    } catch (_error) {
-      // Errors are handled by global interceptor
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.data?.message ||
+        error?.message ||
+        i18next.t('Failed to send SMS verification code')
+      toast.error(msg)
       return false
     } finally {
       setIsSending(false)
     }
+
   }
 
   return {

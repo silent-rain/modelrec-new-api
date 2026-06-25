@@ -18,17 +18,46 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useStatus } from '@/hooks/use-status'
+// import { useStatus } from '@/hooks/use-status'
 import { AuthLayout } from '../auth-layout'
-import { TermsFooter } from '../components/terms-footer'
+// import { TermsFooter } from '../components/terms-footer'
 import { SignUpForm } from './components/sign-up-form'
 
 export function SignUp() {
   const { t } = useTranslation()
-  const { status } = useStatus()
+  // const { status } = useStatus()
 
   return (
     <AuthLayout>
+      <div className='flex w-full flex-col items-center'>
+        {/* 标题区域 - 居中 */}
+        <div className='mb-8 space-y-2 text-center'>
+          <h2 className='text-xl font-semibold tracking-tight'>ModelHub</h2>
+          <h2 className='text-2xl font-semibold tracking-tight'>
+            {t('Create an account')}
+          </h2>
+          <p className='text-muted-foreground text-sm'>
+            {t('Register a new account and embark on an AI journey')}
+          </p>
+        </div>
+
+        {/* 表单 */}
+        <SignUpForm className='w-full' />
+
+        {/* 底部链接 - 居中 */}
+        <p className='text-muted-foreground mt-6 text-center text-sm'>
+          {t('Already have an account?')}{' '}
+          <Link
+            to='/sign-in'
+            className='hover:text-primary font-medium'
+          >
+            {t('Sign in')}
+          </Link>
+        </p>
+      </div>
+    </AuthLayout>
+
+/*     <AuthLayout>
       <div className='w-full space-y-8'>
         <div className='space-y-2'>
           <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
@@ -54,6 +83,6 @@ export function SignUp() {
           className='text-center'
         />
       </div>
-    </AuthLayout>
+    </AuthLayout> */
   )
 }

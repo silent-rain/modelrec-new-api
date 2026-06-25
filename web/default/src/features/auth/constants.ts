@@ -34,19 +34,22 @@ export const registerFormSchema = z
   .object({
     username: z.string().min(1, 'Please enter your username'),
     email: z.string().optional(),
-    phone_number: z.string().optional(),  // 新增
-    phone_verification_code: z.string().optional(),  // 新增
+    phone: z // 新增
+      .string()
+      .min(1, 'Please enter your phone number') // 确保不是空字符串（必填）
+      .regex(/^1[3-9]\d{9}$/, 'Please enter a valid phone number'), // 验证必须是1开头的11位纯数字
+    verification_code: z.string().min(1, 'Please enter your phone verification code'),  // 新增
     password: z
       .string()
       .min(1, 'Please enter your password')
       .min(8, 'Password must be at least 8 characters long')
       .max(20, 'Password must be at most 20 characters long'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    // confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match.",
-    path: ['confirmPassword'],
-  })
+  // .refine((data) => data.password === data.confirmPassword, {
+  //   message: "Passwords don't match.",
+  //   path: ['confirmPassword'],
+  // })
 
 export const forgotPasswordFormSchema = z.object({
   email: z.string().email({
@@ -82,5 +85,7 @@ export const PASSWORD_RESET_COUNTDOWN = 30 // seconds
 
 export const OAUTH_BIND_STORAGE_KEY = 'oauth:binding:result'
 
-// 在文件末尾添加倒计时常量
+// ============================================================================
+// SMS Constants
+// ============================================================================
 export const SMS_VERIFICATION_COUNTDOWN = 60 // seconds
