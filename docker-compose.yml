@@ -50,9 +50,12 @@ services:
       - ./data:/data
       - ./logs:/app/logs
     environment:
-      - SQL_DSN=postgresql://newapi:pass@postgres:5432/new-api # ⚠️ IMPORTANT: Change the password in production!
-      # - SQL_DSN=root:123456@tcp(mysql:3306)/new-api  # Point to the mysql service, uncomment if using MySQL
-      - REDIS_CONN_STRING=redis://redis:6379 # ⚠️ IMPORTANT: Change the password in production!
+      - SQL_DSN=postgresql://root:123456@postgres:5432/new-api # ⚠️ IMPORTANT: Change the password in production!
+#      - SQL_DSN=root:123456@tcp(mysql:3306)/new-api  # Point to the mysql service, uncomment if using MySQL
+#      - LOG_SQL_DSN=postgresql://root:123456@postgres:5432/new-api-log # OPTIONAL: If you want a separate database for logging, uncomment and set this
+#      - LOG_SQL_DSN=clickhouse://default:123456@clickhouse:9000/new_api_logs # OPTIONAL: Use ClickHouse for logs only; also uncomment clickhouse in depends_on and the clickhouse service below
+#      - LOG_SQL_CLICKHOUSE_TTL_DAYS=0 # OPTIONAL: ClickHouse log retention days. Unset or 0 disables automatic deletion; set to e.g. 30 to keep 30 days
+      - REDIS_CONN_STRING=redis://:123456@redis:6379 # ⚠️ IMPORTANT: Change the password in production!
       - TZ=Asia/Shanghai
       - ERROR_LOG_ENABLED=true # 是否启用错误日志记录 (Whether to enable error log recording)
       - BATCH_UPDATE_ENABLED=true  # 是否启用批量更新 (Whether to enable batch update)
@@ -66,10 +69,10 @@ services:
 #      - UMAMI_SCRIPT_URL=https://analytics.umami.is/script.js  # Umami 脚本 URL，默认为官方地址 (Umami Script URL, defaults to official URL)
 
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - redis
+      - postgres
+#      - mysql  # Uncomment if using MySQL
+#      - clickhouse  # Uncomment if using ClickHouse for LOG_SQL_DSN
     networks:
       - new-api-network
     healthcheck:
@@ -146,38 +149,10 @@ services:
 #      - "8123:8123"  # HTTP interface, uncomment if you need external access
 #      - "9000:9000"  # Native interface used by the LOG_SQL_DSN example above
 
-
-  # ============ pgAdmin 数据库管理界面（可选） ============
-  # pgadmin:
-  #   image: dpage/pgadmin4:latest
-  #   container_name: new-api-pgadmin
-  #   restart: always
-  #   ports:
-  #     - "127.0.0.1:5050:80"   # 只绑定到 localhost，外网无法直接访问
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
-  #     PGADMIN_DEFAULT_PASSWORD: CHANGE_THIS_PGADMIN_PASSWORD
-  #     PGADMIN_CONFIG_SERVER_MODE: "True"
-  #     PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-  #   volumes:
-  #     - pgadmin-data:/var/lib/pgadmin
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - new-api-network
-  #   # 不需要时注释掉整个 pgadmin 服务即可
-
 volumes:
   pg_data:
-    driver: local
-  #  mysql_data:
-  #    driver: local
-  redis_data:
-    driver: local
-  pgadmin-data:
-    driver: local
-  nginx-cache:
+#  mysql_data:
+#  clickhouse_data:
 
 networks:
   new-api-network:
