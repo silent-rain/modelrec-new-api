@@ -129,6 +129,23 @@ services:
 #    ports:
 #      - "3306:3306"  # Uncomment if you need to access MySQL from outside Docker
 
+#  clickhouse:
+#    image: clickhouse/clickhouse-server:24.8
+#    container_name: clickhouse
+#    restart: always
+#    environment:
+#      CLICKHOUSE_DB: new_api_logs
+#      CLICKHOUSE_USER: default
+#      CLICKHOUSE_PASSWORD: 123456  # ⚠️ IMPORTANT: Change this password in production!
+#      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+#    volumes:
+#      - clickhouse_data:/var/lib/clickhouse
+#    networks:
+#      - new-api-network
+#    ports:
+#      - "8123:8123"  # HTTP interface, uncomment if you need external access
+#      - "9000:9000"  # Native interface used by the LOG_SQL_DSN example above
+
 
   # ============ pgAdmin 数据库管理界面（可选） ============
   # pgadmin:
