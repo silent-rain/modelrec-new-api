@@ -2524,7 +2524,7 @@
     "Never expires": "永不过期",
     "Never used an API Gateway?": "从未使用过 API 网关/中转 API？",
     "NEW": "新",
-    "New API": "New API",
+    "New API": "模荐经纬",
     "New API &lt;noreply@example.com&gt;": "New API &lt;noreply@example.com&gt;",
     "New API Project Repository:": "New API 项目仓库：",
     "New Format Template": "新格式模板",
@@ -4616,6 +4616,13 @@
     "Zero retention": "零数据保留",
     "Zhipu": "智谱",
     "Zhipu V4": "智谱 V4",
-    "Zoom": "缩放"
+    "Zoom": "缩放",
+    "Don't have an account yet?": "还没有账号？",
+    "Sign in to your account to continue": "欢迎回来",
+    "Password login": "密码登录",
+    "SMS verification login": "验证码登录",
+    "Remember me": "记住我",
+    "Please enter your username or email": "请输入用户名或电子邮件",
+    "Welcome back": "登录您的账号以继续使用"
   }
 }
