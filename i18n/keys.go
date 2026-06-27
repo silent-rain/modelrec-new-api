@@ -330,3 +330,18 @@ const (
 	MsgCustomOAuthBindingNotFound   = "custom_oauth.binding_not_found"
 	MsgCustomOAuthProviderIdInvalid = "custom_oauth.provider_id_field_invalid"
 )
+
+// Phone authentication related messages
+const (
+	MsgPhoneLoginDisabled         = "phone.login_disabled"
+	MsgPhoneRegisterDisabled      = "phone.register_disabled"
+	MsgInvalidPhone              = "phone.invalid_phone"
+	MsgSMSSendFailed            = "phone.sms_send_failed"
+	MsgSMSVerifyFailed          = "phone.sms_verify_failed"
+	MsgSMSVerificationFailed    = "phone.sms_verification_failed"
+	MsgPhoneAlreadyRegistered    = "phone.already_registered"
+	MsgPhoneAlreadyBound         = "phone.already_bound"
+	MsgPhoneBindSuccess          = "phone.bind_success"
+	MsgPhoneUnbindSuccess       = "phone.unbind_success"
+	MsgSMSSent                  = "phone.sms_sent"
+)

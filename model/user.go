@@ -53,6 +53,8 @@ type User struct {
 	StripeCustomer   string         `json:"stripe_customer" gorm:"type:varchar(64);column:stripe_customer;index"`
 	CreatedAt        int64          `json:"created_at" gorm:"autoCreateTime;column:created_at"`
 	LastLoginAt      int64          `json:"last_login_at" gorm:"default:0;column:last_login_at"`
+	Phone            string         `json:"phone" gorm:"column:phone;index;uniqueIndex"`
+	PhoneVerified    bool           `json:"phone_verified" gorm:"column:phone_verified;default:false"`
 }
 
 func (user *User) ToBaseUser() *UserBase {
@@ -559,6 +561,7 @@ func (user *User) ClearBinding(bindingType string) error {
 		"wechat":   "wechat_id",
 		"telegram": "telegram_id",
 		"linuxdo":  "linux_do_id",
+		"phone":    "phone",
 	}
 
 	column, ok := bindingColumnMap[bindingType]
@@ -1063,6 +1066,41 @@ func IsLinuxDOIdAlreadyTaken(linuxDOId string) bool {
 	var user User
 	err := DB.Unscoped().Where("linux_do_id = ?", linuxDOId).First(&user).Error
 	return !errors.Is(err, gorm.ErrRecordNotFound)
+}
+
+func (user *User) FillUserByPhone() error {
+	if user.Phone == "" {
+		return errors.New("phone is empty")
+	}
+	err := DB.Where("phone = ?", user.Phone).First(user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New("该手机号未绑定")
+	}
+	return err
+}
+
+func GetUserByPhone(phone string) (*User, error) {
+	if phone == "" {
+		return nil, errors.New("phone is empty")
+	}
+	var user User
+	err := DB.Where("phone = ?", phone).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("该手机号未注册")
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func IsPhoneAlreadyTaken(phone string) bool {
+	if phone == "" {
+		return false
+	}
+	var count int64
+	DB.Unscoped().Model(&User{}).Where("phone = ?", phone).Count(&count)
+	return count > 0
 }
 
 func (user *User) FillUserByLinuxDOId() error {

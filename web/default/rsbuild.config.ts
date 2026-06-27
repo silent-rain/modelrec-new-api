@@ -13,13 +13,22 @@ export default defineConfig(({ envMode }) => {
     env.rawPublicVars.VITE_REACT_APP_SERVER_URL ||
     'http://localhost:3000'
 
+  //  新增：SMS 服务地址
+  const smsServiceUrl =
+    process.env.VITE_SMS_SERVICE_URL ||
+    'http://127.0.0.1:8080'
+
   const isProd = envMode === 'production'
-  const devProxy = Object.fromEntries(
-    (['/api', '/mj', '/pg'] as const).map((key) => [
-      key,
-      { target: serverUrl, changeOrigin: true },
-    ]),
-  ) as Record<string, { target: string; changeOrigin: boolean }>
+  const devProxy = {
+    '/api/auth/sms': { target: smsServiceUrl, changeOrigin: true },
+    ...Object.fromEntries(
+      (['/api', '/mj', '/pg'] as const).map((key) => [
+        key,
+        { target: serverUrl, changeOrigin: true },
+      ]),
+    ),
+    
+  } as Record<string, { target: string; changeOrigin: boolean }>
 
   return {
     plugins: [pluginReact()],
@@ -90,12 +99,13 @@ export default defineConfig(({ envMode }) => {
     },
     tools: {
       rspack: {
+        // parallelism: 2, 
         plugins: [
           tanstackRouter({
             target: 'react',
             // Dev: avoid per-route async chunks (reduces white flash on navigation + faster HMR feedback).
             // Prod: keep route-based code splitting.
-            autoCodeSplitting: isProd,
+            autoCodeSplitting: true,
           }),
         ],
       },

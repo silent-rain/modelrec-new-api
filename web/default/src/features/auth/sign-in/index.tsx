@@ -32,25 +32,31 @@ export function SignIn() {
     <AuthLayout>
       <div className='w-full space-y-8'>
         <div className='space-y-2'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
+          {/* <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
             {t('Sign in')}
-          </h2>
-          {!status?.self_use_mode_enabled &&
-            status?.register_enabled !== false && (
-              <p className='text-muted-foreground text-left text-sm sm:text-base'>
-                {t("Don't have an account?")}{' '}
-                <Link
-                  to='/sign-up'
-                  className='hover:text-primary font-medium underline underline-offset-4'
-                >
-                  {t('Sign up')}
-                </Link>
-                .
-              </p>
-            )}
+          </h2> */}
+          <div className='mb-8 space-y-2 text-center'>
+          <h2 className='text-xl font-semibold tracking-tight'>ModelHub</h2>
+            <h2 className='text-2xl font-semibold tracking-tight'>
+              {t('Welcome back')}            {/* i18n key: "Welcome back" → "欢迎回来" */}
+            </h2>
+            <p className='text-muted-foreground text-sm'>
+              {t('Sign in to your account to continue')}   {/* 新增 key */}
+            </p>
+          </div>
         </div>
 
         <UserAuthForm redirectTo={redirect} />
+
+        {!status?.self_use_mode_enabled &&
+          status?.register_enabled !== false && (
+            <p className='text-muted-foreground mt-6 text-center text-sm'>
+              {t("Don't have an account yet?")}{' '}
+              <Link to='/sign-up' className='hover:text-primary font-medium'>
+                {t('Sign up')}
+              </Link>
+            </p>
+          )}
 
         <TermsFooter
           variant='sign-in'

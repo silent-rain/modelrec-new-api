@@ -1,0 +1,61 @@
+# New-API Docker Compose Configuration
+# 
+# This configuration uses LOCAL Redis and PostgreSQL services
+# Make sure Redis is running on localhost:6379
+# Make sure PostgreSQL is running on localhost:5432 with database 'new-api'
+#
+# Quick Start:
+#   1. Start local Redis and PostgreSQL services
+#   2. docker-compose up -d
+#   3. Access at http://localhost:3000
+#
+# Using MySQL instead of PostgreSQL:
+#   1. Update SQL_DSN environment variable to point to local MySQL
+#   2. Create the database 'new-api' in your local MySQL
+#
+# ⚠️  IMPORTANT: Change all default passwords before deploying to production!
+
+version: '3.4' # For compatibility with older Docker versions
+
+services:
+  new-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: new-api:local
+    container_name: new-api
+    restart: always
+    network_mode: host                # ← 关键：使用宿主机网络
+    command: --log-dir /app/logs
+    # ports 在 host 模式下不需要（容器直接监听宿主机端口）
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      # localhost 现在真正指向宿主机，可直接访问宿主机上的服务
+      - SQL_DSN=postgresql://newapi:KLkxwftyYy4r@localhost:5432/new-api # ⚠️ IMPORTANT: Change the password in production! Using host network to access host PostgreSQL
+      # - SQL_DSN=root:123456@tcp(localhost:3306)/new-api  # Point to host MySQL, uncomment if using MySQL
+      - REDIS_CONN_STRING=redis://localhost:6379 # ⚠️ IMPORTANT: Change the password in production! Using host network to access host Redis
+      - TZ=Asia/Shanghai
+      - ERROR_LOG_ENABLED=true # 是否启用错误日志记录 (Whether to enable error log recording)
+      - BATCH_UPDATE_ENABLED=true  # 是否启用批量更新 (Whether to enable batch update)
+      - NODE_NAME=new-api-node-1  # 节点名称，用于审计日志中标识节点身份；多节点/容器部署时建议设置 (Node name used in audit logs; recommended when running multiple instances or in containers)
+#      - STREAMING_TIMEOUT=300  # 流模式无响应超时时间，单位秒，默认120秒，如果出现空补全可以尝试改为更大值 （Streaming timeout in seconds, default is 120s. Increase if experiencing empty completions）
+#      - RELAY_IDLE_CONN_TIMEOUT=90  # Relay HTTP 客户端空闲连接超时时间，单位秒，默认跟随 Go 标准库，设置为0表示不限制 (Relay HTTP client idle keep-alive timeout in seconds, defaults to Go standard library; set 0 to disable)
+#      - SESSION_SECRET=random_string  # 多机部署时设置，必须修改这个随机字符串！！ （multi-node deployment, set this to a random string!!!!!!!）
+#      - SYNC_FREQUENCY=60  # Uncomment if regular database syncing is needed
+#      - GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX  # Google Analytics 的测量 ID (Google Analytics Measurement ID)
+#      - UMAMI_WEBSITE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  # Umami 网站 ID (Umami Website ID)
+#      - UMAMI_SCRIPT_URL=https://analytics.umami.is/script.js  # Umami 脚本 URL，默认为官方地址 (Umami Script URL, defaults to official URL)
+
+    # No depends_on needed when using host network + local services
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Local Redis and PostgreSQL are used on the host
+  # With network_mode: host, the container can access them via localhost
+  # Make sure Redis is running on localhost:6379
+  # Make sure PostgreSQL is running on localhost:5432
