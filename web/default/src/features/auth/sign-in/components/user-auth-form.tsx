@@ -17,11 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useMemo, useState } from 'react'
-import type { z } from 'zod'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { Loader2, LogIn, KeyRound } from 'lucide-react'
+import { Phone, Lock, Loader2, KeyRound, User } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
@@ -37,13 +37,11 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog } from '@/components/dialog'
-import { PasswordInput } from '@/components/password-input'
 import { Turnstile } from '@/components/turnstile'
 import { login, wechatLoginByCode } from '@/features/auth/api'
 import { LegalConsent } from '@/features/auth/components/legal-consent'
@@ -51,6 +49,7 @@ import { OAuthProviders } from '@/features/auth/components/oauth-providers'
 import { loginFormSchema } from '@/features/auth/constants'
 import { useAuthRedirect } from '@/features/auth/hooks/use-auth-redirect'
 import { useTurnstile } from '@/features/auth/hooks/use-turnstile'
+import { useSmsVerification } from '@/features/auth/hooks/use-sms-verification'
 import { beginPasskeyLogin, finishPasskeyLogin } from '@/features/auth/passkey'
 import type { AuthFormProps } from '@/features/auth/types'
 
@@ -67,6 +66,8 @@ export function UserAuthForm({
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
   const [isWeChatSubmitting, setIsWeChatSubmitting] = useState(false)
+  const [loginMode, setLoginMode] = useState<'password' | 'sms'>('password')
+  const [showPwd, setShowPwd] = useState(false)
   const legalConsentErrorMessage = t('Please agree to the legal terms first')
   const loginFailedMessage = t('Login failed')
 
@@ -74,10 +75,6 @@ export function UserAuthForm({
   const passkeyLoginEnabled = Boolean(
     status?.passkey_login ?? status?.data?.passkey_login
   )
-  const passwordLoginEnabled =
-    (status?.password_login_enabled ??
-      status?.data?.password_login_enabled ??
-      true) !== false
   const {
     isTurnstileEnabled,
     turnstileSiteKey,
@@ -85,6 +82,17 @@ export function UserAuthForm({
     setTurnstileToken,
     validateTurnstile,
   } = useTurnstile()
+  const turnstileReady = !isTurnstileEnabled || Boolean(turnstileToken)
+
+  const {
+    isSending: isSendingSms,
+    secondsLeft: smsSecondsLeft,
+    isActive: isSmsActive,
+    sendCode: sendSmsLogin,
+  } = useSmsVerification({
+    turnstileToken,
+    validateTurnstile,
+  })
   const { handleLoginSuccess, redirectTo2FA } = useAuthRedirect()
 
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
@@ -120,12 +128,16 @@ export function UserAuthForm({
       .catch(() => setPasskeySupported(false))
   }, [])
 
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      username: '',
-      password: '',
-    },
+  const currentSchema = loginMode === 'sms'
+    ? z.object({
+        username: z.string().min(1, 'Please enter your phone number').regex(/^1[3-9]\d{9}$/, 'Please enter a valid phone number'),
+        password: z.string().min(1, 'Please enter the verification code'),
+      })
+    : loginFormSchema
+
+  const form = useForm<z.infer<typeof currentSchema>>({
+    resolver: zodResolver(currentSchema),
+    defaultValues: { username: '', password: '' },
   })
 
   const wechatQrCodeUrl = useMemo(() => {
@@ -142,30 +154,47 @@ export function UserAuthForm({
     )
   }, [status])
 
-  async function onSubmit(data: z.infer<typeof loginFormSchema>) {
+  async function onSubmit(data: z.infer<typeof currentSchema>) {
     if (requiresLegalConsent && !agreedToLegal) {
       toast.error(legalConsentErrorMessage)
       return
     }
-
     if (!validateTurnstile()) return
 
     setIsLoading(true)
     try {
-      const res = await login({
-        username: data.username,
-        password: data.password,
-        turnstile: turnstileToken,
-      })
-
-      if (res.success) {
-        if (res.data?.require_2fa) {
-          redirectTo2FA()
-          return
+      if (loginMode === 'sms') {
+        const res = await login({
+          username: data.username,
+          password: data.password,
+          turnstile: turnstileToken,
+        })
+        if (res.success) {
+          if (res.data?.require_2fa) {
+            redirectTo2FA()
+            return
+          }
+          await handleLoginSuccess(res.data as { id?: number } | null, redirectTo)
+          toast.success(t('Welcome back!'))
+        } else {
+          toast.error(res?.message || loginFailedMessage)
         }
-
-        await handleLoginSuccess(res.data as { id?: number } | null, redirectTo)
-        toast.success(t('Welcome back!'))
+      } else {
+        const res = await login({
+          username: data.username,
+          password: data.password,
+          turnstile: turnstileToken,
+        })
+        if (res.success) {
+          if (res.data?.require_2fa) {
+            redirectTo2FA()
+            return
+          }
+          await handleLoginSuccess(res.data as { id?: number } | null, redirectTo)
+          toast.success(t('Welcome back!'))
+        } else {
+          toast.error(res?.message || loginFailedMessage)
+        }
       }
     } catch (_error) {
       // Errors are handled by global interceptor
@@ -322,77 +351,235 @@ export function UserAuthForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-4', className)}
+        className={cn('grid gap-5', className)}
         {...props}
       >
-        {hasAlternativeLogin && alternativeLoginMethods}
+        {/* ======== Tab 切换器 ======== */}
+        <div className='flex border-b'>
+          <button
+            type='button'
+            onClick={() => {
+              setLoginMode('password')
+              form.reset({ username: '', password: '' })
+            }}
+            className={cn(
+              'relative flex-1 pb-3 text-center text-sm font-medium transition-colors',
+              loginMode === 'password'
+                ? 'text-[#1677ff]'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {t('Password login')}
+            {loginMode === 'password' && (
+              <span className='absolute bottom-0 left-0 right-0 h-0.5 bg-[#1677ff]' />
+            )}
+          </button>
+          <button
+            type='button'
+            onClick={() => {
+              setLoginMode('sms')
+              form.reset({ username: '', password: '' })
+            }}
+            className={cn(
+              'relative flex-1 pb-3 text-center text-sm font-medium transition-colors',
+              loginMode === 'sms'
+                ? 'text-[#1677ff]'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {t('SMS verification login')}
+            {loginMode === 'sms' && (
+              <span className='absolute bottom-0 left-0 right-0 h-0.5 bg-[#1677ff]' />
+            )}
+          </button>
+        </div>
 
-        {passwordLoginEnabled && (
+        {/* ======== 密码登录模式 ======== */}
+        {loginMode === 'password' && (
           <>
-            {/* Username Field */}
+            {/* 用户名/邮箱字段 */}
             <FormField
               control={form.control}
               name='username'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('Username or Email')}</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder={t('Enter your username or email')}
-                      {...field}
-                    />
+                    <div className='relative'>
+                      <User className='text-muted-foreground absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2' />
+                      <Input
+                        placeholder={t('Enter your username or email')}
+                        className='pl-10'
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Password Field */}
+            {/* 密码字段 */}
             <FormField
               control={form.control}
               name='password'
               render={({ field }) => (
-                <FormItem className='relative'>
-                  <FormLabel>{t('Password')}</FormLabel>
+                <FormItem>
                   <FormControl>
-                    <PasswordInput
-                      placeholder={t('Enter password')}
-                      {...field}
-                    />
+                    <div className='relative'>
+                      <Lock className='text-muted-foreground absolute left-3 top-1/2 z-10 h-[18px] w-[18px] -translate-y-1/2' />
+                      <Input
+                        type={showPwd ? 'text' : 'password'}
+                        placeholder={t('Enter password')}
+                        className='pl-10 pr-10'
+                        {...field}
+                      />
+                      <button
+                        type='button'
+                        className='text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2'
+                        onClick={() => setShowPwd((v) => !v)}
+                        tabIndex={-1}
+                      >
+                        {showPwd ? (
+                          <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
+                        ) : (
+                          <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24'/><line x1='1' y1='1' x2='23' y2='23'/></svg>
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
-                  <Link
-                    to='/forgot-password'
-                    className='text-muted-foreground absolute end-0 -top-0.5 z-10 text-sm font-medium hover:opacity-75'
-                  >
-                    {t('Forgot password?')}
-                  </Link>
                 </FormItem>
               )}
             />
 
-            {/* Submit Button */}
+            {/* 记住我 + 忘记密码 同一行 */}
+            <div className='-mt-1 flex items-center justify-between'>
+              <label className='flex cursor-pointer items-center gap-2 text-sm'>
+                <input type='checkbox' className='border-input h-4 w-4 rounded' />
+                <span className='text-muted-foreground'>{t('Remember me')}</span>
+              </label>
+              <Link
+                to='/forgot-password'
+                className='text-muted-foreground text-sm hover:underline'
+              >
+                {t('Forgot password?')}
+              </Link>
+            </div>
+
+            {/* 登录按钮 */}
             <Button
               type='submit'
-              className='mt-2 w-full justify-center gap-2'
-              disabled={isLoading || (requiresLegalConsent && !agreedToLegal)}
+              className='w-full border-0 bg-[#1677ff] py-6 text-base font-medium text-white shadow-lg shadow-blue-500/25 hover:bg-[#4096ff] disabled:bg-[#1677ff]/50 disabled:text-white/70'
+              disabled={
+                isLoading ||
+                (requiresLegalConsent && !agreedToLegal) ||
+                !turnstileReady
+              }
             >
-              {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
+              {isLoading ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : null}
               {t('Sign in')}
             </Button>
-
-            {/* Turnstile */}
-            {isTurnstileEnabled && (
-              <div className='mt-2'>
-                <Turnstile
-                  siteKey={turnstileSiteKey}
-                  onVerify={setTurnstileToken}
-                />
-              </div>
-            )}
           </>
         )}
 
+        {/* ======== 验证码登录模式 ======== */}
+        {loginMode === 'sms' && (
+          <>
+            {/* 手机号字段 */}
+            <FormField
+              control={form.control}
+              name='username'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className='relative'>
+                      <Phone className='text-muted-foreground absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2' />
+                      <Input
+                        placeholder={t('Enter your phone number')}
+                        type='tel'
+                        className='pl-10'
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 验证码字段 */}
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className='relative'>
+                      <Lock className='text-muted-foreground absolute left-3 top-1/2 z-10 h-[18px] w-[18px] -translate-y-1/2' />
+                      <Input
+                        placeholder={t('Enter verification code')}
+                        className='pl-10 pr-[120px]'
+                        {...field}
+                      />
+                      <Button
+                        variant='ghost'
+                        type='button'
+                        size='sm'
+                        disabled={
+                          isLoading ||
+                          isSendingSms ||
+                          isSmsActive ||
+                          !form.watch('username') ||
+                          !turnstileReady
+                        }
+                        onClick={async () => {
+                          await sendSmsLogin(form.watch('username') || '')
+                        }}
+                        className='absolute right-3 top-0 bottom-0 my-auto flex items-center justify-center text-primary hover:text-primary disabled:cursor-not-allowed h-8'
+                      >
+                        {isSmsActive ? (
+                          t('Resend ({{seconds}}s)', { seconds: smsSecondsLeft })
+                        ) : isSendingSms ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          t('Send SMS code')
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 登录按钮 */}
+            <Button
+              type='submit'
+              className='w-full border-0 bg-[#1677ff] py-6 text-base font-medium text-white shadow-lg shadow-blue-500/25 hover:bg-[#4096ff] disabled:bg-[#1677ff]/50 disabled:text-white/70'
+              disabled={
+                isLoading ||
+                (requiresLegalConsent && !agreedToLegal) ||
+                !turnstileReady
+              }
+            >
+              {isLoading ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : null}
+              {t('Sign in')}
+            </Button>
+          </>
+        )}
+
+        {/* Turnstile — 两种模式共用 */}
+        {isTurnstileEnabled && (
+          <div className='mt-2'>
+            <Turnstile siteKey={turnstileSiteKey} onVerify={setTurnstileToken} />
+          </div>
+        )}
+
+        {/* 法律协议 — 两种模式共用 */}
         <LegalConsent
           status={status}
           checked={agreedToLegal}
@@ -400,16 +587,18 @@ export function UserAuthForm({
           className='mt-1'
         />
 
-        {!hasAlternativeLogin && alternativeLoginMethods}
+        {/* 第三方登录 */}
+        {hasAlternativeLogin && alternativeLoginMethods}
       </form>
 
+      {/* 微信扫码弹窗 — 保持不变 */}
       {hasWeChatLogin && (
         <Dialog
           open={isWeChatDialogOpen}
           onOpenChange={handleWeChatDialogChange}
           title={t('WeChat sign in')}
           description={t(
-            'Scan the QR code to follow the official account and reply with “验证码” to receive your verification code.'
+            'Scan the QR code to follow the official account and reply with "验证码" to receive your verification code.'
           )}
           contentClassName='max-w-sm'
           headerClassName='text-left'

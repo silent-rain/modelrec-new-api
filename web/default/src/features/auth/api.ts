@@ -133,3 +133,32 @@ export async function bindEmail(
   })
   return res.data
 }
+
+// Send SMS verification code
+export async function sendSmsCode(
+  phoneNumber: string,
+  signName?: string,
+  templateCode?: string,
+  turnstile?: string
+): Promise<ApiResponse> {
+  const res = await api.post('/api/auth/sms/send', {
+    phone_number: phoneNumber,
+    sign_name: signName || '速通互联验证码',
+    template_code: templateCode || '100001',
+  }, {
+    params: { turnstile }
+  })
+  return res.data
+}
+
+// Verify SMS code
+export async function verifySmsCode(
+  phoneNumber: string,
+  code: string
+): Promise<ApiResponse> {
+  const res = await api.post('/api/auth/sms/verify', {
+    phone_number: phoneNumber,
+    code: code,
+  })
+  return res.data
+}
