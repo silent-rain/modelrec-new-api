@@ -32,7 +32,7 @@ export function SignUp() {
       <div className='flex w-full flex-col items-center'>
         {/* 标题区域 - 居中 */}
         <div className='mb-8 space-y-2 text-center'>
-          <h2 className='text-xl font-semibold tracking-tight'>ModelHub</h2>
+          <h2 className='text-xl font-semibold tracking-tight'>燧元路由</h2>
           <h2 className='text-2xl font-semibold tracking-tight'>
             {t('Create an account')}
           </h2>

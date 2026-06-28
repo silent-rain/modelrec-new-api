@@ -296,7 +296,7 @@ function MockAppPreview() {
         <div className='flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-2 dark:border-gray-800 dark:bg-gray-800/50'>
           <span className='text-xs font-medium'>9:41</span>
           <div className='flex items-center gap-1'>
-            <span className='text-xs'>ModelHub</span>
+            <span className='text-xs'>燧元路由</span>
           </div>
           <div className='flex items-center gap-1'>
             <div className='size-3 rounded-sm border border-gray-400 dark:border-gray-500' />
@@ -476,7 +476,7 @@ function LandingFooter() {
                 M
               </div>
               <span className='text-base font-semibold tracking-tight'>
-                ModelHub
+                燧元路由
               </span>
             </Link>
             <p className='text-muted-foreground mt-2 mb-1 text-xs font-medium'>
@@ -566,7 +566,7 @@ function LandingFooter() {
 
         {/* Copyright bar */}
         <div className='border-border/30 mt-10 flex items-center justify-between border-t pt-6 text-xs text-muted-foreground/40'>
-          <span>&copy; {currentYear} ModelHub. {t('footer.copyright')}</span>
+          <span>&copy; {currentYear} 燧元路由. {t('footer.copyright')}</span>
         </div>
       </div>
     </footer>
