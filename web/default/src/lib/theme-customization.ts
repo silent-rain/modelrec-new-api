@@ -121,7 +121,7 @@ export type ThemeCustomization = {
 }
 
 export const DEFAULT_THEME_CUSTOMIZATION: ThemeCustomization = {
-  preset: 'default',
+  preset: 'blue-purple',
   font: 'default',
   radius: 'default',
   scale: 'default',
