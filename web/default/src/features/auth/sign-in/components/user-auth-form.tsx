@@ -355,7 +355,7 @@ export function UserAuthForm({
         {...props}
       >
         {/* ======== Tab 切换器 ======== */}
-        <div className='flex border-b'>
+        <div className='auth-tab-switcher flex border-b'>
           <button
             type='button'
             onClick={() => {

@@ -36,7 +36,7 @@ export function SignIn() {
             {t('Sign in')}
           </h2> */}
           <div className='mb-8 space-y-2 text-center'>
-          <h2 className='text-xl font-semibold tracking-tight'>燧元路由</h2>
+          <h2 className='text-l font-semibold tracking-tight'>燧元路由</h2>
             <h2 className='text-2xl font-semibold tracking-tight'>
               {t('Welcome back')}            {/* i18n key: "Welcome back" → "欢迎回来" */}
             </h2>

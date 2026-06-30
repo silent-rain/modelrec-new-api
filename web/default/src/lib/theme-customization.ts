@@ -77,6 +77,11 @@ export const THEME_PRESETS = [
     name: 'Lavender Dream',
     swatches: ['oklch(0.5709 0.1808 306.89)', 'oklch(0.811 0.0589 201.14)'],
   },
+  {
+    value: 'blue-purple',
+    name: 'Blue Purple',
+    swatches: ['oklch(0.84 0.06 265.46)', 'oklch(0.84 0.06 298.96)'],
+  },
 ] as const
 
 export type ThemePreset = (typeof THEME_PRESETS)[number]['value']
