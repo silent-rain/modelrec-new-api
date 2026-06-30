@@ -165,12 +165,9 @@ export function PublicHeader(props: PublicHeaderProps) {
   return (
     <>
       <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
-        <div
-          className='pointer-events-auto mx-auto max-w-7xl px-4 pt-0 md:px-6'
+        <nav
+          className='pointer-events-auto flex items-center justify-between h-16 sf-header-transparent backdrop-blur-xl px-6'
         >
-          <nav
-            className='flex items-center justify-between h-16 border-b border-border/40 bg-background/80 backdrop-blur-md'
-          >
             {/* Logo */}
             <Link
               to={homeUrl}
@@ -268,7 +265,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                   ) : (
                     <Button
                       size='sm'
-                      className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                      className='h-8 rounded-lg px-3.5 text-xs font-medium sf-btn-primary'
                       render={<Link to='/sign-in' />}
                     >
                       {t('Sign in')}
@@ -315,7 +312,6 @@ export function PublicHeader(props: PublicHeaderProps) {
               </Button>
             </div>
           </nav>
-        </div>
       </header>
 
       {/* Mobile full-screen overlay */}

@@ -365,13 +365,13 @@ export function UserAuthForm({
             className={cn(
               'relative flex-1 pb-3 text-center text-sm font-medium transition-colors',
               loginMode === 'password'
-                ? 'text-[#1677ff]'
+                ? 'text-violet-600'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {t('Password login')}
             {loginMode === 'password' && (
-              <span className='absolute bottom-0 left-0 right-0 h-0.5 bg-[#1677ff]' />
+              <span className='absolute bottom-0 left-0 right-0 h-0.5 bg-violet-600' />
             )}
           </button>
           <button
@@ -383,13 +383,13 @@ export function UserAuthForm({
             className={cn(
               'relative flex-1 pb-3 text-center text-sm font-medium transition-colors',
               loginMode === 'sms'
-                ? 'text-[#1677ff]'
+                ? 'text-violet-600'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {t('SMS verification login')}
             {loginMode === 'sms' && (
-              <span className='absolute bottom-0 left-0 right-0 h-0.5 bg-[#1677ff]' />
+              <span className='absolute bottom-0 left-0 right-0 h-0.5 bg-violet-600' />
             )}
           </button>
         </div>
@@ -466,10 +466,10 @@ export function UserAuthForm({
               </Link>
             </div>
 
-            {/* 登录按钮 */}
+            {/* 登录按钮 - 密码模式 */}
             <Button
               type='submit'
-              className='w-full border-0 bg-[#1677ff] py-6 text-base font-medium text-white shadow-lg shadow-blue-500/25 hover:bg-[#4096ff] disabled:bg-[#1677ff]/50 disabled:text-white/70'
+              className='w-full border-0 py-6 text-base font-medium text-white sf-btn-primary disabled:bg-violet-500/50 disabled:text-white/70'
               disabled={
                 isLoading ||
                 (requiresLegalConsent && !agreedToLegal) ||
@@ -554,10 +554,10 @@ export function UserAuthForm({
               )}
             />
 
-            {/* 登录按钮 */}
+            {/* 登录按钮 - 验证码模式 */}
             <Button
               type='submit'
-              className='w-full border-0 bg-[#1677ff] py-6 text-base font-medium text-white shadow-lg shadow-blue-500/25 hover:bg-[#4096ff] disabled:bg-[#1677ff]/50 disabled:text-white/70'
+              className='w-full border-0 py-6 text-base font-medium text-white sf-btn-primary disabled:bg-violet-500/50 disabled:text-white/70'
               disabled={
                 isLoading ||
                 (requiresLegalConsent && !agreedToLegal) ||
