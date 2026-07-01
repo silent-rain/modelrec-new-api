@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useMemo } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,38 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { type TopNavLink } from '../types'
 
+/**
+ * 判断当前路径是否匹配链接（支持子路由）
+ * - "/" 仅精确匹配 "/"
+ * - 其他路径支持前缀匹配，如 "/dashboard" 匹配 "/dashboard/overview"
+ * - "/dashboard" 特殊处理：作为内部页面的兜底，当当前路径不匹配任何其他导航项时保持激活
+ */
+function isPathActive(
+  pathname: string,
+  href: string,
+  allHrefs?: string[]
+): boolean {
+  if (href === '/') return pathname === '/'
+  if (pathname === href || pathname.startsWith(href + '/')) return true
+
+  // /dashboard 作为已认证内部页面的兜底激活项
+  if (href === '/dashboard' && allHrefs && allHrefs.length > 0) {
+    // 主页 "/" 有自己的导航项，不应触发控制台兜底
+    if (pathname === '/') return false
+    const otherHrefs = allHrefs.filter((h) => h !== '/' && h !== '/dashboard')
+    const matchesOther = otherHrefs.some(
+      (h) => pathname === h || pathname.startsWith(h + '/')
+    )
+    const authExcluded = [
+      '/sign-in', '/sign-up', '/forgot-password', '/reset-password',
+    ]
+    const isAuthPage = authExcluded.some((p) => pathname.startsWith(p))
+    return !matchesOther && !isAuthPage
+  }
+
+  return false
+}
+
 type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   links: TopNavLink[]
 }
@@ -38,16 +70,20 @@ type TopNavProps = React.HTMLAttributes<HTMLElement> & {
  * 在大屏幕显示水平导航，在小屏幕显示下拉菜单
  */
 export function TopNav({ className, links, ...props }: TopNavProps) {
-  // 规范化链接，确保所有可选属性都有默认值
+  const routerState = useRouterState()
+  const pathname = routerState.location.pathname
+
+  // 规范化链接，计算激活状态
+  const allHrefs = links.map((l) => l.href)
   const normalizedLinks = useMemo(
     () =>
       links.map((link) => ({
-        isActive: false,
         disabled: false,
         external: false,
         ...link,
+        isActive: isPathActive(pathname, link.href, allHrefs),
       })),
-    [links]
+    [links, pathname, allHrefs]
   )
 
   return (
@@ -71,14 +107,14 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
                         href={href}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className={!isActive ? 'text-muted-foreground' : ''}
+                        className={cn(isActive ? 'nav-link-active' : 'text-muted-foreground')}
                       >
                         {title}
                       </a>
                     ) : (
                       <Link
                         to={href}
-                        className={!isActive ? 'text-muted-foreground' : ''}
+                        className={cn(isActive ? 'nav-link-active' : 'text-muted-foreground')}
                         disabled={disabled}
                       >
                         {title}
@@ -95,7 +131,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
       {/* 桌面端水平导航 */}
       <nav
         className={cn(
-          'hidden items-center space-x-4 lg:flex lg:space-x-4 xl:space-x-6',
+          'top-nav-links hidden items-center space-x-4 lg:flex lg:space-x-4 xl:space-x-6',
           className
         )}
         {...props}
@@ -107,7 +143,10 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
               href={href}
               target='_blank'
               rel='noopener noreferrer'
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+              className={cn(
+                'text-sm font-medium transition-colors hover:text-foreground',
+                isActive ? 'nav-link-active text-foreground' : 'text-muted-foreground'
+              )}
             >
               {title}
             </a>
@@ -116,7 +155,10 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
               key={`${title}-${href}`}
               to={href}
               disabled={disabled}
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+              className={cn(
+                'text-sm font-medium transition-colors hover:text-foreground',
+                isActive ? 'nav-link-active text-foreground' : 'text-muted-foreground'
+              )}
             >
               {title}
             </Link>
