@@ -21,7 +21,7 @@ For commercial licensing, please contact support@quantumnous.com
  */
 
 // System Configuration Defaults
-export const DEFAULT_SYSTEM_NAME = '模荐经纬'
+export const DEFAULT_SYSTEM_NAME = '燧元路由'
 export const DEFAULT_LOGO = '/logo.png'
 
 // LocalStorage Keys

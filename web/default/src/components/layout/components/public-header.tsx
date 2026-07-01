@@ -37,6 +37,38 @@ import { HeaderLogo } from './header-logo'
 
 const AUTH_PROMPT_SECONDS = 5
 
+/**
+ * 判断当前路径是否匹配链接（支持子路由）
+ * - "/" 仅精确匹配 "/"
+ * - 其他路径支持前缀匹配，如 "/dashboard" 匹配 "/dashboard/overview"
+ * - "/dashboard" 特殊处理：作为内部页面的兜底，当当前路径不匹配任何其他导航项时保持激活
+ */
+function isPathActive(
+  pathname: string,
+  href: string,
+  allHrefs?: string[]
+): boolean {
+  if (href === '/') return pathname === '/'
+  if (pathname === href || pathname.startsWith(href + '/')) return true
+
+  // /dashboard 作为已认证内部页面的兜底激活项
+  if (href === '/dashboard' && allHrefs && allHrefs.length > 0) {
+    // 主页 "/" 有自己的导航项，不应触发控制台兜底
+    if (pathname === '/') return false
+    const otherHrefs = allHrefs.filter((h) => h !== '/' && h !== '/dashboard')
+    const matchesOther = otherHrefs.some(
+      (h) => pathname === h || pathname.startsWith(h + '/')
+    )
+    const authExcluded = [
+      '/sign-in', '/sign-up', '/forgot-password', '/reset-password',
+    ]
+    const isAuthPage = authExcluded.some((p) => pathname.startsWith(p))
+    return !matchesOther && !isAuthPage
+  }
+
+  return false
+}
+
 type AuthPromptTarget = {
   title: string
   href: string
@@ -93,6 +125,7 @@ export function PublicHeader(props: PublicHeaderProps) {
   const isAuthenticated = !!user
   const displaySiteName = customSiteName || systemName
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
+  const allHrefs = links.map((l) => l.href)
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
@@ -165,12 +198,9 @@ export function PublicHeader(props: PublicHeaderProps) {
   return (
     <>
       <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
-        <div
-          className='pointer-events-auto mx-auto max-w-7xl px-4 pt-0 md:px-6'
+        <nav
+          className='pointer-events-auto flex items-center justify-between h-16 sf-header-transparent backdrop-blur-xl px-6'
         >
-          <nav
-            className='flex items-center justify-between h-16 border-b border-border/40 bg-background/80 backdrop-blur-md'
-          >
             {/* Logo */}
             <Link
               to={homeUrl}
@@ -190,15 +220,15 @@ export function PublicHeader(props: PublicHeaderProps) {
                   />
                 )}
               </div>
-              <span className='text-sm font-semibold tracking-tight'>
+              <span className='text-l font-semibold tracking-tight'>
                 {loading ? <Skeleton className='h-4 w-16' /> : displaySiteName}
               </span>
             </Link>
 
             {/* Desktop nav */}
-            <div className='hidden items-center gap-0.5 sm:flex'>
+            <div className='hidden items-center gap-0.5 sm:flex top-nav-links'>
               {links.map((link, i) => {
-                const isActive = pathname === link.href
+                  const isActive = isPathActive(pathname, link.href, allHrefs)
                 if (link.external) {
                   return (
                     <a
@@ -227,7 +257,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                     className={cn(
                       'rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-200',
                       isActive
-                        ? 'text-foreground'
+                        ? 'text-foreground nav-link-active'
                         : 'text-muted-foreground hover:text-foreground',
                       link.disabled && 'pointer-events-none opacity-50'
                     )}
@@ -268,7 +298,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                   ) : (
                     <Button
                       size='sm'
-                      className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                      className='h-8 rounded-lg px-3.5 text-xs font-medium sf-btn-primary'
                       render={<Link to='/sign-in' />}
                     >
                       {t('Sign in')}
@@ -315,7 +345,6 @@ export function PublicHeader(props: PublicHeaderProps) {
               </Button>
             </div>
           </nav>
-        </div>
       </header>
 
       {/* Mobile full-screen overlay */}
@@ -328,15 +357,15 @@ export function PublicHeader(props: PublicHeaderProps) {
         )}
       >
         <div className='flex h-full flex-col justify-between px-8 pt-20 pb-10'>
-          <nav className='flex flex-col gap-1'>
+          <nav className='flex flex-col gap-1 top-nav-links'>
             {links.map((link, i) => {
-              const isActive = pathname === link.href
+              const isActive = isPathActive(pathname, link.href, allHrefs)
               const linkClassName = cn(
                 'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
                 mobileOpen
                   ? 'translate-y-0 opacity-100'
                   : 'translate-y-4 opacity-0',
-                isActive ? 'text-foreground' : 'text-muted-foreground',
+                isActive ? 'text-foreground nav-link-active' : 'text-muted-foreground',
                 link.disabled && 'pointer-events-none opacity-50'
               )
               const transitionStyle = {

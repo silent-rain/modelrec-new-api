@@ -27,7 +27,7 @@ import {
 const defaultSiteSettings: SiteSettings = {
   'theme.frontend': 'default',
   Notice: '',
-  SystemName: '模荐经纬',
+  SystemName: '燧元路由',
   Logo: '',
   Footer: '',
   About: '',

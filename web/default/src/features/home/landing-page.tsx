@@ -69,24 +69,18 @@ function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   return (
     <section className='relative overflow-hidden px-6 pt-28 pb-16 md:pt-36 md:pb-24'>
-      {/* Background gradient */}
+      {/* Background gradient - soft lavender glow */}
       <div
         aria-hidden
-        className='pointer-events-none absolute inset-0 -z-10 opacity-20 dark:opacity-[0.08]'
-        style={{
-          background: [
-            'radial-gradient(ellipse 60% 50% at 50% 20%, oklch(0.65 0.18 250 / 80%) 0%, transparent 70%)',
-            'radial-gradient(ellipse 50% 40% at 70% 30%, oklch(0.60 0.15 260 / 50%) 0%, transparent 70%)',
-          ].join(', '),
-        }}
+        className='pointer-events-none absolute inset-0 -z-10 sf-hero-glow'
       />
 
       <div className='mx-auto max-w-4xl text-center'>
         <AnimateInView animation='fade-up' delay={0}>
-          <h1 className='text-[clamp(2.2rem,5vw,3.5rem)] leading-[1.15] font-bold tracking-tight'>
+          <h1 className='text-[clamp(2.2rem,5vw,3.5rem)] leading-[1.15] font-bold tracking-tight hero-title-gradient'>
             {t('AI Model Recommendation')}
           </h1>
-          <p className='mt-4 text-base text-blue-500 md:text-lg'>
+          <p className='mt-4 text-base text-gray-800 md:text-lg dark:text-gray-200'>
             {t('Better quality, better understanding')}
           </p>
         </AnimateInView>
@@ -96,7 +90,7 @@ function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
             {isAuthenticated ? (
               <Button
                 size='lg'
-                className='h-12 rounded-full px-8 text-sm font-medium'
+                className='h-12 rounded-full px-8 text-sm font-medium sf-btn-primary'
                 render={<Link to='/dashboard' />}
               >
                 {t('Go to Dashboard')}
@@ -106,7 +100,7 @@ function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
               <>
                 <Button
                   size='lg'
-                  className='h-12 rounded-full px-8 text-sm font-medium bg-blue-600 hover:bg-blue-700'
+                  className='h-12 rounded-full px-8 text-sm font-medium sf-btn-primary'
                   render={<Link to='/sign-up' />}
                 >
                   {t('Get API Key')}
@@ -114,7 +108,7 @@ function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                 <Button
                   variant='outline'
                   size='lg'
-                  className='h-12 rounded-full px-8 text-sm font-medium border-border/50 hover:border-border hover:bg-muted/50'
+                  className='h-12 rounded-full px-8 text-sm font-medium sf-btn-outline'
                   render={<Link to='/pricing' />}
                 >
                   {t('Configure Market')}
@@ -135,29 +129,29 @@ function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
 const FEATURES = [
   {
     icon: CircleDot,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
+    color: 'text-violet-500',
+    bgColor: 'bg-violet-500/10',
     titleKey: 'feature.anyModelApi.title',
     descKey: 'feature.anyModelApi.desc',
   },
   {
     icon: DollarSign,
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
     titleKey: 'feature.billingRateLimit.title',
     descKey: 'feature.billingRateLimit.desc',
   },
   {
     icon: Activity,
-    color: 'text-violet-500',
-    bgColor: 'bg-violet-500/10',
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-500/10',
     titleKey: 'feature.performanceMonitor.title',
     descKey: 'feature.performanceMonitor.desc',
   },
   {
     icon: Code,
-    color: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
+    color: 'text-fuchsia-500',
+    bgColor: 'bg-fuchsia-500/10',
     titleKey: 'feature.developerSdk.title',
     descKey: 'feature.developerSdk.desc',
   },
@@ -173,7 +167,7 @@ function FeatureCards() {
           const Icon = f.icon
           return (
             <AnimateInView key={f.titleKey} delay={i * 100} animation='scale-in'>
-              <div className='group border-border/40 bg-background flex flex-col items-center rounded-2xl border p-7 text-center transition-all duration-300 hover:border-blue-500/25 hover:bg-muted/20 hover:shadow-md'>
+              <div className='group border-border/40 bg-background flex flex-col items-center rounded-2xl border p-7 text-center transition-all duration-300 hover:border-violet-500/25 hover:bg-muted/20 hover:shadow-md'>
                 <div
                   className={`mb-4 flex size-14 items-center justify-center rounded-2xl ${f.bgColor}`}
                 >
@@ -201,19 +195,19 @@ function FeatureCards() {
 const SETUP_STEPS = [
   {
     num: '1',
-    numBg: 'bg-purple-500',
+    numBg: 'bg-violet-500',
     titleKey: 'setup.step1.title',
     descKey: 'setup.step1.desc',
   },
   {
     num: '2',
-    numBg: 'bg-purple-500',
+    numBg: 'bg-violet-500',
     titleKey: 'setup.step2.title',
     descKey: 'setup.step2.desc',
   },
   {
     num: '3',
-    numBg: 'bg-purple-500',
+    numBg: 'bg-violet-500',
     titleKey: 'setup.step3.title',
     descKey: 'setup.step3.desc',
   },
@@ -259,7 +253,7 @@ function QuickStartSection() {
               <div className='mt-8'>
                 <Button
                   size='lg'
-                  className='rounded-full px-8 bg-blue-600 hover:bg-blue-700'
+                  className='rounded-full px-8 sf-btn-primary'
                   render={<Link to='/sign-up' />}
                 >
                   {t('Get Started')}
@@ -296,7 +290,7 @@ function MockAppPreview() {
         <div className='flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-2 dark:border-gray-800 dark:bg-gray-800/50'>
           <span className='text-xs font-medium'>9:41</span>
           <div className='flex items-center gap-1'>
-            <span className='text-xs'>ModelHub</span>
+            <span className='text-xs'>燧元路由</span>
           </div>
           <div className='flex items-center gap-1'>
             <div className='size-3 rounded-sm border border-gray-400 dark:border-gray-500' />
@@ -364,7 +358,7 @@ function MockAppPreview() {
       {/* Decorative shadow/glow behind phone */}
       <div
         aria-hidden
-        className='-z-10 absolute inset-0 -m-4 rounded-[2.5rem] bg-gradient-to-br from-blue-200/40 via-violet-200/30 to-transparent blur-2xl dark:from-blue-900/20 dark:via-violet-900/10'
+        className='-z-10 absolute inset-0 -m-4 rounded-[2.5rem] bg-gradient-to-br from-violet-200/40 via-purple-200/30 to-transparent blur-2xl dark:from-violet-900/20 dark:via-purple-900/10'
       />
     </div>
   )
@@ -472,11 +466,11 @@ function LandingFooter() {
           {/* Brand column */}
           <div className='shrink-0 max-w-[240px]'>
             <Link to='/' className='group flex items-center gap-2.5'>
-              <div className='bg-primary/10 flex size-8 items-center justify-center rounded-lg text-sm font-bold text-primary'>
+              <div className='bg-violet-500/10 flex size-8 items-center justify-center rounded-lg text-sm font-bold text-violet-600'>
                 M
               </div>
               <span className='text-base font-semibold tracking-tight'>
-                ModelHub
+                燧元路由
               </span>
             </Link>
             <p className='text-muted-foreground mt-2 mb-1 text-xs font-medium'>
@@ -566,7 +560,7 @@ function LandingFooter() {
 
         {/* Copyright bar */}
         <div className='border-border/30 mt-10 flex items-center justify-between border-t pt-6 text-xs text-muted-foreground/40'>
-          <span>&copy; {currentYear} ModelHub. {t('footer.copyright')}</span>
+          <span>&copy; {currentYear} 燧元路由. {t('footer.copyright')}</span>
         </div>
       </div>
     </footer>

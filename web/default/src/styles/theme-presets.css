@@ -291,443 +291,755 @@ For commercial licensing, please contact support@quantumnous.com
   --sidebar-ring: oklch(0.6359 0.1699 307.95);
 }
 
-/* ── Simple Large-font ────────────────────────────────────────────────── */
-[data-theme-preset='simple-large'] {
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.15 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
 
-  --primary: oklch(0.22 0 0);
+/* ── Blue Purple ──────────────────────────────────────────────── */
+[data-theme-preset='blue-purple'] {
+  /* ── Variables ── */
+  --foreground: oklch(0.17 0.03 270);
+  --card: transparent;
+  --card-foreground: oklch(0.17 0.03 270);
+  --popover: rgba(255, 255, 255, 0.88);
+  --popover-foreground: oklch(0.17 0.03 270);
+  --primary: oklch(0.55 0.25 280);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.93 0 0);
-  --secondary-foreground: oklch(0.15 0 0);
-  --muted: oklch(0.95 0 0);
-  --muted-foreground: oklch(0.36 0 0);
-  --accent: oklch(0.91 0 0);
-  --accent-foreground: oklch(0.15 0 0);
-
-  --destructive: oklch(0.55 0.2 28);
+  --secondary: rgba(180, 190, 235, 0.70);
+  --secondary-foreground: oklch(0.20 0.04 275);
+  --muted: rgba(200, 210, 240, 0.60);
+  --muted-foreground: oklch(0.45 0.03 260);
+  --accent: rgba(190, 200, 238, 0.65);
+  --accent-foreground: oklch(0.18 0.04 275);
+  --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
-  --success: oklch(0.45 0.12 145);
+  --success: oklch(0.60 0.17 155);
   --success-foreground: oklch(1 0 0);
-  --warning: oklch(0.72 0.14 75);
-  --warning-foreground: oklch(0.15 0 0);
-  --info: oklch(0.48 0.13 250);
+  --warning: oklch(0.72 0.16 75);
+  --warning-foreground: oklch(0.20 0.02 75);
+  --info: oklch(0.56 0.16 240);
   --info-foreground: oklch(1 0 0);
-  --neutral: oklch(0.36 0 0);
-  --neutral-foreground: oklch(1 0 0);
+  --neutral: rgba(210, 216, 245, 0.72);
+  --neutral-foreground: oklch(0.20 0.025 255);
+  --border: rgba(165, 178, 225, 0.55);
+  --input: rgba(190, 200, 238, 0.50);
+  --ring: oklch(0.55 0.25 280);
+  --table-row: transparent;
+  --table-header: rgba(195, 205, 240, 0.78);
+  --table-header-hover: rgba(180, 192, 235, 0.88);
+  --table-disabled: rgba(220, 228, 248, 0.35);
+  --table-disabled-hover: rgba(200, 212, 240, 0.55);
+  --table-disabled-border: rgba(165, 178, 225, 0.50);
+  --chart-1: oklch(0.55 0.25 280);
+  --chart-2: oklch(0.68 0.18 245);
+  --chart-3: oklch(0.62 0.20 270);
+  --chart-4: oklch(0.58 0.22 285);
+  --chart-5: oklch(0.75 0.14 255);
+  --skeleton-base: rgba(205, 215, 245, 0.65);
+  --skeleton-highlight: rgba(222, 228, 250, 0.75);
 
-  --border: oklch(0.82 0 0);
-  --input: oklch(0.82 0 0);
-  --ring: oklch(0.22 0 0);
-
-  --chart-1: oklch(0.22 0 0);
-  --chart-2: oklch(0.45 0.12 145);
-  --chart-3: oklch(0.48 0.13 250);
-  --chart-4: oklch(0.72 0.14 75);
-  --chart-5: oklch(0.55 0.2 28);
-
-  --sidebar: oklch(0.96 0 0);
-  --sidebar-foreground: oklch(0.15 0 0);
-  --sidebar-primary: oklch(0.22 0 0);
+  /* Sidebar: transparent to show body gradient through */
+  --sidebar: transparent;
+  --sidebar-foreground: oklch(0.20 0.03 265);
+  --sidebar-primary: oklch(0.55 0.25 280);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9 0 0);
-  --sidebar-accent-foreground: oklch(0.15 0 0);
-  --sidebar-border: oklch(0.82 0 0);
-  --sidebar-ring: oklch(0.22 0 0);
-
-  --skeleton-base: oklch(0.9 0 0);
-  --skeleton-highlight: oklch(0.97 0 0);
+  --sidebar-accent: rgba(185, 196, 238, 0.68);
+  --sidebar-accent-foreground: oklch(0.18 0.04 275);
+  --sidebar-border: rgba(165, 178, 225, 0.45);
+  --sidebar-ring: oklch(0.55 0.25 280);
+  --background: transparent;
 
   --radius: 0.5rem;
-  --text-xs: 0.9rem;
-  --text-sm: 1rem;
-  --text-base: 1.125rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.45rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.15rem;
-  --spacing: 0.3rem;
-}
-.dark [data-theme-preset='simple-large'] {
-  --background: oklch(0.215 0 0);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.27 0 0);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.29 0 0);
-  --popover-foreground: oklch(0.97 0 0);
-
-  --primary: oklch(0.94 0 0);
-  --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.315 0 0);
-  --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.315 0 0);
-  --muted-foreground: oklch(0.82 0 0);
-  --accent: oklch(0.36 0 0);
-  --accent-foreground: oklch(0.98 0 0);
-
-  --destructive: oklch(0.68 0.19 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.72 0.13 145);
-  --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.82 0.13 75);
-  --warning-foreground: oklch(0.145 0 0);
-  --info: oklch(0.72 0.12 250);
-  --info-foreground: oklch(0.145 0 0);
-  --neutral: oklch(0.82 0 0);
-  --neutral-foreground: oklch(0.145 0 0);
-
-  --border: oklch(1 0 0 / 18%);
-  --input: oklch(1 0 0 / 24%);
-  --ring: oklch(0.94 0 0);
-
-  --chart-1: oklch(0.94 0 0);
-  --chart-2: oklch(0.72 0.13 145);
-  --chart-3: oklch(0.72 0.12 250);
-  --chart-4: oklch(0.82 0.13 75);
-  --chart-5: oklch(0.68 0.19 25);
-
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-primary: oklch(0.94 0 0);
-  --sidebar-primary-foreground: oklch(0.145 0 0);
-  --sidebar-accent: oklch(0.34 0 0);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(1 0 0 / 18%);
-  --sidebar-ring: oklch(0.94 0 0);
-
-  --skeleton-base: oklch(0.315 0 0);
-  --skeleton-highlight: oklch(0.415 0 0);
 }
 
-/* ── Semantic surface bridge ──────────────────────────────────────────── */
-/* Color presets should tint the surfaces most components actually use, not
- * only primary buttons. These derived tokens keep the app theme-aware without
- * duplicating per-component dark-mode overrides.
- *
- * NOTE: `:not()` contributes its argument's specificity, so this selector
- * resolves to (0,3,0). Presets that define bespoke surfaces below need to
- * either match that specificity or opt out here — the latter is cleaner.
- *
- * Opt-outs:
- *   - `default`: keeps neutral surfaces from :root.
- *   - `anthropic`: warm cream surfaces are a brand choice, NOT a primary-mix
- *     derivation (the Anthropic system deliberately uses warm neutrals for
- *     cards/borders rather than tinting them with the clay accent).
- *   - `simple-large`: keeps intentionally neutral, high-contrast surfaces. */
-[data-theme-preset]:not([data-theme-preset='default']):not(
-    [data-theme-preset='anthropic']
-  ):not([data-theme-preset='simple-large']) {
-  --card: color-mix(in oklch, var(--primary) 3%, var(--background));
-  --popover: color-mix(in oklch, var(--primary) 5%, var(--background));
-  --muted: color-mix(in oklch, var(--primary) 7%, var(--background));
-  --muted-foreground: color-mix(
-    in oklch,
-    var(--foreground) 68%,
-    var(--primary)
-  );
-  --accent: color-mix(in oklch, var(--primary) 14%, var(--background));
-  --accent-foreground: var(--foreground);
-  --border: color-mix(in oklch, var(--primary) 20%, var(--background));
-  --input: color-mix(in oklch, var(--primary) 22%, var(--background));
-  --sidebar: color-mix(in oklch, var(--primary) 4%, var(--background));
-  --sidebar-accent: color-mix(in oklch, var(--primary) 14%, var(--background));
-  --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: color-mix(in oklch, var(--primary) 18%, var(--background));
-  --success: var(--chart-2);
-  --warning: var(--chart-4);
-  --info: var(--chart-1);
-  --neutral: var(--muted-foreground);
-}
-.dark
-  [data-theme-preset]:not([data-theme-preset='default']):not(
-    [data-theme-preset='anthropic']
-  ):not([data-theme-preset='simple-large']) {
-  --card: color-mix(in oklch, var(--primary) 8%, var(--background));
-  --popover: color-mix(in oklch, var(--primary) 12%, var(--background));
-  --muted: color-mix(in oklch, var(--primary) 12%, var(--background));
-  --muted-foreground: color-mix(
-    in oklch,
-    var(--foreground) 74%,
-    var(--primary)
-  );
-  --accent: color-mix(in oklch, var(--primary) 18%, var(--background));
-  --border: color-mix(in oklch, var(--primary) 24%, var(--background));
-  --input: color-mix(in oklch, var(--primary) 28%, var(--background));
-  --sidebar: color-mix(in oklch, var(--primary) 5%, var(--background));
-  --sidebar-accent: color-mix(in oklch, var(--primary) 18%, var(--background));
-  --sidebar-border: color-mix(in oklch, var(--primary) 22%, var(--background));
+/* ═══════════ Blue Purple Light: Per-Area Gradients ═══════════ */
+
+/* ---- Body / root: horizontal blue→purple gradient (homepage match) ---- */
+[data-theme-preset='blue-purple'],
+html:has([data-theme-preset='blue-purple']) body {
+  background: linear-gradient(
+    90deg,
+    #c7e0fa 0%,
+    #bdd4f6 25%,
+    #c4cef4 50%,
+    #ccc8f2 75%,
+    #d4c4f0 100%
+  ) !important;
+  background-attachment: fixed !important;
 }
 
-/* ── Anthropic ────────────────────────────────────────────────────────── */
-/*
- * Inspired by Anthropic's official brand language: warm cream canvas
- * (#faf9f5) on warm slate ink (#141413), with clay/coral (#d97757) as the
- * single primary accent. The dormant accent palette (olive, sky, fig,
- * cactus) is wired into chart and semantic tokens.
- *
- * Defining counter-positioning: a tinted (non-white) canvas with warm
- * neutral cards and borders — NOT primary-tinted surfaces. This is the
- * brand's deliberate counter-positioning against every cool-gray AI tool.
- *
- * Anthropic is opted out of the semantic surface bridge above so these
- * bespoke warm-neutral surface tokens win the cascade. Without the opt-out,
- * the bridge selector (specificity 0,3,0 because of `:not()`) would override
- * this block (specificity 0,1,0) and tint every surface with the clay
- * accent — producing the peach/pink look that doesn't match Anthropic.
- *
- * OKLCH hue 95 = warm yellow-cream (matches #faf9f5 family);
- * OKLCH hue 60 = warm slate (matches #141413 family);
- * OKLCH hue 38 = clay/coral (matches #d97757).
- */
-[data-theme-preset='anthropic'] {
-  /* Canvas + ink — the defining pair. */
-  --background: oklch(0.984 0.004 95); /* ≈ #faf9f5 cream */
-  --foreground: oklch(0.205 0.005 60); /* ≈ #141413 ink */
-
-  /* Warm-neutral surfaces (NOT primary-tinted). Stepped opacity matches
-   * the Anthropic surface ladder: canvas → secondary → card → strong. */
-  --card: oklch(0.945 0.008 92); /* ≈ #efe9de */
-  --card-foreground: oklch(0.205 0.005 60);
-  --popover: oklch(0.97 0.006 92); /* slight cream lift */
-  --popover-foreground: oklch(0.205 0.005 60);
-
-  /* Clay/coral — Anthropic's signature accent, used scarcely on CTAs. */
-  --primary: oklch(0.685 0.142 38); /* ≈ #d97757 */
-  --primary-foreground: oklch(0.99 0.005 95);
-
-  --secondary: oklch(0.925 0.008 92);
-  --secondary-foreground: oklch(0.255 0.005 60);
-
-  --muted: oklch(0.94 0.007 92);
-  --muted-foreground: oklch(0.51 0.006 75); /* ≈ #5e5d59 warm gray */
-  --accent: oklch(0.92 0.009 92);
-  --accent-foreground: oklch(0.205 0.005 60);
-
-  --destructive: oklch(0.55 0.18 27);
-  --destructive-foreground: oklch(0.985 0 0);
-  --success: oklch(0.59 0.082 130); /* olive #788c5d */
-  --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.78 0.13 70); /* kraft amber */
-  --warning-foreground: oklch(0.205 0.005 60);
-  --info: oklch(0.67 0.075 248); /* sky #6a9bcc */
-  --info-foreground: oklch(0.985 0 0);
-  --neutral: oklch(0.51 0.006 75);
-  --neutral-foreground: oklch(0.205 0.005 60);
-
-  /* Hairline borders — warm gray, not coral. */
-  --border: oklch(0.895 0.008 92); /* ≈ #e8e6dc */
-  --input: oklch(0.895 0.008 92);
-  --ring: oklch(0.685 0.142 38);
-
-  /* Chart palette uses Anthropic's dormant accent swatches. */
-  --chart-1: oklch(0.685 0.142 38); /* clay */
-  --chart-2: oklch(0.59 0.082 130); /* olive */
-  --chart-3: oklch(0.67 0.075 248); /* sky */
-  --chart-4: oklch(0.7 0.115 0); /* fig */
-  --chart-5: oklch(0.83 0.027 175); /* cactus */
-
-  --sidebar: oklch(0.955 0.008 92);
-  --sidebar-foreground: oklch(0.255 0.005 60);
-  --sidebar-primary: oklch(0.685 0.142 38);
-  --sidebar-primary-foreground: oklch(0.99 0.005 95);
-  --sidebar-accent: oklch(0.915 0.009 92);
-  --sidebar-accent-foreground: oklch(0.205 0.005 60);
-  --sidebar-border: oklch(0.895 0.008 92);
-  --sidebar-ring: oklch(0.685 0.142 38);
-
-  --skeleton-base: oklch(0.93 0.008 92);
-  --skeleton-highlight: oklch(0.96 0.006 92);
-
-  --radius: 0.625rem;
-
-  /* Default typography for the Anthropic preset is the editorial serif.
-   * Users can override this with the Font axis (`data-theme-font='sans'`).
-   * The `--font-serif` token itself is declared once in theme.css. */
-  --font-body: var(--font-serif);
-}
-.dark [data-theme-preset='anthropic'] {
-  /* Warm near-black product surfaces, not pure black — keeps the editorial
-   * personality even when inverted. Coral lifts slightly for legibility. */
-  --background: oklch(0.215 0.004 60);
-  --foreground: oklch(0.965 0.005 92);
-  --card: oklch(0.255 0.004 60);
-  --card-foreground: oklch(0.965 0.005 92);
-  --popover: oklch(0.275 0.004 60);
-  --popover-foreground: oklch(0.965 0.005 92);
-
-  --primary: oklch(0.72 0.135 40);
-  --primary-foreground: oklch(0.18 0.005 60);
-  --secondary: oklch(0.305 0.004 60);
-  --secondary-foreground: oklch(0.945 0.005 92);
-
-  --muted: oklch(0.285 0.004 60);
-  --muted-foreground: oklch(0.76 0.006 75);
-  --accent: oklch(0.33 0.006 60);
-  --accent-foreground: oklch(0.985 0.005 92);
-
-  --destructive: oklch(0.7 0.19 22);
-  --destructive-foreground: oklch(0.985 0 0);
-  --success: oklch(0.7 0.105 135);
-  --success-foreground: oklch(0.18 0.005 60);
-  --warning: oklch(0.78 0.13 70);
-  --warning-foreground: oklch(0.18 0.005 60);
-  --info: oklch(0.72 0.085 248);
-  --info-foreground: oklch(0.18 0.005 60);
-  --neutral: oklch(0.76 0.006 75);
-  --neutral-foreground: oklch(0.18 0.005 60);
-
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.72 0.135 40);
-
-  --chart-1: oklch(0.72 0.135 40);
-  --chart-2: oklch(0.7 0.105 135);
-  --chart-3: oklch(0.72 0.085 248);
-  --chart-4: oklch(0.78 0.13 0);
-  --chart-5: oklch(0.83 0.027 175);
-
-  --sidebar: oklch(0.205 0.004 60);
-  --sidebar-foreground: oklch(0.95 0.005 92);
-  --sidebar-primary: oklch(0.72 0.135 40);
-  --sidebar-primary-foreground: oklch(0.18 0.005 60);
-  --sidebar-accent: oklch(0.32 0.006 60);
-  --sidebar-accent-foreground: oklch(0.985 0.005 92);
-  --sidebar-border: oklch(1 0 0 / 11%);
-  --sidebar-ring: oklch(0.72 0.135 40);
-
-  --skeleton-base: oklch(0.305 0.004 60);
-  --skeleton-highlight: oklch(0.41 0.004 60);
+/* Force body bg-background to use gradient */
+[data-theme-preset='blue-purple'].bg-background {
+  background: linear-gradient(
+    90deg,
+    #c7e0fa 0%,
+    #bdd4f6 25%,
+    #c4cef4 50%,
+    #ccc8f2 75%,
+    #d4c4f0 100%
+  ) !important;
 }
 
-/* ── Font axis ────────────────────────────────────────────────────────────
- * Mirrors how `data-theme-radius` overrides a preset's default radius:
- * presets may set `--font-body` (Anthropic → serif), and the user's
- * explicit Font choice wins because these blocks sit AFTER preset blocks.
- *
- * The provider resolves `font: 'default'` → `'sans' | 'serif'` against the
- * active preset before writing the attribute, so the DOM always carries a
- * concrete value and CSS only needs the simple `[data-theme-font='serif']`
- * selector below (no `:not()`, no per-preset branches). */
-[data-theme-font='sans'] {
-  --font-body: var(--font-sans);
-}
-[data-theme-font='serif'] {
-  --font-body: var(--font-serif);
-}
-
-/* ── Serif typography refinements ────────────────────────────────────────
- * When the body runs in serif, three things happen:
- *   1. Editorial OpenType features (kern/liga + tabular numerals so numeric
- *      columns stay grid-aligned even with proportional serif glyphs).
- *   2. Every UI surface inherits the editorial voice — buttons, inputs,
- *      tabs, sidebar, table headers, badges, pagination, popovers — all
- *      through Tailwind preflight's `button, input, ... { font: inherit }`
- *      rule plus natural HTML inheritance. We intentionally do NOT carry
- *      a per-slot opt-out list: it adds maintenance cost and only blunts
- *      the Anthropic editorial intent. Monospace contexts are excluded
- *      automatically because:
- *        - `<code>`, `<kbd>`, `<pre>`, `<samp>` are typed monospace by
- *          Tailwind preflight (specificity wins over body inheritance).
- *        - `.font-mono` and `.tabular-nums` utilities declare their own
- *          font-family / font-variant-numeric on the element itself.
- *   3. Headings adopt the Anthropic display setting (medium weight, slight
- *      negative tracking).
- *
- * All keyed off `[data-theme-font='serif']` so they apply to any preset
- * paired with the serif font — not just Anthropic. */
-[data-theme-font='serif'] {
-  font-feature-settings:
-    'kern' 1,
-    'liga' 1,
-    'calt' 1,
-    'tnum' 1;
+/* ---- Sidebar: fully transparent — shows body's blue-purple gradient through ---- */
+[data-theme-preset='blue-purple'] [data-slot='sidebar-wrapper'],
+body[data-theme-preset='blue-purple'] [data-slot='sidebar'],
+body[data-theme-preset='blue-purple'] [data-slot='sidebar-inner'],
+body[data-theme-preset='blue-purple'] [data-slot='sidebar-container'],
+body[data-theme-preset='blue-purple'] [data-slot='sidebar-gap'],
+body[data-theme-preset='blue-purple'] [data-sidebar='sidebar'],
+body[data-theme-preset='blue-purple'] aside.bg-sidebar,
+body[data-theme-preset='blue-purple'] div.bg-sidebar,
+body[data-theme-preset='blue-purple'] .bg-sidebar {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
 }
 
-/* Heading tuning — applies to <h*> tags and the shadcn title slots so
- * card/sheet/dialog titles read with the same authoritative voice as
- * page headers. */
-[data-theme-font='serif'] :is(h1, h2, h3, h4, h5, h6),
-[data-theme-font='serif'] [data-slot='sheet-title'],
-[data-theme-font='serif'] [data-slot='dialog-title'],
-[data-theme-font='serif'] [data-slot='alert-dialog-title'],
-[data-theme-font='serif'] [data-slot='drawer-title'],
-[data-theme-font='serif'] [data-slot='card-title'] {
-  font-weight: 500;
-  letter-spacing: -0.012em;
+/* Remove sidebar container directional borders specifically */
+[data-theme-preset='blue-purple'] [data-slot='sidebar-container'],
+body[data-theme-preset='blue-purple'] [data-slot='sidebar-container'] {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
-/* Larger displays earn tighter tracking, matching Copernicus/Tiempos
- * editorial display setting (~ -0.02em at 30px+). */
-[data-theme-font='serif'] h1,
-[data-theme-font='serif'] .text-3xl,
-[data-theme-font='serif'] .text-4xl,
-[data-theme-font='serif'] .text-5xl {
-  letter-spacing: -0.02em;
+/* Sidebar inner: ensure fully transparent, no ring/shadow */
+body[data-theme-preset='blue-purple'] [data-slot='sidebar-inner'],
+[data-theme-preset='blue-purple'] [data-sidebar='sidebar'] {
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-shadow: none !important;
 }
 
-/* ── Border radius ────────────────────────────────────────────────────── */
-[data-theme-radius='none'] {
-  --radius: 0rem;
+/* Sidebar inset: remove left separator line only */
+[data-theme-preset='blue-purple'] [data-slot='sidebar-inset'] {
+  border-left: none !important;
 }
-[data-theme-radius='sm'] {
-  --radius: 0.3rem;
+
+/* Sidebar inner elements: also transparent */
+body[data-theme-preset='blue-purple'] [data-sidebar='sidebar'] > nav,
+body[data-theme-preset='blue-purple'] [data-sidebar='content'],
+body[data-theme-preset='blue-purple'] [data-sidebar='header'],
+body[data-theme-preset='blue-purple'] [data-sidebar='footer'],
+body[data-theme-preset='blue-purple'] [data-sidebar='group'],
+body[data-theme-preset='blue-purple'] [data-sidebar='menu'],
+body[data-theme-preset='blue-purple'] nav > div,
+body[data-theme-preset='blue-purple'] [role='navigation'] > *,
+body[data-theme-preset='blue-purple'] [data-sidebar] .flex.flex-col,
+[data-theme-preset='blue-purple'] [data-sidebar='sidebar'] > nav,
+[data-theme-preset='blue-purple'] [data-sidebar='content'],
+[data-theme-preset='blue-purple'] [data-sidebar='header'],
+[data-theme-preset='blue-purple'] [data-sidebar='footer'],
+[data-theme-preset='blue-purple'] [data-sidebar='group'],
+[data-theme-preset='blue-purple'] [data-sidebar='menu'],
+[data-theme-preset='blue-purple'] nav > div,
+[data-theme-preset='blue-purple'] [role='navigation'] > *,
+[data-theme-preset='blue-purple'] [data-sidebar] .flex.flex-col {
+  background: transparent !important;
 }
-[data-theme-radius='md'] {
+
+/* Mobile sidebar: keep a subtle tint so it's distinguishable */
+body[data-theme-preset='blue-purple'] [data-state='open'].bg-sidebar,
+[data-theme-preset='blue-purple'] [data-state='open'].bg-sidebar {
+  background: linear-gradient(
+    135deg,
+    #c8d4f4 0%,
+    #d4c0e4 100%
+  ) !important;
+}
+
+/* ---- Main content area: translucent lavender showing body gradient ---- */
+[data-theme-preset='blue-purple'] main[data-slot='sidebar-inset'] {
+  background: rgba(230, 232, 250, 0.35) !important;
+}
+
+/* ---- Cards: frosted glass with visible violet tint ---- */
+[data-theme-preset='blue-purple'] .bg-card,
+[data-theme-preset='blue-purple'] [class*="rounded-xl"],
+[data-theme_preset='blue-purple'] .rounded-xl,
+[data-theme-preset='blue-purple'] div[class*="shadow-sm"] {
+  background: linear-gradient(
+    135deg,
+    rgba(235, 238, 255, 0.82) 0%,
+    rgba(225, 228, 248, 0.80) 40%,
+    rgba(218, 222, 245, 0.82) 100%
+  ) !important;
+  border: 1px solid rgba(165, 178, 225, 0.48) !important;
+  box-shadow:
+    0 1px 3px rgba(100, 115, 180, 0.12),
+    0 1px 2px rgba(120, 130, 185, 0.08) !important;
+}
+
+/* ---- Inside drawer/sheet/dialog: remove per-item card backgrounds ---- */
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .bg-card,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [class*="rounded-xl"],
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .border-b,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] section,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [data-border-b],
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .bg-card,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [class*="rounded-xl"],
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .border-b,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] section,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [data-border-b],
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .bg-card,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [class*="rounded-xl"],
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .border-b,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] section,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [data-border-b],
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .bg-card,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [class*="rounded-xl"],
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .border-b,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] section,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [data-border-b],
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .bg-card,
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [class*="rounded-xl"],
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .border-b,
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] section,
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [data-border-b],
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .bg-card,
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [class*="rounded-xl"],
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .border-b,
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] section,
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [data-border-b] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ---- Page header bar ---- */
+[data-theme-preset='blue-purple'] header,
+[data-theme-preset='blue-purple'] [data-slot='app-header'],
+[data-theme-preset='blue-purple'] .border-b {
+  background: linear-gradient(
+    90deg,
+    rgba(200, 210, 245, 0.60) 0%,
+    rgba(210, 214, 248, 0.55) 50%,
+    rgba(218, 218, 248, 0.58) 100%
+  ) !important;
+  border-bottom-color: rgba(160, 172, 218, 0.38) !important;
+}
+
+/* Exception: public page hero headers & inputs stay transparent */
+[data-theme-preset='blue-purple'] .sf-page-gradient > div > header,
+[data-theme-preset='blue-purple'] header[class*="max-w-3xl"][class*="text-center"] {
+  background: transparent !important;
+}
+
+[data-theme-preset='blue-purple'] .sf-page-gradient input.bg-background,
+[data-theme-preset='blue-purple'] .sf-page-gradient .bg-background[class*="rounded-lg"][class*="border"] {
+  background: transparent !important;
+}
+
+/* ---- Table: visible purple headers ---- */
+[data-theme-preset='blue-purple'] table thead th,
+[data-theme-preset='blue-purple'] [data-slot='data-table-header'] {
+  background: linear-gradient(
+    90deg,
+    rgba(195, 206, 242, 0.85) 0%,
+    rgba(188, 200, 238, 0.83) 100%
+  ) !important;
+  color: oklch(0.20 0.03 270) !important;
+  border-bottom: 1px solid rgba(158, 172, 220, 0.42) !important;
+}
+[data-theme-preset='blue-purple'] table tbody tr {
+  background: rgba(232, 236, 250, 0.38) !important;
+}
+[data-theme-preset='blue-purple'] table tbody tr:nth-child(even) {
+  background: rgba(222, 228, 246, 0.32) !important;
+}
+
+/* ---- Buttons ---- */
+[data-theme-preset='blue-purple'] button.bg-primary,
+[data-theme-preset='blue-purple'] button[class*="bg-primary"] {
+  background: linear-gradient(135deg, #7c6ff0, #6b5ce8) !important;
+  box-shadow: 0 2px 4px rgba(108, 92, 232, 0.25) !important;
+}
+
+/* ---- Inputs ---- */
+[data-theme-preset='blue-purple'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] textarea,
+[data-theme-preset='blue-purple'] select {
+  background: rgba(228, 234, 252, 0.65) !important;
+  border-color: rgba(165, 178, 225, 0.50) !important;
+}
+
+/* Light mode: drawer/sheet inputs — softer to match sheet bg */
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] textarea,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] select,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] textarea,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] select,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] textarea,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] select {
+  background: rgba(225, 230, 248, 0.45) !important;
+  border-color: rgba(180, 190, 220, 0.35) !important;
+}
+
+/* ---- Decorative glow orbs ---- */
+[data-theme-preset='blue-purple']::before,
+[data-theme-preset='blue-purple']::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+[data-theme-preset='blue-purple']::before {
+  top: -8%; left: -5%;
+  width: 32vw; height: 32vw;
+  max-width: 480px; max-height: 480px;
+  background: radial-gradient(circle, rgba(99,102,241,.15) 0%, transparent 70%);
+  filter: blur(45px);
+}
+[data-theme-preset='blue-purple']::after {
+  bottom: -8%; right: -5%;
+  width: 32vw; height: 32vw;
+  max-width: 480px; max-height: 480px;
+  background: radial-gradient(circle, rgba(167,139,250,.14) 0%, transparent 70%);
+  filter: blur(45px);
+}
+
+/* ---- Switch: visible thumb on transparent/colored track ---- */
+[data-theme-preset='blue-purple'] [data-slot='switch-thumb'] {
+  background: #fff !important;
+}
+[data-theme-preset='blue-purple'] [data-slot='switch']:not([data-unchecked]) [data-slot='switch-thumb'],
+[data-theme-preset='blue-purple'] [data-slot='switch'][data-checked] [data-slot='switch-thumb'] {
+  background: #fff !important;
+}
+
+/* ---- Tooltip / Popover / Dropdown: override inverted colors ---- */
+/* Tooltip uses bg-foreground + text-background by default — in blue-purple that gives
+   dark bg + invisible text because --background is transparent */
+[data-theme-preset='blue-purple'] [data-slot='tooltip-content'],
+body[data-theme-preset='blue-purple'] [data-slot='tooltip-content'] {
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+[data-theme-preset='blue-purple'] [data-slot='tooltip-content'] .bg-foreground,
+body[data-theme-preset='blue-purple'] [data-slot='tooltip-content'] .fill-foreground {
+  background: var(--popover) !important;
+  fill: var(--popover) !important;
+}
+
+/* Popover & Dropdown: ensure readable in blue-purple mode */
+[data-theme-preset='blue-purple'] [data-slot='popover-content'],
+[data-theme-preset='blue-purple'] [data-slot='dropdown-menu-content'],
+body[data-theme-preset='blue-purple'] [data-slot='popover-content'],
+body[data-theme-preset='blue-purple'] [data-slot='dropdown-menu-content'] {
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+
+/* ---- Dialog / Drawer: solid white background to prevent transparency bleed ---- */
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'],
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] {
+  background: rgba(250, 251, 255, 0.96) !important;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px rgba(80, 90, 160, 0.15),
+    0 1px 4px rgba(80, 90, 160, 0.10) !important;
+}
+/* ── Blue Purple: Dialog / Drawer / Sheet solid background ──────────── */
+/* Dialog */
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] {
+  --background: rgba(250, 251, 255, 0.96);
+}
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] {
+  --background: rgba(250, 251, 255, 0.96);
+}
+/* Drawer (vaul) */
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] {
+  --background: #dbddf7;
+  background: #dbddf7 !important;
+  background-color: #dbddf7 !important;
+}
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] {
+  --background: #dbddf7;
+  background: #dbddf7 !important;
+  background-color: #dbddf7 !important;
+}
+/* Sheet (base-ui dialog popup — the "drawer" in UI)
+   The sheet-content uses bg-background (var(--background)).
+   Inner children: sheet-header and sheet-footer use bg-background/95,
+   but the main scrollable content area (<div class="flex min-h-0 flex-1...">)
+   has NO background class at all, so it stays transparent.
+   We must set --background on the parent AND force background on the
+   flex-1 child that fills the middle. */
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] {
+  --background: #dbddf7;
+  background: #dbddf7 !important;
+  background-color: #dbddf7 !important;
+}
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.min-h-0,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.flex-1 {
+  background: #dbddf7;
+}
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] {
+  --background: #dbddf7;
+  background: #dbddf7 !important;
+  background-color: #dbddf7 !important;
+}
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.min-h-0,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.flex-1 {
+  background: #dbddf7;
+}
+
+/* ── Blue Purple: top nav link styles ──────────── */
+[data-theme-preset='blue-purple'] .nav-link-active {
+  color: var(--primary) !important;
+}
+
+[data-theme-preset='blue-purple'] .top-nav-links a:not(.nav-link-active):hover,
+[data-theme-preset='blue-purple'] .top-nav-links button:not(.nav-link-active):hover {
+  color: var(--primary) !important;
+}
+
+/* ── Blue Purple: transparent backgrounds ──────────── */
+
+/* Pricing page — fully transparent */
+[data-theme-preset='blue-purple'] .sf-page-gradient,
+body[data-theme-preset='blue-purple'] .sf-page-gradient {
+  background: transparent !important;
+}
+
+/* Hide decorative radial-gradient overlays */
+[data-theme-preset='blue-purple'] div[aria-hidden][style*="radial-gradient"],
+[data-theme-preset='blue-purple'] [class*="pointer-events-none"][style*="radial-gradient"] {
+  display: none !important;
+}
+
+/* Rankings tab bar — transparent */
+[data-theme-preset='blue-purple'] [role="tablist"][class*="border-b"] {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Sign-in tab switcher — transparent background */
+[data-theme-preset='blue-purple'] .auth-tab-switcher {
+  background: transparent !important;
+}
+
+
+
+
+
+
+
+.dark [data-theme-preset='blue-purple'] {
+  /* ── Variables ── */
+  --foreground: oklch(0.93 0.01 260);
+  --card: transparent;
+  --card-foreground: oklch(0.93 0.01 260);
+  --popover: rgba(44, 48, 68, 0.90);
+  --popover-foreground: oklch(0.93 0.01 260);
+  --primary: oklch(0.62 0.24 282);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: rgba(68, 76, 115, 0.58);
+  --secondary-foreground: oklch(0.88 0.02 260);
+  --muted: rgba(52, 58, 85, 0.58);
+  --muted-foreground: oklch(0.63 0.025 260);
+  --accent: rgba(62, 70, 105, 0.63);
+  --accent-foreground: oklch(0.90 0.01 260);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.60 0.17 155);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.72 0.16 75);
+  --warning-foreground: oklch(0.20 0.02 75);
+  --info: oklch(0.56 0.15 240);
+  --info-foreground: oklch(1 0 0);
+  --neutral: rgba(54, 60, 85, 0.68);
+  --neutral-foreground: oklch(0.83 0.01 260);
+  --border: rgba(76, 84, 122, 0.42);
+  --input: rgba(62, 70, 108, 0.42);
+  --ring: oklch(0.62 0.24 282);
+  --table-row: transparent;
+  --table-header: rgba(48, 55, 85, 0.78);
+  --table-header-hover: rgba(58, 66, 98, 0.88);
+  --table-disabled: rgba(34, 38, 58, 0.52);
+  --table-disabled-hover: rgba(42, 48, 72, 0.62);
+  --table-disabled-border: rgba(68, 76, 115, 0.42);
+  --chart-1: oklch(0.62 0.24 282);
+  --chart-2: oklch(0.68 0.18 245);
+  --chart-3: oklch(0.64 0.20 270);
+  --chart-4: oklch(0.60 0.22 285);
+  --chart-5: oklch(0.72 0.14 255);
+  --skeleton-base: rgba(50, 56, 80, 0.64);
+  --skeleton-highlight: rgba(60, 66, 88, 0.74);
+  /* Sidebar: transparent (shows body gradient through) */
+  --sidebar: transparent;
+  --sidebar-foreground: oklch(0.87 0.01 260);
+  --sidebar-primary: oklch(0.62 0.24 282);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: rgba(60, 68, 105, 0.58);
+  --sidebar-accent-foreground: oklch(0.90 0.01 260);
+  --sidebar-border: rgba(66, 74, 112, 0.42);
+  --sidebar-ring: oklch(0.62 0.24 282);
+  --background: transparent;
   --radius: 0.5rem;
 }
-[data-theme-radius='lg'] {
-  --radius: 0.75rem;
-}
-[data-theme-radius='xl'] {
-  --radius: 1rem;
+
+/* ═══════════ Blue Purple Dark: Per-Area Gradients ═══════════ */
+
+/* Body: deep blue-purple horizontal */
+.dark [data-theme-preset='blue-purple'],
+html:has(.dark [data-theme-preset='blue-purple']) body {
+  background: linear-gradient(
+    90deg,
+    oklch(0.170 0.038 238) 0%,
+    oklch(0.164 0.034 256) 35%,
+    oklch(0.168 0.030 272) 70%,
+    oklch(0.172 0.026 288) 100%
+  ) !important;
+  background-attachment: fixed !important;
 }
 
-/* ── Density scale ────────────────────────────────────────────────────── */
-/* `sm` = compact UI; `lg` = comfortable; `xl` = extra readable. Default keeps Tailwind defaults. */
-[data-theme-scale='sm'] {
-  --text-xs: 0.7rem;
-  --text-sm: 0.78rem;
-  --text-base: 0.88rem;
-  --text-lg: 1rem;
-  --text-xl: 1.13rem;
-  --text-2xl: 1.38rem;
-  --text-3xl: 1.7rem;
-  --spacing: 0.225rem;
-}
-[data-theme-scale='lg'] {
-  --text-xs: 0.84rem;
-  --text-sm: 0.95rem;
-  --text-base: 1.075rem;
-  --text-lg: 1.2rem;
-  --text-xl: 1.35rem;
-  --text-2xl: 1.65rem;
-  --text-3xl: 2rem;
-  --spacing: 0.28rem;
-}
-[data-theme-scale='xl'] {
-  --text-xs: 0.9rem;
-  --text-sm: 1rem;
-  --text-base: 1.125rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.45rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.15rem;
-  --spacing: 0.3rem;
+/* Sidebar: fully transparent (dark mode — shows body gradient through) */
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-wrapper'],
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar'],
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-inner'],
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-container'],
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-gap'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='sidebar'],
+.dark [data-theme-preset='blue-purple'] aside.bg-sidebar,
+.dark [data-theme-preset='blue-purple'] div.bg-sidebar,
+.dark [data-theme-preset='blue-purple'] .bg-sidebar {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
 }
 
-/* ── Content layout ───────────────────────────────────────────────────── */
-/* `centered` clamps inset content to a comfortable reading width on large screens.
- * Targets every direct child of <SidebarInset> so router outlet wrappers and
- * page content alike are centered. Only kicks in once the viewport exceeds the
- * clamp value. */
-@media (min-width: 1280px) {
-  [data-theme-content-layout='centered'] [data-slot='sidebar-inset'] > * {
-    max-width: var(--max-content-width, 1280px);
-    margin-inline: auto;
-    width: 100%;
-  }
+/* Remove sidebar container directional borders (dark) */
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-container'] {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar inner: no ring/shadow (dark) */
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-inner'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='sidebar'] {
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+.dark [data-theme-preset='blue-purple'] [data-slot='sidebar-inset'] {
+  border-left: none !important;
+}
+
+/* Dark mode sidebar inner elements: transparent */
+.dark [data-theme-preset='blue-purple'] [data-sidebar='sidebar'] > nav,
+.dark [data-theme-preset='blue-purple'] [data-sidebar='content'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='header'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='footer'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='group'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='menu'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='menu-action'],
+.dark [data-theme-preset='blue-purple'] [data-sidebar='menu-item'],
+.dark [data-theme-preset='blue-purple'] nav > div,
+.dark [data-theme-preset='blue-purple'] [role='navigation'] > * {
+  background: transparent !important;
+}
+
+/* Main content: semi-transparent dark */
+.dark [data-theme-preset='blue-purple'] main[data-slot='sidebar-inset'] {
+  background: rgba(24, 27, 42, 0.52) !important;
+}
+
+/* Cards: dark glass with violet tint */
+.dark [data-theme-preset='blue-purple'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] div[class*="shadow-sm"] {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 38, 58, 0.86) 0%,
+    rgba(32, 36, 55, 0.84) 50%,
+    rgba(30, 34, 53, 0.86) 100%
+  ) !important;
+  border: 1px solid rgba(70, 78, 118, 0.40) !important;
+  box-shadow: 0 1px 3px rgba(20, 22, 40, 0.32) !important;
+}
+
+/* Dark mode: Inside drawer/sheet/dialog — remove per-item card backgrounds */
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] .border-b,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] section,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] [data-border-b],
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] table tbody tr,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] div[class*="shadow-sm"],
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] .border-b,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] section,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] [data-border-b],
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] table tbody tr,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] div[class*="shadow-sm"],
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] .border-b,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] section,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] [data-border-b],
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] table tbody tr,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] div[class*="shadow-sm"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Header */
+.dark [data-theme-preset='blue-purple'] header,
+.dark [data-theme-preset='blue-purple'] [data-slot='app-header'],
+.dark [data-theme-preset='blue-purple'] .border-b {
+  background: linear-gradient(
+    90deg,
+    oklch(0.180 0.032 246) 0%,
+    oklch(0.174 0.028 264) 50%,
+    oklch(0.178 0.026 280) 100%
+  ) !important;
+  border-bottom-color: rgba(68, 76, 115, 0.36) !important;
+}
+
+/* Table headers */
+.dark [data-theme-preset='blue-purple'] table thead th,
+.dark [data-theme-preset='blue-purple'] [data-slot='data-table-header'] {
+  background: linear-gradient(
+    90deg,
+    rgba(46, 52, 82, 0.85) 0%,
+    rgba(42, 49, 78, 0.83) 100%
+  ) !important;
+  color: oklch(0.86 0.01 260) !important;
+  border-bottom: 1px solid rgba(64, 72, 112, 0.38) !important;
+}
+.dark [data-theme-preset='blue-purple'] table tbody tr {
+  background: rgba(28, 32, 50, 0.46) !important;
+}
+.dark [data-theme-preset='blue-purple'] table tbody tr:nth-child(even) {
+  background: rgba(24, 28, 46, 0.40) !important;
+}
+
+/* Buttons */
+.dark [data-theme-preset='blue-purple'] button.bg-primary,
+.dark [data-theme-preset='blue-purple'] button[class*="bg-primary"] {
+  background: linear-gradient(135deg, #6b5ce8, #5a4de0) !important;
+  box-shadow: 0 2px 4px rgba(90, 77, 224, 0.28) !important;
+}
+
+/* Inputs */
+.dark [data-theme-preset='blue-purple'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] textarea,
+.dark [data-theme-preset='blue-purple'] select {
+  background: rgba(32, 36, 56, 0.62) !important;
+  border-color: rgba(68, 76, 115, 0.40) !important;
+}
+
+/* Dark mode: drawer/sheet inputs — softer to match sheet bg */
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] textarea,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] select,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] textarea,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] select,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] textarea,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] select {
+  background: rgba(42, 48, 72, 0.45) !important;
+  border-color: rgba(80, 90, 130, 0.30) !important;
+}
+
+/* Glow orbs (subtle for dark) */
+.dark [data-theme-preset='blue-purple']::before,
+.dark [data-theme-preset='blue-purple']::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.dark [data-theme-preset='blue-purple']::before {
+  top: -8%; left: -5%;
+  width: 32vw; height: 32vw;
+  max-width: 480px; max-height: 480px;
+  background: radial-gradient(circle, rgba(99,102,241,.08) 0%, transparent 70%);
+  filter: blur(55px);
+}
+.dark [data-theme-preset='blue-purple']::after {
+  bottom: -8%; right: -5%;
+  width: 32vw; height: 32vw;
+  max-width: 480px; max-height: 480px;
+  background: radial-gradient(circle, rgba(139,92,246,.07) 0%, transparent 70%);
+  filter: blur(55px);
+}
+
+/* ── Blue Purple Dark: top nav link styles ─────── */
+.dark [data-theme-preset='blue-purple'] .nav-link-active {
+  color: var(--primary) !important;
+}
+
+.dark [data-theme-preset='blue-purple'] .top-nav-links a:not(.nav-link-active):hover,
+.dark [data-theme-preset='blue-purple'] .top-nav-links button:not(.nav-link-active):hover {
+  color: var(--primary) !important;
+}
+
+/* ── Blue Purple Dark: switch/tooltip/popover fixes ─────── */
+.dark [data-theme-preset='blue-purple'] [data-slot='switch-thumb'] {
+  background: #fff !important;
+}
+
+.dark [data-theme-preset='blue-purple'] [data-slot='tooltip-content'] {
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+
+.dark [data-theme-preset='blue-purple'] [data-slot='popover-content'],
+.dark [data-theme-preset='blue-purple'] [data-slot='dropdown-menu-content'] {
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+
+/* Dark mode Dialog / Drawer: solid dark background */
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] {
+  background: rgba(38, 42, 62, 0.96) !important;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.30),
+    0 1px 4px rgba(0, 0, 0, 0.20) !important;
+}
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] {
+  --background: rgba(38, 42, 62, 0.96);
+  background: rgba(38, 42, 62, 0.96) !important;
+  background-color: rgba(38, 42, 62, 0.96) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Dark mode Sheet: solid dark background (theme settings popup uses this) */
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] {
+  --background: rgba(38, 42, 62, 0.96);
+  background: rgba(38, 42, 62, 0.96) !important;
+  background-color: rgba(38, 42, 62, 0.96) !important;
+}
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.min-h-0,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.flex-1 {
+  background: rgba(38, 42, 62, 0.96);
+}
+
+/* ── Blue Purple Dark: transparent backgrounds ─────── */
+.dark [data-theme-preset='blue-purple'] .sf-page-gradient {
+  background: transparent !important;
+}
+
+.dark [data-theme-preset='blue-purple'] [aria-hidden][style*="radial-gradient"] {
+  opacity: 0 !important;
+}
+
+.dark [data-theme-preset='blue-purple'] [role="tablist"][class*="border-b"] {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.dark [data-theme-preset='blue-purple'] .auth-tab-switcher {
+  background: transparent !important;
 }

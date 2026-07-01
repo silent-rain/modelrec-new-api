@@ -16,8 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect } from 'react'
-import { Gift, ExternalLink, Loader2, Receipt, WalletCards } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Gift, ExternalLink, Loader2, Receipt, WalletCards, Pencil } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatNumber } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -111,17 +111,94 @@ export function RechargeFormCard({
 }: RechargeFormCardProps) {
   const { t } = useTranslation()
   const [localAmount, setLocalAmount] = useState(topupAmount.toString())
+  // Separate state for custom amount input, independent from preset selection
+  const [customAmount, setCustomAmount] = useState('')
+  const customInputRef = useRef<HTMLInputElement>(null)
+  const [isCustomAmountSelected, setIsCustomAmountSelected] = useState(false)
 
   useEffect(() => {
     setLocalAmount(topupAmount.toString())
+    // Don't sync custom amount when preset is selected - keep it separate
   }, [topupAmount])
 
   const handleAmountChange = (value: string) => {
     setLocalAmount(value)
-    const numValue = parseInt(value) || 0
-    if (numValue >= 0) {
+    const { valid, numValue } = validateAmountInput(value)
+    if (!valid) {
+      onTopupAmountChange(0)
+    } else {
       onTopupAmountChange(numValue)
     }
+  }
+
+  const handleCustomAmountChange = (value: string) => {
+    const { valid, sanitized, numValue } = validateAmountInput(value)
+    setCustomAmount(sanitized)
+    if (!valid) {
+      onTopupAmountChange(0)
+    } else {
+      onTopupAmountChange(numValue)
+    }
+  }
+
+  /**
+   * Validate and format input value for amount fields.
+   * Rules:
+   * - Only allow positive numbers (no negative sign)
+   * - Allow up to 2 decimal places
+   * - Reject empty or invalid values
+   */
+  const validateAmountInput = (value: string): { valid: boolean; sanitized: string; numValue: number } => {
+    let sanitized = value
+
+    // Block negative sign completely
+    if (sanitized.includes('-')) {
+      return { valid: false, sanitized: '', numValue: NaN }
+    }
+
+    // Only allow digits and single decimal point
+    if (!/^\d*\.?\d*$/.test(sanitized)) {
+      return { valid: false, sanitized: '', numValue: NaN }
+    }
+
+    // Limit to 2 decimal places
+    const parts = sanitized.split('.')
+    if (parts[1] && parts[1].length > 2) {
+      sanitized = `${parts[0]}.${parts[1].slice(0, 2)}`
+    }
+
+    // Remove leading zeros but keep "0.xxx"
+    if (/^0\d/.test(sanitized) && !sanitized.startsWith('0.')) {
+      sanitized = sanitized.replace(/^0+/, '')
+    }
+
+    const numValue = parseFloat(sanitized)
+    const valid = !isNaN(numValue) && numValue > 0 && sanitized.length > 0
+
+    return { valid, sanitized, numValue }
+  }
+
+  const isCustomAmountValid = (): boolean => {
+    if (!customAmount.trim()) return false
+    const numValue = parseFloat(customAmount)
+    return !isNaN(numValue) && numValue > 0
+  }
+
+  const handleCustomCardClick = () => {
+    setIsCustomAmountSelected(true)
+    onSelectPreset({ value: -1, discount: 1, name: 'Custom', icon: '', type: '' } as PresetAmount)
+    // Sync custom amount to main amount when switching to custom mode
+    if (isCustomAmountValid()) {
+      onTopupAmountChange(parseFloat(customAmount))
+    }
+    // Auto focus the custom amount input
+    setTimeout(() => customInputRef.current?.focus(), 0)
+  }
+
+  const handlePresetClick = (preset: PresetAmount) => {
+    setIsCustomAmountSelected(false)
+    setCustomAmount('') // Clear custom amount when selecting preset
+    onSelectPreset(preset)
   }
 
   const hasConfigurableTopup =
@@ -189,7 +266,7 @@ export function RechargeFormCard({
   return (
     <TitledCard
       title={t('Add Funds')}
-      description={t('Choose an amount and payment method')}
+      description={t('Choose alipay amount')}
       icon={<WalletCards className='h-4 w-4' />}
       disableHoverEffect
       action={
@@ -207,7 +284,7 @@ export function RechargeFormCard({
       }
       contentClassName='space-y-4 sm:space-y-6'
     >
-      {/* Online Topup Section */}
+      {/* Online Topup Section - New Amount Card Layout */}
       {hasAnyTopup ? (
         <div className='space-y-4 sm:space-y-6'>
           {hasConfigurableTopup && (
@@ -459,13 +536,136 @@ export function RechargeFormCard({
           )}
         </div>
       ) : (
-        <Alert>
-          <AlertDescription>
-            {t(
-              'Online topup is not enabled. Please use redemption code or contact administrator.'
-            )}
-          </AlertDescription>
-        </Alert>
+        // {/* Original Alert: Online topup not enabled - replaced with amount card layout */}
+        // <Alert>
+        //   <AlertDescription>
+        //     {t(
+        //       'Online topup is not enabled. Please use redemption code or contact administrator.'
+        //     )}
+        //   </AlertDescription>
+        // </Alert>
+
+        /* New Amount Card Layout with custom amount input */
+        <div className='space-y-4 sm:space-y-6'>
+          {/* Preset amount cards + Custom amount input in same row */}
+          <div className='space-y-3'>
+            <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
+              {t('Select Top-up Amount')}
+            </Label>
+            <div className='grid grid-cols-2 gap-3 lg:grid-cols-5'>
+              {/* Preset amount cards - use div for consistent selection style */}
+              {[
+                { value: 50, label: '基础充值', isHot: false },
+                { value: 100, label: '日常选用', isHot: false },
+                { value: 500, label: '热门选择', isHot: true },
+                { value: 1000, label: '超值套餐', isHot: false },
+              ].map((item) => (
+                <div
+                  key={item.value}
+                  className={cn(
+                    'relative flex cursor-pointer flex-col items-center gap-2 rounded-lg border px-4 py-6 text-center transition-all min-h-[90px] justify-center',
+                    selectedPreset === item.value && !isCustomAmountSelected
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-muted hover:border-primary/50'
+                  )}
+                  onClick={() => handlePresetClick({
+                    value: item.value,
+                    discount: 1,
+                    name: `${item.label}`,
+                    icon: '',
+                    type: '',
+                  } as PresetAmount)}
+                >
+                  {item.isHot && (
+                    <span className='absolute right-2 top-2 bg-red-500 rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white'>
+                      最热
+                    </span>
+                  )}
+                  <span className={cn(
+                    'text-lg font-semibold',
+                    selectedPreset === item.value && !isCustomAmountSelected
+                      ? 'text-primary'
+                      : ''
+                  )}>¥{item.value}</span>
+                  <span className='text-muted-foreground text-xs leading-tight'>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+
+              {/* Custom amount input card - same selection style */}
+              <div
+                className={cn(
+                  'flex flex-col items-center gap-2 rounded-lg border px-4 py-6 text-center cursor-pointer transition-all min-h-[90px] justify-center',
+                  isCustomAmountSelected
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                    : 'border-muted hover:border-primary/50'
+                )}
+                onClick={handleCustomCardClick}
+              >
+                {/* ¥ symbol + Input value on top - same style as preset amount */}
+                <div className='flex items-center justify-center gap-0.5'>
+                  <span className='text-lg font-semibold'>¥</span>
+                  <Input
+                    ref={customInputRef}
+                    id='custom-topup-amount'
+                    type='number'
+                    step='0.01'
+                    min={0.01}
+                    value={customAmount}
+                    onChange={(e) => {
+                      handleCustomAmountChange(e.target.value)
+                      // Select this card when user types in it
+                      if (!isCustomAmountSelected) {
+                        setIsCustomAmountSelected(true)
+                        onSelectPreset({ value: -1, discount: 1, name: 'Custom', icon: '', type: '' } as PresetAmount)
+                      }
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Also select card when clicking input directly
+                      if (!isCustomAmountSelected) {
+                        setIsCustomAmountSelected(true)
+                        onSelectPreset({ value: -1, discount: 1, name: 'Custom', icon: '', type: '' } as PresetAmount)
+                      }
+                    }}
+                    onFocus={() => {
+                      if (!isCustomAmountSelected) {
+                        setIsCustomAmountSelected(true)
+                        onSelectPreset({ value: -1, discount: 1, name: 'Custom', icon: '', type: '' } as PresetAmount)
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Block minus sign completely
+                      if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                        e.preventDefault()
+                      }
+                    }}
+                    placeholder={t('Enter Amount')}
+                    className='[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-moz-appearance:textfield] text-lg font-semibold w-full text-center border-none shadow-none focus-visible:ring-0 p-0 bg-transparent'
+                  />
+                </div>
+                {/* Label with icon below - same style as preset description */}
+                <div className='flex items-center gap-1'>
+                  <span className='text-muted-foreground text-xs leading-tight'>
+                    {t('Custom Amount')}
+                  </span>
+                  <Pencil className='text-muted-foreground h-3.5 w-3.5' />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pay button */}
+          <Button
+            size='lg'
+            disabled={topupAmount <= 0 || !!paymentLoading || (isCustomAmountSelected && !isCustomAmountValid())}
+            className='w-full h-12 text-base font-semibold'
+          >
+            {paymentLoading && <Loader2 className='mr-2 h-5 w-5 animate-spin' />}
+            {t('Pay Now')}
+          </Button>
+        </div>
       )}
 
       {/* Creem Products Section */}
@@ -530,13 +730,17 @@ export function RechargeFormCard({
           )}
         </div>
       ) : (
-        <Alert className='border-t'>
-          <AlertDescription>
-            {t(
-              'Redemption codes are disabled until the administrator confirms compliance terms.'
-            )}
-          </AlertDescription>
-        </Alert>
+        // {/* Original Alert: Redemption codes disabled - keep as comment */}
+        // <Alert className='border-t'>
+        //   <AlertDescription>
+        //     {t(
+        //       'Redemption codes are disabled until the administrator confirms compliance terms.'
+        //     )}
+        //   </AlertDescription>
+        // </Alert>
+
+        /* Empty state - redemption disabled, no extra UI needed */
+        null
       )}
     </TitledCard>
   )

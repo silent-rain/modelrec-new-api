@@ -605,3 +605,105 @@ For commercial licensing, please contact support@quantumnous.com
     animation: none !important;
   }
 }
+
+/* ── SiliconFlow-style gradient theme for public pages ── */
+@layer utilities {
+  /* Hero title gradient: purple → blue → purple (matching reference) */
+  .hero-title-gradient {
+    background: linear-gradient(
+      90deg,
+      #C647FC 19.71%,
+      #437EFF 50.34%,
+      #6E29F6 80.6%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Page background: compressed left-blue → mid #cbd6f6 → right purple */
+  .sf-page-gradient {
+    background: linear-gradient(
+      90deg,
+      #cfe3fa 0%,
+              #cbd6f6 30%,
+              #d0d8f4 60%,
+              #d8d8f6 100%
+    );
+  }
+
+  .dark .sf-page-gradient {
+    background: linear-gradient(
+      90deg,
+      oklch(0.22 0.05 240) 0%,
+      oklch(0.23 0.04 260) 50%,
+      oklch(0.24 0.03 280) 100%
+    );
+  }
+
+  /* Hero area subtle blue-purple glow */
+  .sf-hero-glow {
+    background:
+      radial-gradient(
+        ellipse 80% 55% at 20% 40%,
+        rgba(99, 102, 241, 0.10) 0%,
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 75% 35%,
+        rgba(139, 92, 246, 0.08) 0%,
+        transparent 65%
+      );
+  }
+
+  .dark .sf-hero-glow {
+    background:
+      radial-gradient(
+        ellipse 80% 55% at 20% 40%,
+        rgba(99, 102, 241, 0.06) 0%,
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 75% 35%,
+        rgba(139, 92, 246, 0.05) 0%,
+        transparent 65%
+      );
+  }
+
+  /* Purple primary button - override default dark hover to stay in violet family */
+  .sf-btn-primary {
+    @apply bg-violet-600 text-white shadow-lg shadow-violet-500/25;
+  }
+  .sf-btn-primary:hover {
+    @apply bg-violet-700;
+  }
+
+  /* Purple outline button - keep hover in violet tones */
+  .sf-btn-outline {
+    @apply border-violet-300 text-violet-700 transition-colors duration-200;
+  }
+  .sf-btn-outline:hover {
+    @apply bg-violet-50 border-violet-400 dark:border-violet-600 dark:text-violet-200 dark:bg-violet-950/40;
+  }
+
+  /* Glass morphism card for auth pages */
+  .sf-glass-card {
+    @apply bg-white/80 backdrop-blur-xl border-white/60 shadow-xl shadow-purple-500/5;
+  }
+
+  .dark .sf-glass-card {
+    @apply bg-gray-900/80 backdrop-blur-xl border-gray-700/50 shadow-xl shadow-purple-500/10;
+  }
+
+  /* Header bar: full-width, glass-morphism white effect, no border */
+  .sf-header-transparent {
+    background: rgba(255, 255, 255, 0.15);
+    border-bottom: none;
+  }
+
+  .dark .sf-header-transparent {
+    background: rgba(15, 15, 25, 0.15);
+    border-bottom: none;
+  }
+}
