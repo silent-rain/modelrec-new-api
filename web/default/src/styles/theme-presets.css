@@ -469,6 +469,42 @@ body[data-theme-preset='blue-purple'] [data-state='open'].bg-sidebar,
     0 1px 2px rgba(120, 130, 185, 0.08) !important;
 }
 
+/* ---- Inside drawer/sheet/dialog: remove per-item card backgrounds ---- */
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .bg-card,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [class*="rounded-xl"],
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .border-b,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] section,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [data-border-b],
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .bg-card,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [class*="rounded-xl"],
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .border-b,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] section,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [data-border-b],
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .bg-card,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [class*="rounded-xl"],
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .border-b,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] section,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [data-border-b],
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .bg-card,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [class*="rounded-xl"],
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] .border-b,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] section,
+body[data-theme-preset='blue-purple'] [data-slot='sheet-content'] [data-border-b],
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .bg-card,
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [class*="rounded-xl"],
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] .border-b,
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] section,
+body[data-theme-preset='blue-purple'] [data-slot='drawer-content'] [data-border-b],
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .bg-card,
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [class*="rounded-xl"],
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] .border-b,
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] section,
+body[data-theme-preset='blue-purple'] [data-slot='dialog-content'] [data-border-b] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 /* ---- Page header bar ---- */
 [data-theme-preset='blue-purple'] header,
 [data-theme-preset='blue-purple'] [data-slot='app-header'],
@@ -524,6 +560,20 @@ body[data-theme-preset='blue-purple'] [data-state='open'].bg-sidebar,
 [data-theme-preset='blue-purple'] select {
   background: rgba(228, 234, 252, 0.65) !important;
   border-color: rgba(165, 178, 225, 0.50) !important;
+}
+
+/* Light mode: drawer/sheet inputs — softer to match sheet bg */
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] textarea,
+[data-theme-preset='blue-purple'] [data-slot='sheet-content'] select,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] textarea,
+[data-theme-preset='blue-purple'] [data-slot='drawer-content'] select,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] textarea,
+[data-theme-preset='blue-purple'] [data-slot='dialog-content'] select {
+  background: rgba(225, 230, 248, 0.45) !important;
+  border-color: rgba(180, 190, 220, 0.35) !important;
 }
 
 /* ---- Decorative glow orbs ---- */
@@ -813,6 +863,33 @@ html:has(.dark [data-theme-preset='blue-purple']) body {
   box-shadow: 0 1px 3px rgba(20, 22, 40, 0.32) !important;
 }
 
+/* Dark mode: Inside drawer/sheet/dialog — remove per-item card backgrounds */
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] .border-b,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] section,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] [data-border-b],
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] table tbody tr,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] div[class*="shadow-sm"],
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] .border-b,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] section,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] [data-border-b],
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] table tbody tr,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] div[class*="shadow-sm"],
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] .bg-card,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] [class*="rounded-xl"],
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] .border-b,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] section,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] [data-border-b],
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] table tbody tr,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] div[class*="shadow-sm"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 /* Header */
 .dark [data-theme-preset='blue-purple'] header,
 .dark [data-theme-preset='blue-purple'] [data-slot='app-header'],
@@ -857,6 +934,20 @@ html:has(.dark [data-theme-preset='blue-purple']) body {
 .dark [data-theme-preset='blue-purple'] select {
   background: rgba(32, 36, 56, 0.62) !important;
   border-color: rgba(68, 76, 115, 0.40) !important;
+}
+
+/* Dark mode: drawer/sheet inputs — softer to match sheet bg */
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] textarea,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] select,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] textarea,
+.dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] select,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] input:not([type="checkbox"]):not([type="radio"]),
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] textarea,
+.dark [data-theme-preset='blue-purple'] [data-slot='dialog-content'] select {
+  background: rgba(42, 48, 72, 0.45) !important;
+  border-color: rgba(80, 90, 130, 0.30) !important;
 }
 
 /* Glow orbs (subtle for dark) */
@@ -918,8 +1009,21 @@ html:has(.dark [data-theme-preset='blue-purple']) body {
     0 1px 4px rgba(0, 0, 0, 0.20) !important;
 }
 .dark [data-theme-preset='blue-purple'] [data-slot='drawer-content'] {
+  --background: rgba(38, 42, 62, 0.96);
   background: rgba(38, 42, 62, 0.96) !important;
+  background-color: rgba(38, 42, 62, 0.96) !important;
   backdrop-filter: blur(12px);
+}
+
+/* Dark mode Sheet: solid dark background (theme settings popup uses this) */
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] {
+  --background: rgba(38, 42, 62, 0.96);
+  background: rgba(38, 42, 62, 0.96) !important;
+  background-color: rgba(38, 42, 62, 0.96) !important;
+}
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.min-h-0,
+.dark [data-theme-preset='blue-purple'] [data-slot='sheet-content'] > .flex.flex-1 {
+  background: rgba(38, 42, 62, 0.96);
 }
 
 /* ── Blue Purple Dark: transparent backgrounds ─────── */
