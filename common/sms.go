@@ -12,7 +12,7 @@ import (
 // VerifySMSCode 调用微服务验证短信验证码
 // 返回 true 表示验证成功，error 包含详细错误信息
 func VerifySMSCode(phone string, code string) (bool, error) {
-	url := SMSAuthBaseURL + "/api/auth/sms/verify"
+	url := SMSAuthBaseURL + "/api/v2/auth/sms/verify"
 
 	body, _ := json.Marshal(map[string]string{
 		"phone_number": phone,

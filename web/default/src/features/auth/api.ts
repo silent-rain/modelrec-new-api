@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { api } from '@/lib/api'
+import { api } from "@/lib/api";
 import type {
   LoginPayload,
   LoginResponse,
@@ -24,7 +24,7 @@ import type {
   TwoFAPayload,
   RegisterPayload,
   ApiResponse,
-} from './types'
+} from "./types";
 
 // ============================================================================
 // Authentication APIs
@@ -36,27 +36,27 @@ import type {
 
 // User login with username and password
 export async function login(payload: LoginPayload) {
-  const turnstile = payload.turnstile ?? ''
+  const turnstile = payload.turnstile ?? "";
   const res = await api.post<LoginResponse>(
     `/api/user/login?turnstile=${turnstile}`,
     {
       username: payload.username,
       password: payload.password,
-    }
-  )
-  return res.data
+    },
+  );
+  return res.data;
 }
 
 // Two-factor authentication login
 export async function login2fa(payload: TwoFAPayload) {
-  const res = await api.post<Login2FAResponse>('/api/user/login/2fa', payload)
-  return res.data
+  const res = await api.post<Login2FAResponse>("/api/user/login/2fa", payload);
+  return res.data;
 }
 
 // User logout
 export async function logout(): Promise<ApiResponse> {
-  const res = await api.get('/api/user/logout')
-  return res.data
+  const res = await api.get("/api/user/logout");
+  return res.data;
 }
 
 // ----------------------------------------------------------------------------
@@ -66,12 +66,12 @@ export async function logout(): Promise<ApiResponse> {
 // Send password reset email
 export async function sendPasswordResetEmail(
   email: string,
-  turnstile?: string
+  turnstile?: string,
 ): Promise<ApiResponse> {
-  const res = await api.get('/api/reset_password', {
+  const res = await api.get("/api/reset_password", {
     params: { email, turnstile },
-  })
-  return res.data
+  });
+  return res.data;
 }
 
 // ----------------------------------------------------------------------------
@@ -80,23 +80,23 @@ export async function sendPasswordResetEmail(
 
 // Start GitHub OAuth flow
 export async function githubOAuthStart(clientId: string, state: string) {
-  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&state=${state}&scope=user:email`
-  window.open(url)
+  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&state=${state}&scope=user:email`;
+  window.open(url);
 }
 
 // Get OAuth state for CSRF protection
 export async function getOAuthState(): Promise<string> {
   const aff =
-    typeof window !== 'undefined' ? (localStorage.getItem('aff') ?? '') : ''
-  const res = await api.get('/api/oauth/state', { params: { aff } })
-  if (res.data?.success) return res.data.data
-  return ''
+    typeof window !== "undefined" ? (localStorage.getItem("aff") ?? "") : "";
+  const res = await api.get("/api/oauth/state", { params: { aff } });
+  if (res.data?.success) return res.data.data;
+  return "";
 }
 
 // WeChat login by authorization code
 export async function wechatLoginByCode(code: string): Promise<ApiResponse> {
-  const res = await api.get('/api/oauth/wechat', { params: { code } })
-  return res.data
+  const res = await api.get("/api/oauth/wechat", { params: { code } });
+  return res.data;
 }
 
 // ----------------------------------------------------------------------------
@@ -106,32 +106,32 @@ export async function wechatLoginByCode(code: string): Promise<ApiResponse> {
 // User registration
 export async function register(payload: RegisterPayload): Promise<ApiResponse> {
   const res = await api.post(`/api/user/register`, payload, {
-    params: { turnstile: payload.turnstile ?? '' },
-  })
-  return res.data
+    params: { turnstile: payload.turnstile ?? "" },
+  });
+  return res.data;
 }
 
 // Send email verification code
 export async function sendEmailVerification(
   email: string,
-  turnstile?: string
+  turnstile?: string,
 ): Promise<ApiResponse> {
-  const res = await api.get('/api/verification', {
+  const res = await api.get("/api/verification", {
     params: { email, turnstile },
-  })
-  return res.data
+  });
+  return res.data;
 }
 
 // Bind email to OAuth account
 export async function bindEmail(
   email: string,
-  code: string
+  code: string,
 ): Promise<ApiResponse> {
-  const res = await api.post('/api/oauth/email/bind', {
+  const res = await api.post("/api/oauth/email/bind", {
     email,
     code,
-  })
-  return res.data
+  });
+  return res.data;
 }
 
 // Send SMS verification code
@@ -139,26 +139,30 @@ export async function sendSmsCode(
   phoneNumber: string,
   signName?: string,
   templateCode?: string,
-  turnstile?: string
+  turnstile?: string,
 ): Promise<ApiResponse> {
-  const res = await api.post('/api/auth/sms/send', {
-    phone_number: phoneNumber,
-    sign_name: signName || '速通互联验证码',
-    template_code: templateCode || '100001',
-  }, {
-    params: { turnstile }
-  })
-  return res.data
+  const res = await api.post(
+    "/api/v2/auth/sms/send",
+    {
+      phone_number: phoneNumber,
+      sign_name: signName || "速通互联验证码",
+      template_code: templateCode || "100001",
+    },
+    {
+      params: { turnstile },
+    },
+  );
+  return res.data;
 }
 
 // Verify SMS code
 export async function verifySmsCode(
   phoneNumber: string,
-  code: string
+  code: string,
 ): Promise<ApiResponse> {
-  const res = await api.post('/api/auth/sms/verify', {
+  const res = await api.post("/api/v2/auth/sms/verify", {
     phone_number: phoneNumber,
     code: code,
-  })
-  return res.data
+  });
+  return res.data;
 }
