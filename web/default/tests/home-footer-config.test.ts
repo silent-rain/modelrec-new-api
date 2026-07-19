@@ -23,6 +23,11 @@ const readHomeFooterSource = () =>
     new URL('../src/features/home/components/home-footer.tsx', import.meta.url)
   ).text()
 
+const readLocale = async (locale: 'en' | 'zh') =>
+  Bun.file(
+    new URL(`../src/i18n/locales/${locale}.json`, import.meta.url)
+  ).json()
+
 describe('home footer configuration contract', () => {
   test('uses the configured footer HTML only for the bottom notice', async () => {
     const source = await readHomeFooterSource()
@@ -40,12 +45,21 @@ describe('home footer configuration contract', () => {
   test('keeps the required project attribution outside the configurable notice', async () => {
     const source = await readHomeFooterSource()
     const customNoticeIndex = source.indexOf('dangerouslySetInnerHTML')
-    const attributionIndex = source.indexOf(
-      "href='https://github.com/QuantumNous/new-api'"
-    )
+    const attributionIndex = source.indexOf('<ProjectAttribution')
 
     expect(customNoticeIndex).toBeGreaterThan(-1)
     expect(attributionIndex).toBeGreaterThan(customNoticeIndex)
-    expect(source).toContain('new-api / QuantumNous')
+    expect(source).toContain('<LegalLinks leadingSeparator />')
+    expect(source).toContain("from '@/components/layout/components/footer'")
+  })
+
+  test('keeps the upstream New API project name in footer translations', async () => {
+    const [english, chinese] = await Promise.all([
+      readLocale('en'),
+      readLocale('zh'),
+    ])
+
+    expect(english.translation['New API']).toBe('New API')
+    expect(chinese.translation['New API']).toBe('New API')
   })
 })

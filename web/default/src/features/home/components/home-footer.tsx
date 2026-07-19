@@ -20,6 +20,10 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import {
+  LegalLinks,
+  ProjectAttribution,
+} from '@/components/layout/components/footer'
 import { useSystemConfig } from '@/hooks/use-system-config'
 
 const FOOTER_COLUMNS = [
@@ -69,7 +73,7 @@ export function HomeFooter() {
   const customFooterHtml = footerHtml?.trim()
 
   return (
-    <footer className='min-h-[420px] bg-[#111827] px-6 py-16 text-[#9ca3af]'>
+    <footer className='dark min-h-[420px] bg-[#111827] px-6 py-16 text-[#9ca3af]'>
       <div className='mx-auto max-w-7xl'>
         <div className='grid gap-12 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,0.75fr))] md:gap-16'>
           <div>
@@ -120,29 +124,22 @@ export function HomeFooter() {
           ))}
         </div>
 
-        <div className='mt-14 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-white/10 pt-7 text-xs'>
-          {customFooterHtml ? (
-            <div
-              className='custom-footer min-w-0'
-              // eslint-disable-next-line react/no-danger -- Footer HTML is administrator-managed, matching the shared footer contract.
-              dangerouslySetInnerHTML={{ __html: customFooterHtml }}
-            />
-          ) : (
-            <span>
-              © {currentYear} {displayName}. {t('footer.defaultCopyright')}
-            </span>
-          )}
-          {/* <span aria-hidden='true'>·</span>
-          <a
-            href='https://github.com/QuantumNous/new-api'
-            target='_blank'
-            rel='noopener noreferrer'
-            className='transition-colors hover:text-white'
-          >
-            new-api / QuantumNous
-          </a> */}
-
-          {/* Footer policy and language shortcuts are temporarily hidden. */}
+        <div className='mt-14 flex flex-col items-center justify-between gap-x-3 gap-y-2 border-t border-white/10 pt-7 text-xs sm:flex-row'>
+          <div className='flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start'>
+            {customFooterHtml ? (
+              <div
+                className='custom-footer min-w-0'
+                // eslint-disable-next-line react/no-danger -- Footer HTML is administrator-managed, matching the shared footer contract.
+                dangerouslySetInnerHTML={{ __html: customFooterHtml }}
+              />
+            ) : (
+              <span>
+                © {currentYear} {displayName}. {t('footer.defaultCopyright')}
+              </span>
+            )}
+            <LegalLinks leadingSeparator />
+          </div>
+          <ProjectAttribution currentYear={currentYear} />
         </div>
       </div>
     </footer>
