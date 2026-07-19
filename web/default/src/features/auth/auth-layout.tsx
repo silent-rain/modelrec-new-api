@@ -129,7 +129,7 @@ export function AuthLayout({
 
           {activeView ? (
             <nav
-              className='mb-10 flex h-11 items-start gap-8 border-b border-[#edf0ec] dark:border-white/10'
+              className='auth-tab-switcher mb-10 flex h-11 items-start gap-8 border-b border-[#edf0ec] dark:border-white/10'
               aria-label={t('Authentication navigation')}
             >
               <Link

@@ -250,12 +250,12 @@ export function UserAuthForm({
                     <div className='relative'>
                       {loginMode === 'password' ? (
                         <UserRound
-                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab]'
+                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
                           aria-hidden='true'
                         />
                       ) : (
                         <Phone
-                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab]'
+                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
                           aria-hidden='true'
                         />
                       )}
@@ -300,7 +300,7 @@ export function UserAuthForm({
                     ) : (
                       <div className='relative'>
                         <ShieldCheck
-                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab]'
+                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
                           aria-hidden='true'
                         />
                         <Input
@@ -350,7 +350,7 @@ export function UserAuthForm({
                 onClick={() =>
                   switchLoginMode(loginMode === 'password' ? 'sms' : 'password')
                 }
-                className='rounded-md text-[#6f7874] transition-colors outline-none hover:text-[#ed8100] focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50'
+                className='rounded-md text-[#6f7874] transition-colors outline-none hover:text-[#ed8100] focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50 dark:text-white/65 dark:hover:text-[#ff9f33]'
               >
                 {loginMode === 'password'
                   ? t('Use verification code to sign in')
@@ -359,7 +359,7 @@ export function UserAuthForm({
               {loginMode === 'password' ? (
                 <Link
                   to='/forgot-password'
-                  className='shrink-0 rounded-md text-[#6f7874] transition-colors outline-none hover:text-[#ed8100] focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50'
+                  className='shrink-0 rounded-md text-[#6f7874] transition-colors outline-none hover:text-[#ed8100] focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50 dark:text-white/65 dark:hover:text-[#ff9f33]'
                 >
                   {t('Forgot password?')}
                 </Link>
