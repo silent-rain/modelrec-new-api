@@ -1,3 +1,4 @@
+import i18next from 'i18next'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,8 +18,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState, useCallback } from 'react'
-import i18next from 'i18next'
 import { toast } from 'sonner'
+
 import { requestAlipayPayment } from '../api'
 import type { AlipayPaymentData, AlipayPaymentResponse } from '../types'
 
@@ -40,30 +41,22 @@ export function useAlipayPayment() {
   const [processing, setProcessing] = useState(false)
 
   const processAlipayPayment = useCallback(
-    async (params: {
-      amount: number
-      subject: string
-      userId: number
-    }): Promise<AlipayPaymentData | null> => {
+    async (params: { amount: number }): Promise<AlipayPaymentData | null> => {
       try {
         setProcessing(true)
 
         const response = await requestAlipayPayment({
           amount: params.amount,
-          subject: params.subject,
-          user_id: params.userId,
-          method: "GET",
+          scene: 'desktop',
         })
 
         if (!isAlipaySuccess(response)) {
-          toast.error(
-            response?.message || i18next.t('Payment request failed')
-          )
+          toast.error(response?.message || i18next.t('Payment request failed'))
           return null
         }
 
         return response.data ?? null
-      } catch (_error) {
+      } catch {
         toast.error(i18next.t('Payment request failed'))
         return null
       } finally {

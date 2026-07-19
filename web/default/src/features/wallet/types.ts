@@ -204,41 +204,43 @@ export interface WaffoPancakePaymentRequest {
   amount: number
 }
 
-/**
- * Alipay payment request parameters
- */
+export type AlipayPaymentScene = 'desktop'
+export type AlipayDisplayMode = 'iframe' | 'redirect'
+export type AlipayOrderStatus = 'pending' | 'success' | 'closed'
+
 export interface AlipayPaymentRequest {
-  /** Payment amount */
   amount: number
-  /** Product/order subject shown on the Alipay page */
-  subject: string
-  /** Current user ID */
-  user_id: number
+  scene: AlipayPaymentScene
 }
 
-/**
- * Alipay payment data returned by the create endpoint
- */
 export interface AlipayPaymentData {
-  /** Merchant order number */
   out_trade_no: string
-  /** Alipay trade number (null before payment) */
   trade_no: string | null
-  /** Payment link to open in a new tab (pay_type === 'url') */
   pay_data: string
-  /** Payment type, e.g. 'url' */
-  pay_type: string
+  pay_type: 'url'
+  display_mode?: AlipayDisplayMode
+  cashier_url?: string
+  expires_at?: number
 }
 
-/**
- * Alipay create response
- *
- * The endpoint returns a non-standard envelope: { code, message, data }.
- */
+export interface AlipayQueryData {
+  out_trade_no: string
+  status: AlipayOrderStatus
+  trade_status?: string | null
+  credited: boolean
+  pay_time?: string | null
+}
+
 export interface AlipayPaymentResponse {
   code?: number
   message?: string
   data?: AlipayPaymentData
+}
+
+export interface AlipayQueryResponse {
+  code?: number
+  message?: string
+  data?: AlipayQueryData
 }
 
 /**
