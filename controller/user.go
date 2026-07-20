@@ -305,8 +305,7 @@ func Register(c *gin.Context) {
 			} else {
 				common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 			}
-			common.SysLog(fmt.Sprintf("Phone registration failed: SMS verification failed, phone=%s, code=%s, error=%v, valid=%v", 
-				user.Phone, user.VerificationCode, err, valid))
+			common.SysLog(fmt.Sprintf("Phone registration failed: SMS verification failed, error=%v, valid=%v", err, valid))
 			return
 		}
 		// 检查手机号是否已被注册

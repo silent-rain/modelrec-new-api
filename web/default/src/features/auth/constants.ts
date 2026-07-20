@@ -18,6 +18,11 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { z } from 'zod'
 
+export const MAINLAND_CHINA_PHONE_REGEX = /^1[3-9]\d{9}$/
+
+export const isValidMainlandChinaPhone = (phone: string) =>
+  MAINLAND_CHINA_PHONE_REGEX.test(phone)
+
 // ============================================================================
 // Form Schemas
 // ============================================================================
@@ -32,24 +37,56 @@ export const loginFormSchema = z.object({
 
 export const registerFormSchema = z
   .object({
+    registrationMethod: z.enum(['phone', 'email']),
     username: z.string().min(1, 'Please enter your username'),
-    email: z.string().optional(),
-    phone: z // 新增
-      .string()
-      .min(1, 'Please enter your phone number') // 确保不是空字符串（必填）
-      .regex(/^1[3-9]\d{9}$/, 'Please enter a valid phone number'), // 验证必须是1开头的11位纯数字
-    verification_code: z.string().min(1, 'Please enter your phone verification code'),  // 新增
+    email: z.string(),
+    phone: z.string(),
+    verification_code: z.string().min(1, 'Please enter your verification code'),
     password: z
       .string()
       .min(1, 'Please enter your password')
       .min(8, 'Password must be at least 8 characters long')
       .max(20, 'Password must be at most 20 characters long'),
-    // confirmPassword: z.string().min(1, 'Please confirm your password'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
-  // .refine((data) => data.password === data.confirmPassword, {
-  //   message: "Passwords don't match.",
-  //   path: ['confirmPassword'],
-  // })
+  .superRefine((data, context) => {
+    if (data.registrationMethod === 'phone') {
+      if (!data.phone) {
+        context.addIssue({
+          code: 'custom',
+          message: 'Please enter your phone number',
+          path: ['phone'],
+        })
+      } else if (!MAINLAND_CHINA_PHONE_REGEX.test(data.phone)) {
+        context.addIssue({
+          code: 'custom',
+          message: 'Please enter a valid phone number',
+          path: ['phone'],
+        })
+      }
+    }
+
+    if (data.registrationMethod === 'email') {
+      const emailResult = z.email().safeParse(data.email)
+      if (!emailResult.success) {
+        context.addIssue({
+          code: 'custom',
+          message: 'Please enter a valid email address',
+          path: ['email'],
+        })
+      }
+    }
+
+    if (data.password !== data.confirmPassword) {
+      context.addIssue({
+        code: 'custom',
+        message: "Passwords don't match.",
+        path: ['confirmPassword'],
+      })
+    }
+  })
+
+export type RegisterFormValues = z.infer<typeof registerFormSchema>
 
 export const forgotPasswordFormSchema = z.object({
   email: z.string().email({

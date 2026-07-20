@@ -16,12 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Fragment, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/lib/utils'
+
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { cn } from '@/lib/utils'
 
 interface FooterLink {
   text: string
@@ -78,7 +79,7 @@ function FooterLinkItem(props: { link: FooterLink }) {
 // Renders User Agreement / Privacy Policy links inline with the parent's
 // copyright row when either is configured in System Settings → Site. Emits
 // fragmented siblings so the parent flex container's gap controls spacing.
-function LegalLinks(props: { leadingSeparator?: boolean }) {
+export function LegalLinks(props: { leadingSeparator?: boolean }) {
   const { t } = useTranslation()
   const { status } = useStatus()
   const items: { key: string; label: string; href: string }[] = []
@@ -122,7 +123,10 @@ function LegalLinks(props: { leadingSeparator?: boolean }) {
 
 // inline=true returns just the inner span for composition in a parent flex
 // row. inline=false wraps in a centered/right-aligned div (default).
-function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
+export function ProjectAttribution(props: {
+  currentYear: number
+  inline?: boolean
+}) {
   const { t } = useTranslation()
   const content = (
     <span className='text-muted-foreground/45'>

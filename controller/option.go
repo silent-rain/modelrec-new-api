@@ -81,11 +81,12 @@ func GetOptions(c *gin.Context) {
 	common.OptionMapRWMutex.Lock()
 	for k, v := range common.OptionMap {
 		value := common.Interface2String(v)
-		isSensitiveKey := strings.HasSuffix(k, "Token") ||
+		isPublicKey := k == "TurnstileSiteKey"
+		isSensitiveKey := !isPublicKey && (strings.HasSuffix(k, "Token") ||
 			strings.HasSuffix(k, "Secret") ||
 			strings.HasSuffix(k, "Key") ||
 			strings.HasSuffix(k, "secret") ||
-			strings.HasSuffix(k, "api_key")
+			strings.HasSuffix(k, "api_key"))
 		if isSensitiveKey {
 			continue
 		}
@@ -150,6 +151,33 @@ func UpdateOption(c *gin.Context) {
 		}
 	}
 	switch option.Key {
+	case "HumanVerificationProvider":
+		provider := strings.ToLower(strings.TrimSpace(option.Value.(string)))
+		if provider != common.HumanVerificationProviderNone &&
+			provider != common.HumanVerificationProviderTurnstile &&
+			provider != common.HumanVerificationProviderAliyun {
+			common.ApiErrorMsg(c, "人机验证提供方无效，可选值为 none、turnstile 或 aliyun")
+			return
+		}
+		if provider == common.HumanVerificationProviderTurnstile &&
+			(strings.TrimSpace(common.TurnstileSiteKey) == "" || strings.TrimSpace(common.TurnstileSecretKey) == "") {
+			common.ApiErrorMsg(c, "无法启用 Turnstile，请先填写 Site Key 和 Secret Key")
+			return
+		}
+		if provider == common.HumanVerificationProviderAliyun && !common.IsAliyunCaptchaPublicConfigComplete() {
+			common.ApiErrorMsg(c, "无法启用阿里云验证码，请先填写区域、Prefix 和 SceneId")
+			return
+		}
+		option.Value = provider
+	case "AliyunCaptchaRegion":
+		region := strings.ToLower(strings.TrimSpace(option.Value.(string)))
+		if region != "cn" && region != "sgp" {
+			common.ApiErrorMsg(c, "阿里云验证码区域无效，可选值为 cn 或 sgp")
+			return
+		}
+		option.Value = region
+	case "AliyunCaptchaPrefix", "AliyunCaptchaSceneID":
+		option.Value = strings.TrimSpace(option.Value.(string))
 	case "GitHubOAuthEnabled":
 		if option.Value == "true" && common.GitHubClientId == "" {
 			c.JSON(http.StatusOK, gin.H{

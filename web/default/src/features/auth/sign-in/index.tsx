@@ -16,53 +16,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Link, useSearch } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
+import { useSearch } from '@tanstack/react-router'
+
 import { useStatus } from '@/hooks/use-status'
+
 import { AuthLayout } from '../auth-layout'
-import { TermsFooter } from '../components/terms-footer'
 import { UserAuthForm } from './components/user-auth-form'
 
 export function SignIn() {
-  const { t } = useTranslation()
   const { redirect } = useSearch({ from: '/(auth)/sign-in' })
   const { status } = useStatus()
+  const showRegister =
+    !status?.self_use_mode_enabled &&
+    status?.register_enabled !== false &&
+    status?.password_register_enabled !== false
 
   return (
-    <AuthLayout>
-      <div className='w-full space-y-8'>
-        <div className='space-y-2'>
-          {/* <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Sign in')}
-          </h2> */}
-          <div className='mb-8 space-y-2 text-center'>
-          <h2 className='text-xl font-semibold tracking-tight'>燧元路由</h2>
-            <h2 className='text-2xl font-semibold tracking-tight'>
-              {t('Welcome back')}            {/* i18n key: "Welcome back" → "欢迎回来" */}
-            </h2>
-            <p className='text-muted-foreground text-sm'>
-              {t('Sign in to your account to continue')}   {/* 新增 key */}
-            </p>
-          </div>
-        </div>
-
+    <AuthLayout activeView='sign-in' showRegister={showRegister}>
+      <div className='w-full'>
         <UserAuthForm redirectTo={redirect} />
-
-        {!status?.self_use_mode_enabled &&
-          status?.register_enabled !== false && (
-            <p className='text-muted-foreground mt-6 text-center text-sm'>
-              {t("Don't have an account yet?")}{' '}
-              <Link to='/sign-up' className='hover:text-primary font-medium'>
-                {t('Sign up')}
-              </Link>
-            </p>
-          )}
-
-        <TermsFooter
-          variant='sign-in'
-          status={status}
-          className='text-center'
-        />
       </div>
     </AuthLayout>
   )

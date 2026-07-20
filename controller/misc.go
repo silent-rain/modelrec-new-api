@@ -47,6 +47,7 @@ func GetStatus(c *gin.Context) {
 
 	passkeySetting := system_setting.GetPasskeySettings()
 	legalSetting := system_setting.GetLegalSettings()
+	humanVerificationProvider := common.GetHumanVerificationProvider()
 
 	data := gin.H{
 		"version":                     common.Version,
@@ -68,8 +69,13 @@ func GetStatus(c *gin.Context) {
 		"wechat_qrcode":               common.WeChatAccountQRCodeImageURL,
 		"wechat_login":                common.WeChatAuthEnabled,
 		"server_address":              system_setting.ServerAddress,
-		"turnstile_check":             common.TurnstileCheckEnabled,
+		"turnstile_check":             humanVerificationProvider == common.HumanVerificationProviderTurnstile,
 		"turnstile_site_key":          common.TurnstileSiteKey,
+		"human_verification_provider": humanVerificationProvider,
+		"aliyun_captcha_enabled":      humanVerificationProvider == common.HumanVerificationProviderAliyun,
+		"aliyun_captcha_region":       common.AliyunCaptchaRegion,
+		"aliyun_captcha_prefix":       common.AliyunCaptchaPrefix,
+		"aliyun_captcha_scene_id":     common.AliyunCaptchaSceneID,
 		"docs_link":                   operation_setting.GetGeneralSetting().DocsLink,
 		"quota_per_unit":              common.QuotaPerUnit,
 		// 兼容旧前端：保留 display_in_currency，同时提供新的 quota_display_type

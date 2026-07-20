@@ -454,7 +454,7 @@ body[data-theme-preset='orange-green'] [data-state='open'].bg-sidebar,
 :root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-xl"]:not([data-slot^='sidebar']):not([data-slot='avatar']):not([data-slot='avatar-fallback']),
 :root:not(.dark) [data-theme-preset='orange-green'] .rounded-xl:not([data-slot^='sidebar']):not([data-slot='avatar']):not([data-slot='avatar-fallback']),
 :root:not(.dark) [data-theme-preset='orange-green'] div[class*="shadow-sm"]:not([data-slot^='sidebar']),
-:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"]:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']):not([data-slot^='sidebar']):not([data-slot='avatar']):not([data-slot='avatar-fallback']) {
+:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"]:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']):not([data-slot^='sidebar']):not([data-slot='avatar']):not([data-slot='avatar-fallback']) {
   background: #FFFFFF !important;
   border: 1px solid oklch(0.88 0.03 75) !important;
   box-shadow:
@@ -497,10 +497,10 @@ body[data-theme-preset='orange-green'] [data-state='open'].bg-sidebar,
    (only the 1px border shows). Re-compose the ring shadow here so selected
    cards keep a visible selection thickness. We prefix with `:root:not(.dark)`
    so this rule is at least as specific as the white-card override above. ── */
-:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].border-primary:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']),
-:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-1:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']),
-:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-2:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']),
-:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"][class*="ring-primary"]:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']) {
+:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].border-primary:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']),
+:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-1:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']),
+:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-2:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']),
+:root:not(.dark) [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"][class*="ring-primary"]:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']) {
   background: color-mix(in oklab, var(--primary) 12%, transparent) !important;
   border-color: var(--primary) !important;
   --tw-ring-color: var(--primary) !important;
@@ -536,7 +536,7 @@ body[data-theme-preset='orange-green'] [data-state='open'].bg-sidebar,
 /* ── Orange Green Light: disabled primary buttons stay on-theme with a soft
    orange tint instead of an unrelated warm-gray, so they remain visible on
    white/beige cards. ── */
-[data-theme-preset='orange-green'] [data-slot='button']:disabled {
+[data-theme-preset='orange-green'] [data-component='button']:disabled {
   opacity: 1 !important;
   background: #FFF0E0 !important;
   color: #C96E00 !important;
@@ -548,7 +548,7 @@ body[data-theme-preset='orange-green'] [data-state='open'].bg-sidebar,
    override must not wash them out to white-on-white. `[class~="bg-primary"]`
    matches the exact token (not `bg-primary/10`), so selected payment-method
    buttons stay as tinted cards instead of solid orange. */
-[data-theme-preset='orange-green'] button[data-slot='button'][class~="bg-primary"]:not(:disabled) {
+[data-theme-preset='orange-green'] button[data-component='button'][class~="bg-primary"]:not(:disabled) {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
   border-color: transparent !important;
@@ -900,10 +900,10 @@ html:has(.dark [data-theme-preset='orange-green']) body {
 }
 
 /* ── Orange Green Dark: selected/active primary borders + ring (see light notes) ── */
-.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].border-primary:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']),
-.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-1:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']),
-.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-2:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']),
-.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"][class*="ring-primary"]:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-slot='button']) {
+.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].border-primary:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']),
+.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-1:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']),
+.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"].ring-2:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']),
+.dark [data-theme-preset='orange-green'] [class*="rounded-lg"][class*="border"][class*="ring-primary"]:not([data-slot='popover-content']):not([data-slot='dropdown-menu-content']):not([data-component='button']):not([data-slot='button']) {
   background: color-mix(in oklab, var(--primary) 14%, transparent) !important;
   border-color: var(--primary) !important;
   --tw-ring-color: var(--primary) !important;
@@ -915,7 +915,7 @@ html:has(.dark [data-theme-preset='orange-green']) body {
 
 /* ── Orange Green Dark: disabled primary buttons stay on-theme with a muted
    orange fill instead of warm-gray. ── */
-.dark [data-theme-preset='orange-green'] [data-slot='button']:disabled {
+.dark [data-theme-preset='orange-green'] [data-component='button']:disabled {
   opacity: 1 !important;
   background: #3D2E1F !important;
   color: #E8C39A !important;
@@ -924,7 +924,7 @@ html:has(.dark [data-theme-preset='orange-green']) body {
 }
 
 /* Enabled default-variant buttons keep the orange primary fill (dark). */
-.dark [data-theme-preset='orange-green'] button[data-slot='button'][class~="bg-primary"]:not(:disabled) {
+.dark [data-theme-preset='orange-green'] button[data-component='button'][class~="bg-primary"]:not(:disabled) {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
   border-color: transparent !important;

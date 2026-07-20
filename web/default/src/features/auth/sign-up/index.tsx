@@ -17,72 +17,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
+import { CircleOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-// import { useStatus } from '@/hooks/use-status'
+
+import { useStatus } from '@/hooks/use-status'
+
 import { AuthLayout } from '../auth-layout'
-// import { TermsFooter } from '../components/terms-footer'
 import { SignUpForm } from './components/sign-up-form'
 
 export function SignUp() {
   const { t } = useTranslation()
-  // const { status } = useStatus()
+  const { status } = useStatus()
+  const registrationEnabled =
+    status?.register_enabled !== false &&
+    status?.password_register_enabled !== false &&
+    !status?.self_use_mode_enabled
 
   return (
-    <AuthLayout>
-      <div className='flex w-full flex-col items-center'>
-        {/* 标题区域 - 居中 */}
-        <div className='mb-8 space-y-2 text-center'>
-          <h2 className='text-xl font-semibold tracking-tight'>燧元路由</h2>
-          <h2 className='text-2xl font-semibold tracking-tight'>
-            {t('Create an account')}
-          </h2>
-          <p className='text-muted-foreground text-sm'>
-            {t('Register a new account and embark on an AI journey')}
-          </p>
-        </div>
-
-        {/* 表单 */}
-        <SignUpForm className='w-full' />
-
-        {/* 底部链接 - 居中 */}
-        <p className='text-muted-foreground mt-6 text-center text-sm'>
-          {t('Already have an account?')}{' '}
+    <AuthLayout activeView='sign-up'>
+      {registrationEnabled ? (
+        <SignUpForm />
+      ) : (
+        <div className='space-y-6 text-center'>
+          <div className='mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f6f8f6] text-[#7b8580] dark:bg-white/6 dark:text-white/65'>
+            <CircleOff className='h-6 w-6' aria-hidden='true' />
+          </div>
+          <div className='space-y-2'>
+            <h1 className='text-xl font-semibold'>
+              {t('Registration is currently unavailable')}
+            </h1>
+            <p className='text-muted-foreground text-sm'>
+              {t('Please contact the administrator or return to sign in.')}
+            </p>
+          </div>
           <Link
             to='/sign-in'
-            className='hover:text-primary font-medium'
+            className='sf-btn-primary inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50'
           >
-            {t('Sign in')}
+            {t('Back to sign in')}
           </Link>
-        </p>
-      </div>
-    </AuthLayout>
-
-/*     <AuthLayout>
-      <div className='w-full space-y-8'>
-        <div className='space-y-2'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Create an account')}
-          </h2>
-          <p className='text-muted-foreground text-left text-sm sm:text-base'>
-            {t('Already have an account?')}{' '}
-            <Link
-              to='/sign-in'
-              className='hover:text-primary font-medium underline underline-offset-4'
-            >
-              {t('Sign in')}
-            </Link>
-            .
-          </p>
         </div>
-
-        <SignUpForm />
-
-        <TermsFooter
-          variant='sign-up'
-          status={status}
-          className='text-center'
-        />
-      </div>
-    </AuthLayout> */
+      )}
+    </AuthLayout>
   )
 }

@@ -202,9 +202,9 @@ export function PublicHeader(props: PublicHeaderProps) {
 
   return (
     <>
-      <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
+      <header className='pointer-events-none sticky top-0 z-50 h-[var(--header-height,4rem)]'>
         <nav
-          className='pointer-events-auto flex items-center justify-between h-16 sf-header-transparent backdrop-blur-xl px-6'
+          className='pointer-events-auto flex h-full items-center justify-between sf-header-transparent px-6 backdrop-blur-xl'
         >
             {/* Logo */}
             <Link
@@ -314,7 +314,7 @@ export function PublicHeader(props: PublicHeaderProps) {
             </div>
 
             {/* Mobile: compact actions + hamburger */}
-            <div className='flex items-center gap-2 sm:hidden'>
+            <div className='sf-public-mobile-actions items-center gap-2'>
               {showThemeSwitch && <ThemeSwitch />}
               {showAuthButtons && !loading && isAuthenticated && (
                 <ProfileDropdown />
@@ -421,7 +421,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               <Link
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
                 onClick={() => setMobileOpen(false)}
-                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                className='sf-btn-primary inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80'
               >
                 {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
               </Link>

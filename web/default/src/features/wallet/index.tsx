@@ -18,20 +18,24 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getSelf } from '@/lib/api'
+
+import { SectionPageLayout } from '@/components/layout'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
-import { SectionPageLayout } from '@/components/layout'
+import { getSelf } from '@/lib/api'
+
 import { AffiliateRewardsCard } from './components/affiliate-rewards-card'
+import { AlipayDesktopPaymentDialog } from './components/dialogs/alipay-desktop-payment-dialog'
+import { AlipayPaymentDialog } from './components/dialogs/alipay-payment-dialog'
 import { BillingHistoryDialog } from './components/dialogs/billing-history-dialog'
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
-import { AlipayPaymentDialog } from './components/dialogs/alipay-payment-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
-import { DEFAULT_DISCOUNT_RATE } from './constants'
+import { DEFAULT_DISCOUNT_RATE, PAYMENT_TYPES } from './constants'
 import {
   useTopupInfo,
   usePayment,
@@ -40,16 +44,17 @@ import {
   useCreemPayment,
   useWaffoPayment,
   useWaffoPancakePayment,
+  useAlipayDesktopPayment,
   useAlipayPayment,
 } from './hooks'
 import {
   getDefaultPaymentType,
   getMinTopupAmount,
   isWaffoPancakePayment,
-  redirectPaymentWindow,
   openPaymentWindow,
+  redirectPaymentWindow,
+  requireDesktopAlipayRefreshData,
 } from './lib'
-import { PAYMENT_TYPES } from './constants'
 import type {
   UserWalletData,
   PaymentMethod,
@@ -63,10 +68,11 @@ interface WalletProps {
 
 export function Wallet(props: WalletProps) {
   const { t } = useTranslation()
+  const isMobile = useIsMobile()
   const [user, setUser] = useState<UserWalletData | null>(null)
   const [userLoading, setUserLoading] = useState(true)
-  const [topupAmount, setTopupAmount] = useState(100)
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(100)
+  const [topupAmount, setTopupAmount] = useState(0)
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod>()
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null)
@@ -111,21 +117,29 @@ export function Wallet(props: WalletProps) {
   const { processing: alipayProcessing, processAlipayPayment } =
     useAlipayPayment()
 
-  // Fetch and refresh user data
-  const fetchUser = useCallback(async () => {
+  const refreshUserAfterPayment = useCallback(async (): Promise<void> => {
+    const response = await getSelf()
+    const refreshedUser =
+      requireDesktopAlipayRefreshData<UserWalletData>(response)
+    setUser(refreshedUser)
+  }, [])
+
+  // Fetch and refresh user data with page-level loading and error recovery.
+  const fetchUser = useCallback(async (): Promise<void> => {
     try {
       setUserLoading(true)
-      const response = await getSelf()
-      if (response.success && response.data) {
-        setUser(response.data as UserWalletData)
-      }
+      await refreshUserAfterPayment()
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch user data:', error)
     } finally {
       setUserLoading(false)
     }
-  }, [])
+  }, [refreshUserAfterPayment])
+
+  const desktopAlipay = useAlipayDesktopPayment({
+    onSuccess: refreshUserAfterPayment,
+  })
 
   useEffect(() => {
     fetchUser()
@@ -146,7 +160,9 @@ export function Wallet(props: WalletProps) {
 
       // Calculate initial payment amount with default payment type
       const defaultPaymentType = getDefaultPaymentType(topupInfo)
-      calculatePaymentAmount(minTopup, defaultPaymentType)
+      if (defaultPaymentType) {
+        calculatePaymentAmount(minTopup, defaultPaymentType)
+      }
     }
   }, [topupInfo, topupAmount, calculatePaymentAmount])
 
@@ -176,7 +192,10 @@ export function Wallet(props: WalletProps) {
 
     try {
       // Validate minimum topup
-      const minTopup = getMinTopupAmount(topupInfo)
+      const minTopup = Math.max(
+        getMinTopupAmount(topupInfo),
+        method.min_topup || 0
+      )
       if (topupAmount < minTopup) {
         return
       }
@@ -192,12 +211,10 @@ export function Wallet(props: WalletProps) {
   // Trigger the Alipay create flow: open a blank tab synchronously to preserve
   // the user-gesture context (so Safari does not block the popup) and
   // immediately paint a loading spinner while the API response is pending.
-  const startAlipayPayment = useCallback(async () => {
+  const startLegacyAlipayPayment = useCallback(async () => {
     const newWindow = openPaymentWindow()
     const data = await processAlipayPayment({
       amount: topupAmount,
-      subject: t('Account Topup'),
-      userId: user?.id ?? 0,
     })
     if (data?.pay_data) {
       redirectPaymentWindow(newWindow, data.pay_data)
@@ -205,7 +222,7 @@ export function Wallet(props: WalletProps) {
     } else if (newWindow) {
       newWindow.close()
     }
-  }, [processAlipayPayment, topupAmount, t, user?.id])
+  }, [processAlipayPayment, topupAmount])
 
   // Handle payment confirmation
   const handlePaymentConfirm = async () => {
@@ -214,7 +231,14 @@ export function Wallet(props: WalletProps) {
     // Alipay uses a dedicated create endpoint.
     if (selectedPaymentMethod.type === PAYMENT_TYPES.ALIPAY) {
       setConfirmDialogOpen(false)
-      await startAlipayPayment()
+      if (isMobile) {
+        await startLegacyAlipayPayment()
+      } else {
+        await desktopAlipay.startPayment({
+          amount: topupAmount,
+          displayAmount: paymentAmount,
+        })
+      }
       return
     }
 
@@ -228,11 +252,6 @@ export function Wallet(props: WalletProps) {
       await fetchUser()
     }
   }
-
-  // Handle the "Pay Now" button in the simple amount-card layout
-  const handlePayNow = useCallback(() => {
-    startAlipayPayment()
-  }, [startAlipayPayment])
 
   // Handle redemption
   const handleRedeem = async () => {
@@ -341,8 +360,6 @@ export function Wallet(props: WalletProps) {
                   enableWaffoPancakeTopup={
                     topupInfo?.enable_waffo_pancake_topup
                   }
-                  onPayNow={handlePayNow}
-                  payNowLoading={alipayProcessing}
                 />
               </div>
 
@@ -375,7 +392,12 @@ export function Wallet(props: WalletProps) {
         paymentAmount={paymentAmount}
         paymentMethod={selectedPaymentMethod}
         calculating={calculating}
-        processing={processing || pancakeProcessing || alipayProcessing}
+        processing={
+          processing ||
+          pancakeProcessing ||
+          alipayProcessing ||
+          desktopAlipay.processing
+        }
         discountRate={getDiscountRate()}
         usdExchangeRate={effectiveUsdExchangeRate}
       />
@@ -383,6 +405,18 @@ export function Wallet(props: WalletProps) {
       <AlipayPaymentDialog
         open={alipayModalOpen}
         onFinish={() => window.location.reload()}
+      />
+
+      <AlipayDesktopPaymentDialog
+        state={desktopAlipay.state}
+        checking={desktopAlipay.checking}
+        onOpenChange={(open) => {
+          if (!open) desktopAlipay.closeDialog()
+        }}
+        onCheckNow={() => {
+          void desktopAlipay.checkNow()
+        }}
+        onRetry={desktopAlipay.retryPayment}
       />
 
       <TransferDialog

@@ -18,9 +18,12 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useNavigate } from '@tanstack/react-router'
 import i18n from 'i18next'
-import { useAuthStore } from '@/stores/auth-store'
-import { getSelf } from '@/lib/api'
+
 import type { User } from '@/features/users/types'
+import { getSelf } from '@/lib/api'
+import { useAuthStore } from '@/stores/auth-store'
+
+import { resolveAuthRedirect } from '../lib/redirect'
 import { saveUserId } from '../lib/storage'
 
 function getSavedLanguage(user: User): string | undefined {
@@ -86,7 +89,7 @@ export function useAuthRedirect() {
     }
 
     // Navigate to target page
-    const targetPath = redirectTo || '/dashboard'
+    const targetPath = resolveAuthRedirect(redirectTo, window.location.origin)
     navigate({ to: targetPath, replace: true })
   }
 

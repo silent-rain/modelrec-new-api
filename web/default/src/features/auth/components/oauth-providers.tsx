@@ -1,3 +1,4 @@
+import { LogIn, ShieldCheck } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -18,14 +19,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import {
   IconDiscord,
   IconGithub,
   IconLinuxDo,
   IconWeChat,
 } from '@/assets/brand-icons'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
 import { useOAuthLogin } from '../hooks/use-oauth-login'
 import type { SystemStatus } from '../types'
 
@@ -35,6 +38,8 @@ type OAuthProvidersProps = {
   className?: string
   onWeChatLogin?: () => void
   isWeChatLoading?: boolean
+  appearance?: 'compact' | 'list'
+  showDivider?: boolean
 }
 
 type ProviderButton = {
@@ -51,6 +56,8 @@ export function OAuthProviders({
   className,
   onWeChatLogin,
   isWeChatLoading = false,
+  appearance = 'list',
+  showDivider = true,
 }: OAuthProvidersProps) {
   const { t } = useTranslation()
   const {
@@ -61,7 +68,6 @@ export function OAuthProviders({
     handleDiscordLogin,
     handleOIDCLogin,
     handleLinuxDOLogin,
-    handleTelegramLogin,
     handleCustomOAuthLogin,
   } = useOAuthLogin(status)
 
@@ -101,6 +107,7 @@ export function OAuthProviders({
       key: 'oidc',
       label: t('Continue with OIDC'),
       onClick: handleOIDCLogin,
+      icon: <ShieldCheck className='h-4 w-4' />,
     })
   }
 
@@ -113,14 +120,6 @@ export function OAuthProviders({
     })
   }
 
-  if (status?.telegram_oauth) {
-    providerButtons.push({
-      key: 'telegram',
-      label: t('Continue with Telegram'),
-      onClick: handleTelegramLogin,
-    })
-  }
-
   // Custom OAuth providers
   const customProviders = status?.custom_oauth_providers
   if (customProviders && customProviders.length > 0) {
@@ -129,11 +128,46 @@ export function OAuthProviders({
         key: `custom-${provider.slug}`,
         label: t('Continue with {{name}}', { name: provider.name }),
         onClick: () => handleCustomOAuthLogin(provider),
+        icon: <LogIn className='h-4 w-4' />,
       })
     }
   }
 
   if (providerButtons.length === 0) return null
+
+  if (appearance === 'compact') {
+    return (
+      <div className={cn('space-y-4', className)}>
+        {showDivider ? (
+          <div className='flex items-center gap-3 text-xs text-[#9aa29e]'>
+            <span className='h-px flex-1 bg-[#edf0ec] dark:bg-white/10' />
+            <span>{t('Quick sign in')}</span>
+            <span className='h-px flex-1 bg-[#edf0ec] dark:bg-white/10' />
+          </div>
+        ) : null}
+
+        <div className='flex flex-wrap justify-center gap-3'>
+          {providerButtons.map(
+            ({ key, label, onClick, icon, disabled: extraDisabled }) => (
+              <Button
+                key={key}
+                variant='outline'
+                type='button'
+                size='icon'
+                disabled={disabled || isLoading || extraDisabled}
+                onClick={onClick}
+                className='text-foreground h-11 w-11 rounded-full border-[#e8ece9] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.04)] transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[#ffc47f] hover:bg-white hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8'
+                aria-label={label}
+                title={label}
+              >
+                {icon ?? <LogIn className='h-4 w-4' />}
+              </Button>
+            )
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn('space-y-3', className)}>
