@@ -1,3 +1,5 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowRight, Loader2 } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,14 +19,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState } from 'react'
-import type { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
-import { useCountdown } from '@/hooks/use-countdown'
+import type { z } from 'zod'
+
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -35,13 +34,15 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Turnstile } from '@/components/turnstile'
 import { sendPasswordResetEmail } from '@/features/auth/api'
+import { HumanVerificationField } from '@/features/auth/components/human-verification-field'
 import {
   forgotPasswordFormSchema,
   PASSWORD_RESET_COUNTDOWN,
 } from '@/features/auth/constants'
-import { useTurnstile } from '@/features/auth/hooks/use-turnstile'
+import { useHumanVerification } from '@/features/auth/hooks/use-human-verification'
+import { useCountdown } from '@/hooks/use-countdown'
+import { cn } from '@/lib/utils'
 
 export function ForgotPasswordForm({
   className,
@@ -50,13 +51,7 @@ export function ForgotPasswordForm({
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
 
-  const {
-    isTurnstileEnabled,
-    turnstileSiteKey,
-    turnstileToken,
-    setTurnstileToken,
-    validateTurnstile,
-  } = useTurnstile()
+  const humanVerification = useHumanVerification()
   const {
     secondsLeft,
     isActive,
@@ -67,14 +62,13 @@ export function ForgotPasswordForm({
     resolver: zodResolver(forgotPasswordFormSchema),
     defaultValues: { email: '' },
   })
-  const turnstileReady = !isTurnstileEnabled || Boolean(turnstileToken)
-
   async function onSubmit(data: z.infer<typeof forgotPasswordFormSchema>) {
-    if (!validateTurnstile()) return
+    const verification = await humanVerification.verify()
+    if (!verification) return
 
     setIsLoading(true)
     try {
-      const res = await sendPasswordResetEmail(data.email, turnstileToken)
+      const res = await sendPasswordResetEmail(data.email, verification)
       if (res?.success) {
         form.reset()
         startCountdown()
@@ -82,7 +76,7 @@ export function ForgotPasswordForm({
       } else {
         toast.error(res?.message || t('Failed to send reset email'))
       }
-    } catch (_error) {
+    } catch {
       // Errors are handled by global interceptor
     } finally {
       setIsLoading(false)
@@ -101,9 +95,15 @@ export function ForgotPasswordForm({
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('Email')}</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input
+                  type='email'
+                  inputMode='email'
+                  autoComplete='email'
+                  placeholder='name@example.com'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -113,7 +113,7 @@ export function ForgotPasswordForm({
         <Button
           type='submit'
           className='mt-2'
-          disabled={isLoading || isActive || !turnstileReady}
+          disabled={isLoading || isActive || !humanVerification.isReady}
         >
           {isActive
             ? t('Resend ({{seconds}}s)', { seconds: secondsLeft })
@@ -121,14 +121,9 @@ export function ForgotPasswordForm({
           {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
         </Button>
 
-        {isTurnstileEnabled && (
-          <div className='mt-2'>
-            <Turnstile
-              siteKey={turnstileSiteKey}
-              onVerify={setTurnstileToken}
-            />
-          </div>
-        )}
+        <div className='mt-2'>
+          <HumanVerificationField verification={humanVerification} />
+        </div>
       </form>
     </Form>
   )

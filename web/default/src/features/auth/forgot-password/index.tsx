@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+
 import { AuthLayout } from '../auth-layout'
 import { ForgotPasswordForm } from './components/forgot-password-form'
 
@@ -32,7 +33,7 @@ export function ForgotPassword() {
           </h2>
           <p className='text-muted-foreground text-left text-sm sm:text-base'>
             {t(
-              'Enter your registered email and we will send you a link to reset your password.'
+              'Password recovery currently supports email only. Enter the email linked to your account and we will send you a reset link.'
             )}
           </p>
           <p className='text-muted-foreground text-left text-sm sm:text-base'>

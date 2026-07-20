@@ -17,9 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/lib/utils'
+
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+
 import type { SystemStatus } from '../types'
 
 interface LegalConsentProps {
@@ -27,6 +29,7 @@ interface LegalConsentProps {
   checked: boolean
   onCheckedChange: (nextValue: boolean) => void
   className?: string
+  variant?: 'card' | 'inline'
 }
 
 export function LegalConsent({
@@ -34,6 +37,7 @@ export function LegalConsent({
   checked,
   onCheckedChange,
   className,
+  variant = 'card',
 }: LegalConsentProps) {
   const { t } = useTranslation()
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
@@ -50,7 +54,10 @@ export function LegalConsent({
   return (
     <div
       className={cn(
-        'border-border/60 bg-muted/40 flex items-start gap-3 rounded-md border p-3',
+        'flex items-start gap-3',
+        variant === 'card'
+          ? 'border-border/60 bg-muted/40 rounded-md border p-3'
+          : 'px-0.5 py-1',
         className
       )}
     >
@@ -76,7 +83,7 @@ export function LegalConsent({
               {t('User Agreement')}
             </a>
           )}
-          {hasUserAgreement && hasPrivacyPolicy && ' and the '}
+          {hasUserAgreement && hasPrivacyPolicy && ` ${t('and the')} `}
           {hasPrivacyPolicy && (
             <a
               href='/privacy-policy'

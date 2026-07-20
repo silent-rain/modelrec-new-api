@@ -1,3 +1,5 @@
+import { isAxiosError } from 'axios'
+import i18next from 'i18next'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,9 +19,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState } from 'react'
-import i18next from 'i18next'
 import { toast } from 'sonner'
+
 import { useCountdown } from '@/hooks/use-countdown'
+
 import { sendSmsCode } from '../api'
 import { SMS_VERIFICATION_COUNTDOWN } from '../constants'
 
@@ -62,7 +65,12 @@ export function useSmsVerification(options?: UseSmsVerificationOptions) {
 
     setIsSending(true)
     try {
-      const res = await sendSmsCode(phoneNumber, undefined, undefined, options?.turnstileToken)
+      const res = await sendSmsCode(
+        phoneNumber,
+        undefined,
+        undefined,
+        options?.turnstileToken
+      )
       // 后端返回 {code:0, message:"ok", data:{success:true, message:"..."}}
       // 以 code===0 为成功判定，同时兼容 {success:true} 格式
       const isSuccess = res?.code === 0 || res?.success === true
@@ -72,21 +80,29 @@ export function useSmsVerification(options?: UseSmsVerificationOptions) {
         return true
       }
       toast.error(
-        res?.message || res?.data?.message || i18next.t('Failed to send SMS verification code')
+        res?.message ||
+          res?.data?.message ||
+          i18next.t('Failed to send SMS verification code')
       )
       return false
-    } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        error?.response?.data?.data?.message ||
-        error?.message ||
-        i18next.t('Failed to send SMS verification code')
-      toast.error(msg)
+    } catch (error: unknown) {
+      const fallbackMessage = i18next.t('Failed to send SMS verification code')
+      if (
+        isAxiosError<{ message?: string; data?: { message?: string } }>(error)
+      ) {
+        toast.error(
+          error.response?.data?.message ||
+            error.response?.data?.data?.message ||
+            error.message ||
+            fallbackMessage
+        )
+      } else {
+        toast.error(error instanceof Error ? error.message : fallbackMessage)
+      }
       return false
     } finally {
       setIsSending(false)
     }
-
   }
 
   return {

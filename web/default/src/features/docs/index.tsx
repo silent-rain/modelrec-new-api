@@ -160,7 +160,7 @@ function DocsHero({
   const { t } = useTranslation()
 
   return (
-    <section className='relative overflow-hidden px-6 pt-28 pb-12 md:pt-36 md:pb-14'>
+    <section className='relative overflow-hidden px-6 pt-12 pb-12 md:pt-20 md:pb-14'>
       <div aria-hidden className='pointer-events-none absolute inset-0 -z-10 sf-hero-glow' />
       <div className='mx-auto max-w-4xl text-center'>
         <AnimateInView animation='fade-up' delay={0}>

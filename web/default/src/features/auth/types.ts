@@ -26,6 +26,14 @@ export interface LoginPayload {
   username: string
   password: string
   turnstile?: string
+  captcha_verify_param?: string
+}
+
+export type HumanVerificationProvider = 'none' | 'turnstile' | 'aliyun'
+
+export interface HumanVerificationPayload {
+  turnstile?: string
+  captcha_verify_param?: string
 }
 
 export interface TwoFAPayload {
@@ -39,7 +47,8 @@ export interface RegisterPayload {
   verification_code?: string
   aff_code?: string
   turnstile?: string
-  phone?: string              // 新增
+  captcha_verify_param?: string
+  phone?: string // 新增
 }
 
 export interface PasswordResetPayload {
@@ -82,6 +91,16 @@ export interface ApiResponse {
   data?: unknown
 }
 
+export interface SmsApiResponse {
+  success?: boolean
+  message?: string
+  code?: number
+  data?: {
+    success?: boolean
+    message?: string
+  }
+}
+
 // ============================================================================
 // System Status
 // ============================================================================
@@ -113,6 +132,11 @@ export interface SystemStatus {
     WeChatAccountQRCodeImageURL?: string
     turnstile_check?: boolean
     turnstile_site_key?: string
+    human_verification_provider?: HumanVerificationProvider
+    aliyun_captcha_enabled?: boolean
+    aliyun_captcha_region?: 'cn' | 'sgp'
+    aliyun_captcha_prefix?: string
+    aliyun_captcha_scene_id?: string
     email_verification?: boolean
     self_use_mode_enabled?: boolean
     display_in_currency?: boolean
@@ -156,6 +180,11 @@ export interface SystemStatus {
   WeChatAccountQRCodeImageURL?: string
   turnstile_check?: boolean
   turnstile_site_key?: string
+  human_verification_provider?: HumanVerificationProvider
+  aliyun_captcha_enabled?: boolean
+  aliyun_captcha_region?: 'cn' | 'sgp'
+  aliyun_captcha_prefix?: string
+  aliyun_captcha_scene_id?: string
   email_verification?: boolean
   self_use_mode_enabled?: boolean
   display_in_currency?: boolean

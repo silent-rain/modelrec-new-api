@@ -19,10 +19,9 @@ For commercial licensing, please contact support@quantumnous.com
 import {
   PAYMENT_TYPES,
   DEFAULT_PRESET_MULTIPLIERS,
-  DEFAULT_PAYMENT_TYPE,
   DEFAULT_MIN_TOPUP,
 } from '../constants'
-import type { PresetAmount, TopupInfo } from '../types'
+import type { PaymentMethod, PresetAmount, TopupInfo } from '../types'
 
 // ============================================================================
 // Payment Processing Functions
@@ -138,20 +137,44 @@ export function isWaffoPancakePayment(paymentType: string): boolean {
 }
 
 /**
- * Get default payment type from topup info
+ * Get configured payment methods that are available for the current gateway
+ * state. Direct Alipay remains available without Epay only when it is present
+ * in the backend-provided method list.
+ */
+export function getAvailablePaymentMethods(
+  topupInfo: TopupInfo | null
+): PaymentMethod[] {
+  if (!topupInfo || topupInfo.payment_compliance_confirmed === false) {
+    return []
+  }
+
+  return (topupInfo.pay_methods ?? []).filter((method) => {
+    switch (method.type) {
+      case PAYMENT_TYPES.ALIPAY:
+        return true
+      case PAYMENT_TYPES.STRIPE:
+        return topupInfo.enable_stripe_topup
+      case PAYMENT_TYPES.WAFFO_PANCAKE:
+        return topupInfo.enable_waffo_pancake_topup === true
+      case PAYMENT_TYPES.WAFFO:
+        return false
+      default:
+        return topupInfo.enable_online_topup
+    }
+  })
+}
+
+/**
+ * Get the first available payment type from topup info.
  */
 export function getDefaultPaymentType(topupInfo: TopupInfo | null): string {
   if (!topupInfo) {
-    return DEFAULT_PAYMENT_TYPE
+    return ''
   }
 
-  // Return first available payment method or default
-  if (topupInfo.pay_methods?.length > 0) {
-    return topupInfo.pay_methods[0].type
-  }
-
-  if (topupInfo.enable_stripe_topup) {
-    return PAYMENT_TYPES.STRIPE
+  const availableMethods = getAvailablePaymentMethods(topupInfo)
+  if (availableMethods.length > 0) {
+    return availableMethods[0].type
   }
 
   if (topupInfo.enable_waffo_topup) {
@@ -162,18 +185,22 @@ export function getDefaultPaymentType(topupInfo: TopupInfo | null): string {
     return PAYMENT_TYPES.WAFFO_PANCAKE
   }
 
-  return DEFAULT_PAYMENT_TYPE
+  return ''
 }
 
 /**
  * Get minimum topup amount from topup info
  */
 export function getMinTopupAmount(topupInfo: TopupInfo | null): number {
-  if (!topupInfo) {
+  if (!topupInfo || topupInfo.payment_compliance_confirmed === false) {
     return DEFAULT_MIN_TOPUP
   }
 
-  if (topupInfo.enable_online_topup) {
+  const hasDirectAlipay = getAvailablePaymentMethods(topupInfo).some(
+    (method) => method.type === PAYMENT_TYPES.ALIPAY
+  )
+
+  if (topupInfo.enable_online_topup || hasDirectAlipay) {
     return topupInfo.min_topup
   }
 

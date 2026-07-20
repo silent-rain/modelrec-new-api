@@ -143,11 +143,11 @@ function StyledAboutContent() {
           <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
             {t("about.coreValues")}
           </h2>
-          <p className="mb-8 text-center text-sm font-medium text-muted-foreground">
+          {/* <p className="mb-8 text-center text-sm font-medium text-muted-foreground">
             {t("about.weBelieve")}
-          </p>
+          </p> */}
 
-          <div className="flex flex-nowrap items-center justify-center gap-4 sm:gap-8 md:gap-12">
+          <div className="flex flex-nowrap items-center justify-center gap-4 sm:gap-8 md:gap-12 mt-8">
             {values.map((item) => {
               const Icon = item.icon;
               return (

@@ -38,6 +38,7 @@ export type TopNavLink = {
  *   console: true,
  *   pricing: { enabled: true, requireAuth: false },
  *   rankings: { enabled: true, requireAuth: false },
+ *   playground: true,
  *   docs: true,
  *   about: true
  * }
@@ -80,6 +81,16 @@ export function useTopNavLinks(): TopNavLink[] {
   if (rankings && typeof rankings === 'object' && rankings.enabled) {
     const requiresAuth = rankings.requireAuth && !isAuthed
     links.push({ title: t('Rankings'), href: '/rankings', requiresAuth })
+  }
+
+  // Playground is always an authenticated route. This option only controls
+  // whether it appears in the shared top navigation.
+  if (modules?.playground !== false) {
+    links.push({
+      title: t('Playground'),
+      href: '/playground',
+      requiresAuth: !isAuthed,
+    })
   }
 
   // Docs (internal developer documentation page, see /docs route)

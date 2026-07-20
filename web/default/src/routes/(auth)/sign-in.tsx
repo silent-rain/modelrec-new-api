@@ -1,3 +1,4 @@
+import { createFileRoute, redirect } from '@tanstack/react-router'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,9 +18,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { z } from 'zod'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useAuthStore } from '@/stores/auth-store'
+
+import { resolveAuthRedirect } from '@/features/auth/lib/redirect'
 import { SignIn } from '@/features/auth/sign-in'
+import { useAuthStore } from '@/stores/auth-store'
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -35,7 +37,13 @@ export const Route = createFileRoute('/(auth)/sign-in')({
     if (auth.user) {
       // 优先使用 redirect 参数（用户之前想去的地方）
       // 否则跳转到 dashboard
-      throw redirect({ to: search?.redirect || '/dashboard' })
+      const currentOrigin =
+        typeof window === 'undefined'
+          ? 'http://localhost'
+          : window.location.origin
+      throw redirect({
+        to: resolveAuthRedirect(search?.redirect, currentOrigin),
+      })
     }
   },
 })

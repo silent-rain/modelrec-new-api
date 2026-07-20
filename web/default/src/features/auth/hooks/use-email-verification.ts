@@ -1,3 +1,4 @@
+import i18next from 'i18next'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,15 +18,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState } from 'react'
-import i18next from 'i18next'
 import { toast } from 'sonner'
+
 import { useCountdown } from '@/hooks/use-countdown'
+
 import { sendEmailVerification } from '../api'
 import { EMAIL_VERIFICATION_COUNTDOWN } from '../constants'
+import type { HumanVerificationPayload } from '../types'
 
 interface UseEmailVerificationOptions {
-  turnstileToken?: string
-  validateTurnstile?: () => boolean
+  getVerification?: () => Promise<HumanVerificationPayload | null>
 }
 
 /**
@@ -48,14 +50,16 @@ export function useEmailVerification(options?: UseEmailVerificationOptions) {
       return false
     }
 
-    // Validate turnstile if validation function is provided
-    if (options?.validateTurnstile && !options.validateTurnstile()) {
-      return false
+    let verification: HumanVerificationPayload = {}
+    if (options?.getVerification) {
+      const result = await options.getVerification()
+      if (!result) return false
+      verification = result
     }
 
     setIsSending(true)
     try {
-      const res = await sendEmailVerification(email, options?.turnstileToken)
+      const res = await sendEmailVerification(email, verification)
       if (res?.success) {
         startCountdown()
         toast.success(i18next.t('Verification email sent'))
@@ -65,7 +69,7 @@ export function useEmailVerification(options?: UseEmailVerificationOptions) {
         res?.message || i18next.t('Failed to send verification email')
       )
       return false
-    } catch (_error) {
+    } catch {
       // Errors are handled by global interceptor
       return false
     } finally {

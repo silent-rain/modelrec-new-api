@@ -53,6 +53,7 @@ const headerNavSchema = z.object({
   pricingRequireAuth: z.boolean(),
   rankingsEnabled: z.boolean(),
   rankingsRequireAuth: z.boolean(),
+  playground: z.boolean(),
   docs: z.boolean(),
   about: z.boolean(),
 })
@@ -87,6 +88,10 @@ const toFormValues = (config: HeaderNavModulesConfig): HeaderNavFormValues => ({
     config.rankings?.requireAuth === undefined
       ? HEADER_NAV_DEFAULT.rankings.requireAuth
       : Boolean(config.rankings.requireAuth),
+  playground:
+    config.playground === undefined
+      ? HEADER_NAV_DEFAULT.playground
+      : Boolean(config.playground),
   docs:
     config.docs === undefined ? HEADER_NAV_DEFAULT.docs : Boolean(config.docs),
   about:
@@ -117,6 +122,7 @@ export function HeaderNavigationSection({
       ...config,
       home: values.home,
       console: values.console,
+      playground: values.playground,
       docs: values.docs,
       about: values.about,
       pricing: {
@@ -160,6 +166,11 @@ export function HeaderNavigationSection({
       key: 'console',
       title: t('Console'),
       description: t('User dashboard and quota controls.'),
+    },
+    {
+      key: 'playground',
+      title: t('Playground'),
+      description: t('Playground experiments and live conversations.'),
     },
     {
       key: 'docs',

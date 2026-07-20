@@ -625,7 +625,7 @@ For commercial licensing, please contact support@quantumnous.com
    * orange-green preset so public pages (home, model market, leaderboard, docs)
    * stay consistent regardless of the active color preset. */
   .sf-page-gradient {
-    background: #FEFCF8;
+    background: #fefcf8;
   }
 
   .dark .sf-page-gradient {
@@ -646,12 +646,12 @@ For commercial licensing, please contact support@quantumnous.com
    * so it never shifts on hover. */
   .sf-btn-primary {
     @apply text-white shadow-lg;
-    background: var(--primary, #FF8A00) !important;
-    background-color: var(--primary, #FF8A00) !important;
-    box-shadow: 0 4px 14px rgba(255, 138, 0, 0.30);
+    background: var(--primary, #ff8a00) !important;
+    background-color: var(--primary, #ff8a00) !important;
+    box-shadow: 0 4px 14px rgba(255, 138, 0, 0.3);
   }
   .sf-btn-primary:not(:disabled) {
-    color: #FFFFFF !important;
+    color: #ffffff !important;
   }
   .sf-btn-primary:hover,
   .sf-btn-primary:active {
@@ -665,13 +665,13 @@ For commercial licensing, please contact support@quantumnous.com
     @apply border-orange-300 text-orange-700 transition-colors duration-200;
   }
   .sf-btn-outline:hover {
-    @apply bg-orange-50 border-orange-400 dark:border-orange-600 dark:text-orange-200 dark:bg-orange-950/40;
+    @apply border-orange-400 bg-orange-50 dark:border-orange-600 dark:bg-orange-950/40 dark:text-orange-200;
   }
 
   /* Green step badge — used for steps 1 & 3 on landing / docs pages */
   .sf-step-green {
-    background: #007B43 !important;
-    background-color: #007B43 !important;
+    background: #007b43 !important;
+    background-color: #007b43 !important;
   }
 
   /* Glass morphism card for auth pages: soft white border + deep neutral shadow */
@@ -694,12 +694,147 @@ For commercial licensing, please contact support@quantumnous.com
 
   /* Header bar: solid white opaque */
   .sf-header-transparent {
-    background: #FFFFFF;
+    background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
   }
 
   .dark .sf-header-transparent {
     background: oklch(0.16 0.01 55);
     border-bottom: 1px solid rgba(68, 62, 48, 0.36);
+  }
+}
+@keyframes sf-home-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -9px, 0);
+  }
+}
+
+.sf-home-float {
+  animation-name: sf-home-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+/* Auth inputs intentionally follow the prototype's cool neutral surface instead
+ * of the active theme preset's warm form treatment. */
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']) {
+  background: #f5f7f8 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):hover {
+  background: #f1f4f4 !important;
+}
+
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):focus-visible {
+  background: #ffffff !important;
+  border-color: #ffb45e !important;
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: transparent !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):focus-visible {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: #ffb45e !important;
+}
+
+/* Keep saved credentials on the same auth surface instead of letting the
+ * browser's light autofill paint override the active color scheme. */
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ) {
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0 1000px #f5f7f8 inset !important;
+  box-shadow: 0 0 0 1000px #f5f7f8 inset !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ) {
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0 1000px #2d302c inset !important;
+  box-shadow: 0 0 0 1000px #2d302c inset !important;
+}
+
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ):focus-visible {
+  -webkit-box-shadow:
+    0 0 0 1000px #ffffff inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+  box-shadow:
+    0 0 0 1000px #ffffff inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ):focus-visible {
+  -webkit-box-shadow:
+    0 0 0 1000px #353834 inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+  box-shadow:
+    0 0 0 1000px #353834 inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+}
+
+.sf-home-menu-trigger {
+  display: flex;
+}
+
+.sf-public-mobile-actions {
+  display: flex;
+}
+
+@media (min-width: 40rem) {
+  .sf-public-mobile-actions {
+    display: none !important;
+  }
+}
+
+@media (min-width: 64rem) {
+  .sf-home-menu-trigger {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-home-float {
+    animation: none;
   }
 }
