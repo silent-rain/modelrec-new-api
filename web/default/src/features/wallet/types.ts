@@ -204,30 +204,34 @@ export interface WaffoPancakePaymentRequest {
   amount: number
 }
 
-export type AlipayPaymentScene = 'desktop'
-export type AlipayDisplayMode = 'iframe' | 'redirect'
-export type AlipayOrderStatus = 'pending' | 'success' | 'closed'
+export type AlipayQrPayMode =
+  | 'SimplePreview'
+  | 'Preview'
+  | 'Redirect'
+  | 'MiniPreview'
+  | 'CustomWidth'
 
 export interface AlipayPaymentRequest {
+  /** Topup quota amount used to calculate the actual payment amount */
   amount: number
-  scene: AlipayPaymentScene
+  /** PC QR pay mode (optional, defaults to SimplePreview on the server) */
+  qr_pay_mode?: AlipayQrPayMode
+  /** Custom QR code width in pixels (only valid when qr_pay_mode is CustomWidth) */
+  qrcode_width?: number
+  /** Source URL to return to when the user cancels payment (ALIAPP integration) */
+  request_from_url?: string
 }
 
 export interface AlipayPaymentData {
   out_trade_no: string
-  trade_no: string | null
-  pay_data: string
-  pay_type: 'url'
-  display_mode?: AlipayDisplayMode
-  cashier_url?: string
-  expires_at?: number
+  pay_url: string
+  expires_at: number
 }
 
 export interface AlipayQueryData {
   out_trade_no: string
-  status: AlipayOrderStatus
-  trade_status?: string | null
-  credited: boolean
+  trade_status: string
+  total_amount?: string
   pay_time?: string | null
 }
 

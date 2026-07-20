@@ -25,7 +25,6 @@ import {
   isDesktopAlipayExpired,
   isDesktopAlipayTerminal,
   requireDesktopAlipayRefreshData,
-  resolveDesktopAlipayCashierUrl,
   resolveDesktopAlipayStatus,
   runDesktopAlipayBalanceRefresh,
   shouldPollDesktopAlipay,
@@ -71,20 +70,6 @@ describe('desktop Alipay state helpers', () => {
     )
   })
 
-  test('uses the standard cashier URL with a legacy fallback', () => {
-    const embeddedUrl = 'https://example.com/embedded'
-    const cashierUrl = 'https://example.com/cashier'
-
-    assert.equal(
-      resolveDesktopAlipayCashierUrl(cashierUrl, embeddedUrl),
-      cashierUrl
-    )
-    assert.equal(
-      resolveDesktopAlipayCashierUrl(undefined, embeddedUrl),
-      embeddedUrl
-    )
-  })
-
   test('recognizes terminal, expired, and pollable states', () => {
     assert.equal(isDesktopAlipayTerminal('awaiting_payment'), false)
     assert.equal(isDesktopAlipayTerminal('success'), true)
@@ -95,16 +80,14 @@ describe('desktop Alipay state helpers', () => {
     assert.equal(shouldPollDesktopAlipay('awaiting_payment', true, true), false)
   })
 
-  test('only treats credited success as complete', () => {
-    assert.equal(resolveDesktopAlipayStatus('success', true), 'success')
+  test('maps Alipay trade status to desktop flow status', () => {
+    assert.equal(resolveDesktopAlipayStatus('TRADE_SUCCESS'), 'success')
+    assert.equal(resolveDesktopAlipayStatus('TRADE_FINISHED'), 'success')
+    assert.equal(resolveDesktopAlipayStatus('TRADE_CLOSED'), 'closed')
     assert.equal(
-      resolveDesktopAlipayStatus('success', false),
+      resolveDesktopAlipayStatus('WAIT_BUYER_PAY'),
       'awaiting_payment'
     )
-    assert.equal(resolveDesktopAlipayStatus('closed', false), 'closed')
-    assert.equal(
-      resolveDesktopAlipayStatus('pending', false),
-      'awaiting_payment'
-    )
+    assert.equal(resolveDesktopAlipayStatus(''), 'awaiting_payment')
   })
 })

@@ -184,7 +184,7 @@ export function AlipayDesktopPaymentDialog(
               variant='outline'
               render={
                 <a
-                  href={props.state.payment.cashierUrl}
+                  href={props.state.payment.payUrl}
                   target='_blank'
                   rel='noopener noreferrer'
                 />

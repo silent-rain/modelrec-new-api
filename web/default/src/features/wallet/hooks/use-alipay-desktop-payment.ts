@@ -25,7 +25,6 @@ import {
   createDesktopAlipayQueryGate,
   getDesktopAlipayPollDelay,
   isDesktopAlipayExpired,
-  resolveDesktopAlipayCashierUrl,
   resolveDesktopAlipayStatus,
   runDesktopAlipayBalanceRefresh,
   shouldPollDesktopAlipay,
@@ -112,10 +111,7 @@ export function useAlipayDesktopPayment(
         return
       }
 
-      const nextStatus = resolveDesktopAlipayStatus(
-        response.data.status,
-        response.data.credited
-      )
+      const nextStatus = resolveDesktopAlipayStatus(response.data.trade_status)
       if (nextStatus === 'success') {
         const refreshed = await runDesktopAlipayBalanceRefresh(
           onSuccessRef.current
@@ -162,10 +158,9 @@ export function useAlipayDesktopPayment(
       try {
         const response = await requestAlipayPayment({
           amount: input.amount,
-          scene: 'desktop',
         })
         if (flowRef.current !== flow) return false
-        if (!response.data?.out_trade_no || !response.data.pay_data) {
+        if (!response.data?.out_trade_no || !response.data.pay_url) {
           const errorMessage =
             response.message || i18next.t('Payment request failed')
           toast.error(errorMessage)
@@ -180,14 +175,8 @@ export function useAlipayDesktopPayment(
 
         const payment: AlipayDesktopPayment = {
           outTradeNo: response.data.out_trade_no,
-          payUrl: response.data.pay_data,
-          cashierUrl: resolveDesktopAlipayCashierUrl(
-            response.data.cashier_url,
-            response.data.pay_data
-          ),
-          expiresAt:
-            response.data.expires_at ??
-            Math.floor(Date.now() / 1_000) + 15 * 60,
+          payUrl: response.data.pay_url,
+          expiresAt: response.data.expires_at,
           displayAmount: input.displayAmount,
         }
         paymentRef.current = payment

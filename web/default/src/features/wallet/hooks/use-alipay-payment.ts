@@ -29,7 +29,7 @@ import type { AlipayPaymentData, AlipayPaymentResponse } from '../types'
  * that is not covered by the global business-error interceptor.
  */
 function isAlipaySuccess(response: AlipayPaymentResponse): boolean {
-  if (response?.data?.pay_data) return true
+  if (response?.data?.pay_url) return true
   return response?.code === 0 || response?.message === 'ok'
 }
 
@@ -47,7 +47,6 @@ export function useAlipayPayment() {
 
         const response = await requestAlipayPayment({
           amount: params.amount,
-          scene: 'desktop',
         })
 
         if (!isAlipaySuccess(response)) {

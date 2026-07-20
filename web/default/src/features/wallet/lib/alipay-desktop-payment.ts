@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { AlipayOrderStatus } from '../types'
 
 export type AlipayDesktopFlowStatus =
   | 'idle'
@@ -30,7 +29,6 @@ export type AlipayDesktopFlowStatus =
 export interface AlipayDesktopPayment {
   outTradeNo: string
   payUrl: string
-  cashierUrl: string
   expiresAt: number
   displayAmount: number
 }
@@ -83,13 +81,6 @@ export async function runDesktopAlipayBalanceRefresh(
   }
 }
 
-export function resolveDesktopAlipayCashierUrl(
-  cashierUrl: string | undefined,
-  embeddedPayUrl: string
-): string {
-  return cashierUrl?.trim() || embeddedPayUrl
-}
-
 export function requireDesktopAlipayRefreshData<T>(response: {
   success?: boolean
   data?: T | null
@@ -133,10 +124,15 @@ export function shouldPollDesktopAlipay(
 }
 
 export function resolveDesktopAlipayStatus(
-  status: AlipayOrderStatus,
-  credited: boolean
+  tradeStatus: string
 ): AlipayDesktopFlowStatus {
-  if (status === 'success' && credited) return 'success'
-  if (status === 'closed') return 'closed'
-  return 'awaiting_payment'
+  switch (tradeStatus) {
+    case 'TRADE_SUCCESS':
+    case 'TRADE_FINISHED':
+      return 'success'
+    case 'TRADE_CLOSED':
+      return 'closed'
+    default:
+      return 'awaiting_payment'
+  }
 }
