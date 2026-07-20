@@ -38,7 +38,7 @@ export function AuthPasswordInput({
   return (
     <div className='relative'>
       <Lock
-        className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab]'
+        className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
         aria-hidden='true'
       />
       <Input
@@ -51,7 +51,7 @@ export function AuthPasswordInput({
         type='button'
         disabled={disabled}
         onClick={() => setIsVisible((current) => !current)}
-        className='hover:text-foreground absolute top-1/2 right-3 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-[#89928e] transition-colors outline-none hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-white/8'
+        className='hover:text-foreground absolute top-1/2 right-3 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-[#89928e] transition-colors outline-none hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50 disabled:pointer-events-none disabled:opacity-50 dark:text-white/60 dark:hover:bg-white/8'
         aria-label={toggleLabel}
         title={toggleLabel}
       >

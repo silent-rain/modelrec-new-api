@@ -761,6 +761,58 @@ For commercial licensing, please contact support@quantumnous.com
   border-color: #ffb45e !important;
 }
 
+/* Keep saved credentials on the same auth surface instead of letting the
+ * browser's light autofill paint override the active color scheme. */
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ) {
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0 1000px #f5f7f8 inset !important;
+  box-shadow: 0 0 0 1000px #f5f7f8 inset !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ) {
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0 1000px #2d302c inset !important;
+  box-shadow: 0 0 0 1000px #2d302c inset !important;
+}
+
+[data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ):focus-visible {
+  -webkit-box-shadow:
+    0 0 0 1000px #ffffff inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+  box-shadow:
+    0 0 0 1000px #ffffff inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-auth-input:not([type='checkbox']):not([type='radio']):is(
+    :-webkit-autofill,
+    :autofill
+  ):focus-visible {
+  -webkit-box-shadow:
+    0 0 0 1000px #353834 inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+  box-shadow:
+    0 0 0 1000px #353834 inset,
+    0 0 0 3px rgba(255, 138, 0, 0.12) !important;
+}
+
 .sf-home-menu-trigger {
   display: flex;
 }

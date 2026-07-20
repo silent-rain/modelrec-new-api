@@ -204,41 +204,47 @@ export interface WaffoPancakePaymentRequest {
   amount: number
 }
 
-/**
- * Alipay payment request parameters
- */
+export type AlipayQrPayMode =
+  | 'SimplePreview'
+  | 'Preview'
+  | 'Redirect'
+  | 'MiniPreview'
+  | 'CustomWidth'
+
 export interface AlipayPaymentRequest {
-  /** Payment amount */
+  /** Topup quota amount used to calculate the actual payment amount */
   amount: number
-  /** Product/order subject shown on the Alipay page */
-  subject: string
-  /** Current user ID */
-  user_id: number
+  /** PC QR pay mode (optional, defaults to SimplePreview on the server) */
+  qr_pay_mode?: AlipayQrPayMode
+  /** Custom QR code width in pixels (only valid when qr_pay_mode is CustomWidth) */
+  qrcode_width?: number
+  /** Source URL to return to when the user cancels payment (ALIAPP integration) */
+  request_from_url?: string
 }
 
-/**
- * Alipay payment data returned by the create endpoint
- */
 export interface AlipayPaymentData {
-  /** Merchant order number */
   out_trade_no: string
-  /** Alipay trade number (null before payment) */
-  trade_no: string | null
-  /** Payment link to open in a new tab (pay_type === 'url') */
-  pay_data: string
-  /** Payment type, e.g. 'url' */
-  pay_type: string
+  pay_url: string
+  expires_at: number
 }
 
-/**
- * Alipay create response
- *
- * The endpoint returns a non-standard envelope: { code, message, data }.
- */
+export interface AlipayQueryData {
+  out_trade_no: string
+  trade_status: string
+  total_amount?: string
+  pay_time?: string | null
+}
+
 export interface AlipayPaymentResponse {
   code?: number
   message?: string
   data?: AlipayPaymentData
+}
+
+export interface AlipayQueryResponse {
+  code?: number
+  message?: string
+  data?: AlipayQueryData
 }
 
 /**

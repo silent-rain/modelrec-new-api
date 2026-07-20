@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { api } from '@/lib/api'
+
 import type {
   RedemptionRequest,
   PaymentRequest,
@@ -40,6 +41,7 @@ import type {
   WaffoPancakePaymentResponse,
   AlipayPaymentRequest,
   AlipayPaymentResponse,
+  AlipayQueryResponse,
 } from './types'
 
 // ============================================================================
@@ -183,6 +185,18 @@ export async function requestAlipayPayment(
   const res = await api.post('/api/v2/pay/alipay/create', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
+  return res.data
+}
+
+export async function queryAlipayPayment(
+  outTradeNo: string
+): Promise<AlipayQueryResponse> {
+  const res = await api.get('/api/v2/pay/alipay/query', {
+    params: { out_trade_no: outTradeNo },
+    disableDuplicate: true,
+    skipBusinessError: true,
+    skipErrorHandler: true,
+  })
   return res.data
 }
 
