@@ -179,19 +179,7 @@ export function AlipayDesktopPaymentDialog(
         ) : null}
 
         {waitingForPayment && props.state.payment ? (
-          <DialogFooter className='grid grid-cols-2 gap-2 sm:grid-cols-2'>
-            <Button
-              variant='outline'
-              render={
-                <a
-                  href={props.state.payment.payUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                />
-              }
-            >
-              {t('Open Alipay cashier')}
-            </Button>
+          <DialogFooter>
             <Button onClick={props.onCheckNow} disabled={props.checking}>
               <span className='inline-flex size-4 items-center justify-center'>
                 {props.checking ? (
