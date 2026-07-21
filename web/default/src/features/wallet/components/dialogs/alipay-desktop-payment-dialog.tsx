@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/dialog'
 
 import type { AlipayDesktopCheckoutState } from '../../lib/alipay-desktop-payment'
-import { formatCurrency } from '../../lib/format'
+import { formatWalletPaymentAmount } from '../../lib/format'
 
 interface AlipayDesktopPaymentDialogProps {
   state: AlipayDesktopCheckoutState
@@ -121,7 +121,7 @@ export function AlipayDesktopPaymentDialog(
                 {t('You Pay')}
               </span>
               <span className='text-lg font-semibold'>
-                ¥{formatCurrency(props.state.payment.displayAmount)}
+                {formatWalletPaymentAmount(props.state.payment.displayAmount)}
               </span>
             </div>
 

@@ -23,6 +23,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -32,7 +38,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { formatNumber } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 import {
@@ -40,13 +45,16 @@ import {
   CUSTOM_AMOUNT_MIN,
   CUSTOM_AMOUNT_SELECTION,
   type RechargeAmountSelection,
-  formatCurrency,
+  formatWalletPaymentAmount,
+  formatWalletTopupAmount,
+  getWalletCurrencySymbol,
   getDiscountLabel,
   getPaymentIcon,
   getMinTopupAmount,
   calculatePresetPricing,
   getAvailablePaymentMethods,
   parseCustomAmount,
+  usesAlipayWordmark,
 } from '../lib'
 import type {
   PaymentMethod,
@@ -129,6 +137,7 @@ export function RechargeFormCard({
   const redemptionEnabled = topupInfo?.enable_redemption !== false
   const customAmountInvalid =
     customAmount !== '' && parseCustomAmount(customAmount) === 0
+  const currencySymbol = getWalletCurrencySymbol()
 
   if (loading) {
     return (
@@ -243,7 +252,7 @@ export function RechargeFormCard({
                       >
                         <div className='flex w-full items-center justify-between'>
                           <div className='text-base font-semibold sm:text-lg'>
-                            {formatNumber(displayValue)}
+                            {formatWalletTopupAmount(displayValue)}
                           </div>
                           {hasDiscount && (
                             <div className='text-xs font-medium text-green-600'>
@@ -252,11 +261,12 @@ export function RechargeFormCard({
                           )}
                         </div>
                         <div className='text-muted-foreground mt-1.5 w-full text-xs sm:mt-2'>
-                          Pay {formatCurrency(actualPrice)}
+                          {t('Pay')} {formatWalletPaymentAmount(actualPrice)}
                           {hasDiscount && savedAmount > 0 && (
                             <span className='text-green-600'>
                               {' '}
-                              • Save {formatCurrency(savedAmount)}
+                              • {t('You save')}{' '}
+                              {formatWalletPaymentAmount(savedAmount)}
                             </span>
                           )}
                         </div>
@@ -291,21 +301,33 @@ export function RechargeFormCard({
                   >
                     {t('Custom Amount')}
                   </Label>
-                  <Input
-                    id='topup-amount'
-                    type='number'
-                    inputMode='numeric'
-                    value={customAmount}
-                    onChange={(event) =>
-                      onCustomAmountChange(event.target.value)
-                    }
-                    min={CUSTOM_AMOUNT_MIN}
-                    max={CUSTOM_AMOUNT_MAX}
-                    step={1}
-                    aria-invalid={customAmountInvalid}
-                    aria-describedby='topup-amount-help'
-                    className='h-9 text-base sm:h-10 sm:text-lg'
-                  />
+                  <InputGroup className='h-9 sm:h-10'>
+                    {currencySymbol && (
+                      <InputGroupAddon align='inline-start'>
+                        <InputGroupText
+                          data-testid='custom-amount-currency-symbol'
+                          aria-hidden='true'
+                        >
+                          {currencySymbol}
+                        </InputGroupText>
+                      </InputGroupAddon>
+                    )}
+                    <InputGroupInput
+                      id='topup-amount'
+                      type='number'
+                      inputMode='numeric'
+                      value={customAmount}
+                      onChange={(event) =>
+                        onCustomAmountChange(event.target.value)
+                      }
+                      min={CUSTOM_AMOUNT_MIN}
+                      max={CUSTOM_AMOUNT_MAX}
+                      step={1}
+                      aria-invalid={customAmountInvalid}
+                      aria-describedby='topup-amount-help'
+                      className='text-base sm:text-lg'
+                    />
+                  </InputGroup>
                   <p
                     id='topup-amount-help'
                     className={cn(
@@ -333,18 +355,27 @@ export function RechargeFormCard({
                       )
                       const disabled =
                         topupAmount <= 0 || methodMinTopup > topupAmount
+                      const formattedMinTopup = formatWalletTopupAmount(
+                        methodMinTopup * usdExchangeRate
+                      )
                       const disabledReason = disabled
                         ? t('Minimum topup amount: {{amount}}', {
-                            amount: methodMinTopup,
+                            amount: formattedMinTopup,
                           })
                         : undefined
                       const disabledLabel = disabled
-                        ? `${t('Minimum:')} ${methodMinTopup}`
+                        ? `${t('Minimum:')} ${formattedMinTopup}`
                         : undefined
+                      const showAlipayWordmark = usesAlipayWordmark(
+                        method.type,
+                        method.icon
+                      )
+                      const visuallyDisabled = disabled || !!paymentLoading
 
                       const button = (
                         <Button
                           key={method.type}
+                          data-wallet-payment-method=''
                           variant='outline'
                           onClick={() => onPaymentMethodSelect(method)}
                           disabled={disabled || !!paymentLoading}
@@ -354,28 +385,41 @@ export function RechargeFormCard({
                               ? `${method.name}. ${disabledReason}`
                               : method.name
                           }
-                          className='min-h-14 min-w-0 justify-start gap-2 rounded-lg px-3 py-2 text-left'
+                          className='border-foreground hover:bg-muted/40 min-h-14 min-w-0 justify-start gap-3 rounded-lg px-3 py-2 text-left disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:opacity-100 dark:disabled:border-zinc-700 dark:disabled:bg-zinc-800/70 dark:disabled:text-zinc-500'
                         >
-                          {paymentLoading === method.type ? (
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                          ) : (
-                            getPaymentIcon(
-                              method.type,
-                              'h-4 w-4',
-                              method.icon,
-                              method.name
-                            )
-                          )}
-                          <span className='flex min-w-0 flex-col items-start gap-0.5'>
-                            <span className='max-w-full truncate'>
-                              {method.name}
-                            </span>
-                            {disabledLabel && (
-                              <span className='text-muted-foreground max-w-full truncate text-[11px] leading-4 font-normal'>
-                                {disabledLabel}
-                              </span>
+                          <span
+                            className={cn(
+                              'flex shrink-0 items-center',
+                              visuallyDisabled && 'opacity-50 grayscale'
+                            )}
+                          >
+                            {paymentLoading === method.type ? (
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                            ) : (
+                              getPaymentIcon(
+                                method.type,
+                                showAlipayWordmark
+                                  ? 'h-8 w-auto max-w-[92px] object-contain'
+                                  : 'h-5 w-5',
+                                method.icon,
+                                method.name
+                              )
                             )}
                           </span>
+                          {(!showAlipayWordmark || disabledLabel) && (
+                            <span className='flex min-w-0 flex-col items-start gap-0.5'>
+                              {!showAlipayWordmark && (
+                                <span className='max-w-full truncate'>
+                                  {method.name}
+                                </span>
+                              )}
+                              {disabledLabel && (
+                                <span className='text-muted-foreground max-w-full truncate text-[11px] leading-4 font-normal'>
+                                  {disabledLabel}
+                                </span>
+                              )}
+                            </span>
+                          )}
                         </Button>
                       )
 
@@ -417,14 +461,18 @@ export function RechargeFormCard({
                         const waffoMin = waffoMinTopup || 0
                         const belowMin =
                           topupAmount <= 0 || waffoMin > topupAmount
+                        const formattedWaffoMin = formatWalletTopupAmount(
+                          waffoMin * usdExchangeRate
+                        )
                         const disabledReason = belowMin
                           ? t('Minimum topup amount: {{amount}}', {
-                              amount: waffoMin,
+                              amount: formattedWaffoMin,
                             })
                           : undefined
                         const disabledLabel = belowMin
-                          ? `${t('Minimum:')} ${waffoMin}`
+                          ? `${t('Minimum:')} ${formattedWaffoMin}`
                           : undefined
+                        const visuallyDisabled = belowMin || !!paymentLoading
 
                         let methodIcon = getPaymentIcon('waffo')
                         if (paymentLoading === loadingKey) {
@@ -444,6 +492,7 @@ export function RechargeFormCard({
                         const button = (
                           <Button
                             key={methodKey}
+                            data-wallet-payment-method=''
                             variant='outline'
                             onClick={() => onWaffoMethodSelect(method, index)}
                             disabled={belowMin || !!paymentLoading}
@@ -453,9 +502,16 @@ export function RechargeFormCard({
                                 ? `${method.name}. ${disabledReason}`
                                 : method.name
                             }
-                            className='min-h-14 min-w-0 justify-start gap-2 rounded-lg px-3 py-2 text-left'
+                            className='border-foreground hover:bg-muted/40 min-h-14 min-w-0 justify-start gap-3 rounded-lg px-3 py-2 text-left disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:opacity-100 dark:disabled:border-zinc-700 dark:disabled:bg-zinc-800/70 dark:disabled:text-zinc-500'
                           >
-                            {methodIcon}
+                            <span
+                              className={cn(
+                                'flex shrink-0 items-center',
+                                visuallyDisabled && 'opacity-50 grayscale'
+                              )}
+                            >
+                              {methodIcon}
+                            </span>
                             <span className='flex min-w-0 flex-col items-start gap-0.5'>
                               <span className='max-w-full truncate'>
                                 {method.name}

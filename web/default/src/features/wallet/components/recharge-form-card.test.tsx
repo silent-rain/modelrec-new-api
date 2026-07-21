@@ -17,11 +17,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import assert from 'node:assert/strict'
-import { describe, test } from 'node:test'
+import { afterEach, beforeEach, describe, test } from 'node:test'
 
 import { createInstance } from 'i18next'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
+
+import {
+  DEFAULT_CURRENCY_CONFIG,
+  useSystemConfigStore,
+} from '@/stores/system-config-store'
 
 import { CUSTOM_AMOUNT_SELECTION } from '../lib'
 import type { PaymentMethod, PresetAmount, TopupInfo } from '../types'
@@ -36,6 +41,8 @@ await testI18n.use(initReactI18next).init({
         'Custom Amount': 'Custom Amount',
         'Please enter an amount between 1 and 100000 yuan.':
           'Please enter an amount between 1 and 100000 yuan.',
+        Pay: 'Pay',
+        'You save': 'You save',
       },
     },
   },
@@ -55,16 +62,31 @@ const topupInfo: TopupInfo = {
 interface RenderOverrides {
   selectedPreset: number | typeof CUSTOM_AMOUNT_SELECTION | null
   customAmount?: string
+  topupAmount?: number
+  minTopup?: number
+  paymentIcon?: string
 }
 
 function renderCard(overrides: RenderOverrides): string {
+  const renderedTopupInfo: TopupInfo = {
+    ...topupInfo,
+    min_topup: overrides.minTopup ?? topupInfo.min_topup,
+    pay_methods: [
+      {
+        name: 'Alipay',
+        type: 'alipay',
+        icon: overrides.paymentIcon,
+        min_topup: overrides.minTopup,
+      },
+    ],
+  }
   const props = {
-    topupInfo,
+    topupInfo: renderedTopupInfo,
     presetAmounts: [{ value: 10 }, { value: 20 }] satisfies PresetAmount[],
     selectedPreset: overrides.selectedPreset,
     onSelectPreset: (_preset: PresetAmount) => undefined,
     onSelectCustom: () => undefined,
-    topupAmount: 10,
+    topupAmount: overrides.topupAmount ?? 10,
     customAmount: overrides.customAmount ?? '',
     onCustomAmountChange: (_value: string) => undefined,
     onPaymentMethodSelect: (_method: PaymentMethod) => undefined,
@@ -83,6 +105,27 @@ function renderCard(overrides: RenderOverrides): string {
     </I18nextProvider>
   )
 }
+
+const originalConfig = useSystemConfigStore.getState().config
+
+beforeEach(() => {
+  useSystemConfigStore.setState((state) => ({
+    config: {
+      ...state.config,
+      currency: {
+        ...DEFAULT_CURRENCY_CONFIG,
+        quotaDisplayType: 'CUSTOM',
+        usdExchangeRate: 1,
+        customCurrencySymbol: '燧点',
+        customCurrencyExchangeRate: 10000,
+      },
+    },
+  }))
+})
+
+afterEach(() => {
+  useSystemConfigStore.setState({ config: originalConfig })
+})
 
 describe('wallet recharge amount controls', () => {
   test('keeps the custom option beside presets without showing its input', () => {
@@ -120,5 +163,45 @@ describe('wallet recharge amount controls', () => {
 
     assert.ok(markup.includes('aria-invalid="true"'))
     assert.ok(markup.includes('text-destructive'))
+  })
+
+  test('shows configured currency on preset, payment, and custom input amounts', () => {
+    const presetMarkup = renderCard({ selectedPreset: 10 })
+    assert.match(presetMarkup, /¥10/)
+    assert.match(presetMarkup, /Pay.*¥10/)
+
+    const customMarkup = renderCard({
+      selectedPreset: CUSTOM_AMOUNT_SELECTION,
+      customAmount: '57',
+    })
+    assert.match(customMarkup, /data-testid="custom-amount-currency-symbol"/)
+    assert.match(customMarkup, />¥<\/span>/)
+    assert.match(customMarkup, /value="57"/)
+  })
+
+  test('renders the full Alipay wordmark without duplicate visible name', () => {
+    const markup = renderCard({
+      selectedPreset: 10,
+      paymentIcon: 'SiAlipay',
+    })
+
+    assert.match(markup, /src="\/pay-alipay\.svg"/)
+    assert.doesNotMatch(markup, />Alipay<\/span>/)
+  })
+
+  test('uses neutral disabled payment styling below the channel minimum', () => {
+    const markup = renderCard({
+      selectedPreset: CUSTOM_AMOUNT_SELECTION,
+      customAmount: '',
+      topupAmount: 0,
+      minTopup: 10,
+      paymentIcon: 'SiAlipay',
+    })
+
+    assert.match(markup, /disabled=""/)
+    assert.match(markup, /data-wallet-payment-method=""/)
+    assert.match(markup, /disabled:bg-zinc-100/)
+    assert.match(markup, /disabled:border-zinc-200/)
+    assert.match(markup, /grayscale/)
   })
 })

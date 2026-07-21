@@ -22,6 +22,47 @@ import { DEFAULT_DISCOUNT_RATE } from '../constants'
 // Wallet-specific Formatting Functions
 // ============================================================================
 
+const WALLET_PAYMENT_CURRENCY = 'CNY'
+
+function formatWalletYuan(amount: number): string {
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'currency',
+    currency: WALLET_PAYMENT_CURRENCY,
+    currencyDisplay: 'narrowSymbol',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Math.abs(amount) >= 1 ? 2 : 4,
+  }).format(amount)
+}
+
+/**
+ * Format a recharge value in the ordinary wallet payment unit (yuan).
+ *
+ * Wallet payment money is intentionally independent from the global quota
+ * display type: a balance may be shown as tokens or a custom credit label,
+ * while Epay/Alipay still settles the order in CNY.
+ */
+export function formatWalletTopupAmount(amount: number): string {
+  return formatWalletYuan(amount)
+}
+
+/**
+ * Format money that is already expressed in yuan.
+ */
+export function formatWalletPaymentAmount(amount: number | string): string {
+  const numeric =
+    typeof amount === 'number' ? amount : Number.parseFloat(String(amount))
+  if (!Number.isFinite(numeric)) return '-'
+
+  return formatWalletYuan(numeric)
+}
+
+/**
+ * Get the non-editable prefix for a recharge amount input.
+ */
+export function getWalletCurrencySymbol(): string {
+  return '¥'
+}
+
 /**
  * Format Creem price with currency symbol (USD/EUR)
  */
@@ -44,21 +85,6 @@ export function formatQuotaShort(quota: number): string {
     return `${(quota / 1000).toFixed(1)}K`
   }
   return quota.toString()
-}
-
-/**
- * Format currency amount that is already in local currency.
- * This is used for payment amounts that have been calculated via priceRatio.
- */
-export function formatCurrency(amount: number | string): string {
-  const numeric =
-    typeof amount === 'number' ? amount : Number.parseFloat(String(amount))
-  if (!Number.isFinite(numeric)) return '-'
-
-  return new Intl.NumberFormat(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: Math.abs(numeric) >= 1 ? 2 : 4,
-  }).format(numeric)
 }
 
 /**
