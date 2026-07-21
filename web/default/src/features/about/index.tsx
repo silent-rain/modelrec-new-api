@@ -155,10 +155,10 @@ function StyledAboutContent() {
                   key={item.key}
                   className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Icon className="h-5 w-5" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <span className="text-sm font-semibold text-foreground">
+                  <span className="text-[22px] font-semibold text-foreground">
                     {t(item.key)}
                   </span>
                 </div>
