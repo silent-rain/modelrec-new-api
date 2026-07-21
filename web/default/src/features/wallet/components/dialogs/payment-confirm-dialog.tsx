@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { formatLocalCurrencyAmount } from '@/lib/currency'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+
 import { DEFAULT_DISCOUNT_RATE } from '../../constants'
-import { formatCurrency, getPaymentIcon } from '../../lib'
+import {
+  formatWalletPaymentAmount,
+  formatWalletTopupAmount,
+  getPaymentIcon,
+  usesAlipayWordmark,
+} from '../../lib'
 import type { PaymentMethod } from '../../types'
 
 interface PaymentConfirmDialogProps {
@@ -63,6 +69,10 @@ export function PaymentConfirmDialog({
   const hasDiscount = discountRate > 0 && discountRate < 1 && paymentAmount > 0
   const originalAmount = hasDiscount ? paymentAmount / discountRate : 0
   const discountAmount = hasDiscount ? originalAmount - paymentAmount : 0
+  const showAlipayWordmark = usesAlipayWordmark(
+    paymentMethod?.type,
+    paymentMethod?.icon
+  )
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -82,11 +92,7 @@ export function PaymentConfirmDialog({
               {t('Topup Amount')}
             </span>
             <span className='text-lg font-semibold'>
-              {formatLocalCurrencyAmount(topupAmount * usdExchangeRate, {
-                digitsLarge: 2,
-                digitsSmall: 2,
-                abbreviate: false,
-              })}
+              {formatWalletTopupAmount(topupAmount * usdExchangeRate)}
             </span>
           </div>
 
@@ -99,11 +105,11 @@ export function PaymentConfirmDialog({
             ) : (
               <div className='flex items-baseline gap-2'>
                 <span className='text-2xl font-semibold'>
-                  {formatCurrency(paymentAmount)}
+                  {formatWalletPaymentAmount(paymentAmount)}
                 </span>
                 {hasDiscount && (
                   <span className='text-muted-foreground text-sm line-through'>
-                    {formatCurrency(originalAmount)}
+                    {formatWalletPaymentAmount(originalAmount)}
                   </span>
                 )}
               </div>
@@ -115,7 +121,7 @@ export function PaymentConfirmDialog({
               <div className='flex items-center justify-between text-sm'>
                 <span className='text-muted-foreground'>{t('You save')}</span>
                 <span className='font-semibold text-green-600'>
-                  {formatCurrency(discountAmount)}
+                  {formatWalletPaymentAmount(discountAmount)}
                 </span>
               </div>
             </div>
@@ -129,11 +135,15 @@ export function PaymentConfirmDialog({
               <div className='flex items-center gap-2'>
                 {getPaymentIcon(
                   paymentMethod?.type,
-                  'h-4 w-4',
+                  showAlipayWordmark
+                    ? 'h-6 w-auto max-w-[72px] object-contain'
+                    : 'h-4 w-4',
                   paymentMethod?.icon,
                   paymentMethod?.name
                 )}
-                <span className='font-medium'>{paymentMethod?.name}</span>
+                {!showAlipayWordmark && (
+                  <span className='font-medium'>{paymentMethod?.name}</span>
+                )}
               </div>
             </div>
           </div>

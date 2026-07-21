@@ -71,10 +71,8 @@ export function AuthLayout({
           </Link>
 
           <div className='mt-12 max-w-[390px]'>
-            <h1 className='text-[38px] leading-[1.16] font-semibold tracking-[-0.03em]'>
-              {t('One interface,')}
-              <br />
-              {t('Infinite possibilities')}
+            <h1 className='text-[38px] leading-[1.16] font-semibold tracking-[-0.03em] whitespace-nowrap'>
+              {t('One interface,')} {t('Infinite possibilities')}
             </h1>
             <p className='mt-5 text-lg leading-8 text-white/84'>
               {t(
