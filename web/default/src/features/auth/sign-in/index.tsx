@@ -18,21 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useSearch } from '@tanstack/react-router'
 
-import { useStatus } from '@/hooks/use-status'
-
 import { AuthLayout } from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
 
 export function SignIn() {
   const { redirect } = useSearch({ from: '/(auth)/sign-in' })
-  const { status } = useStatus()
-  const showRegister =
-    !status?.self_use_mode_enabled &&
-    status?.register_enabled !== false &&
-    status?.password_register_enabled !== false
 
   return (
-    <AuthLayout activeView='sign-in' showRegister={showRegister}>
+    <AuthLayout>
       <div className='w-full'>
         <UserAuthForm redirectTo={redirect} />
       </div>

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { KeyRound, Loader2, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { KeyRound, Loader2 } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { login } from '@/features/auth/api'
-import { AUTH_INPUT_CLASS } from '@/features/auth/components/auth-form-styles'
+import { SIGN_IN_INPUT_CLASS } from '@/features/auth/components/auth-form-styles'
 import { AuthPasswordInput } from '@/features/auth/components/auth-password-input'
 import { HumanVerificationField } from '@/features/auth/components/human-verification-field'
 import { LegalConsent } from '@/features/auth/components/legal-consent'
@@ -59,6 +59,14 @@ import {
 } from '@/lib/passkey'
 import { cn } from '@/lib/utils'
 
+import {
+  DEFAULT_LOGIN_MODE,
+  isPasswordLoginAvailable,
+  isRegistrationEntryVisible,
+  type LoginMode,
+} from '../lib/login-page-options'
+import { LoginModeTabs } from './login-mode-tabs'
+
 const smsLoginFormSchema = z.object({
   username: z
     .string()
@@ -67,7 +75,6 @@ const smsLoginFormSchema = z.object({
   password: z.string().min(1, 'Please enter the verification code'),
 })
 
-type LoginMode = 'password' | 'sms'
 type LoginFormValues = z.infer<typeof loginFormSchema>
 
 export function UserAuthForm({
@@ -78,17 +85,15 @@ export function UserAuthForm({
   const { t } = useTranslation()
   const { status } = useStatus()
   const { handleLoginSuccess, redirectTo2FA } = useAuthRedirect()
-  const [loginMode, setLoginMode] = useState<LoginMode>('password')
+  const [loginMode, setLoginMode] = useState<LoginMode>(DEFAULT_LOGIN_MODE)
   const [isLoading, setIsLoading] = useState(false)
   const [agreedToLegal, setAgreedToLegal] = useState(false)
   const [passkeySupported, setPasskeySupported] = useState(false)
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
 
-  const passwordLoginEnabled =
-    status?.password_login_enabled ??
-    status?.data?.password_login_enabled ??
-    true
+  const passwordLoginEnabled = isPasswordLoginAvailable(status)
+  const showRegisterEntry = isRegistrationEntryVisible(status)
   const passkeyLoginEnabled = Boolean(
     status?.passkey_login ?? status?.data?.passkey_login
   )
@@ -236,48 +241,37 @@ export function UserAuthForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-5', className)}
+        className={cn('grid gap-4', className)}
         {...props}
       >
         {passwordLoginEnabled ? (
           <>
+            <LoginModeTabs mode={loginMode} onModeChange={switchLoginMode} />
+
             <FormField
               control={form.control}
               name='username'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div className='relative'>
-                      {loginMode === 'password' ? (
-                        <UserRound
-                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
-                          aria-hidden='true'
-                        />
-                      ) : (
-                        <Phone
-                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
-                          aria-hidden='true'
-                        />
-                      )}
-                      <Input
-                        type={loginMode === 'sms' ? 'tel' : 'text'}
-                        inputMode={loginMode === 'sms' ? 'numeric' : 'text'}
-                        maxLength={loginMode === 'sms' ? 11 : undefined}
-                        autoComplete={loginMode === 'sms' ? 'tel' : 'username'}
-                        aria-label={
-                          loginMode === 'sms'
-                            ? t('Phone number')
-                            : t('Username or email')
-                        }
-                        placeholder={
-                          loginMode === 'sms'
-                            ? t('Enter your phone number')
-                            : t('Enter your username or email')
-                        }
-                        className={AUTH_INPUT_CLASS}
-                        {...field}
-                      />
-                    </div>
+                    <Input
+                      type={loginMode === 'sms' ? 'tel' : 'text'}
+                      inputMode={loginMode === 'sms' ? 'numeric' : 'text'}
+                      maxLength={loginMode === 'sms' ? 11 : undefined}
+                      autoComplete={loginMode === 'sms' ? 'tel' : 'username'}
+                      aria-label={
+                        loginMode === 'sms'
+                          ? t('Phone number')
+                          : t('Username or email')
+                      }
+                      placeholder={
+                        loginMode === 'sms'
+                          ? t('Enter your phone number')
+                          : t('Enter your username, email, or phone number')
+                      }
+                      className={SIGN_IN_INPUT_CLASS}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -292,24 +286,22 @@ export function UserAuthForm({
                   <FormControl>
                     {loginMode === 'password' ? (
                       <AuthPasswordInput
+                        showLeadingIcon={false}
                         autoComplete='current-password'
                         aria-label={t('Password')}
                         placeholder={t('Enter password')}
+                        className={SIGN_IN_INPUT_CLASS}
                         {...field}
                       />
                     ) : (
                       <div className='relative'>
-                        <ShieldCheck
-                          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
-                          aria-hidden='true'
-                        />
                         <Input
                           inputMode='numeric'
                           autoComplete='one-time-code'
                           maxLength={6}
                           aria-label={t('Verification code')}
                           placeholder={t('Enter verification code')}
-                          className={`${AUTH_INPUT_CLASS} pr-[104px]`}
+                          className={cn(SIGN_IN_INPUT_CLASS, 'pr-[104px]')}
                           {...field}
                         />
                         <Button
@@ -328,7 +320,7 @@ export function UserAuthForm({
                           onClick={() =>
                             sendSmsLogin(form.getValues('username'))
                           }
-                          className='absolute top-1/2 right-3 h-10 -translate-y-1/2 rounded-lg px-2 text-[#ed8100] hover:bg-[#fff3e5] hover:text-[#d87300]'
+                          className='text-primary hover:bg-primary/10 hover:text-primary absolute top-1/2 right-2 h-9 -translate-y-1/2 rounded-lg px-2'
                         >
                           {isSendingSms ? (
                             <Loader2 className='h-4 w-4 animate-spin' />
@@ -343,41 +335,6 @@ export function UserAuthForm({
                 </FormItem>
               )}
             />
-
-            <div className='-mt-1 flex items-center justify-between gap-4 text-sm'>
-              <button
-                type='button'
-                onClick={() =>
-                  switchLoginMode(loginMode === 'password' ? 'sms' : 'password')
-                }
-                className='rounded-md text-[#6f7874] transition-colors outline-none hover:text-[#ed8100] focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50 dark:text-white/65 dark:hover:text-[#ff9f33]'
-              >
-                {loginMode === 'password'
-                  ? t('Use verification code to sign in')
-                  : t('Use password to sign in')}
-              </button>
-              {loginMode === 'password' ? (
-                <Link
-                  to='/forgot-password'
-                  className='shrink-0 rounded-md text-[#6f7874] transition-colors outline-none hover:text-[#ed8100] focus-visible:ring-2 focus-visible:ring-[#ff8a00]/50 dark:text-white/65 dark:hover:text-[#ff9f33]'
-                >
-                  {t('Forgot password?')}
-                </Link>
-              ) : null}
-            </div>
-
-            <HumanVerificationField verification={humanVerification} />
-
-            <Button
-              type='submit'
-              disabled={
-                isLoading || legalConsentMissing || !humanVerification.isReady
-              }
-              className='sf-btn-primary h-14 w-full rounded-2xl border-0 text-base font-semibold transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:shadow-none'
-            >
-              {isLoading ? <Loader2 className='h-4 w-4 animate-spin' /> : null}
-              {t('Sign in')}
-            </Button>
           </>
         ) : (
           <div className='rounded-2xl border border-[#ecefeb] bg-[#f7f9f7] p-4 text-sm text-[#6f7874] dark:border-white/10 dark:bg-white/5 dark:text-white/65'>
@@ -391,6 +348,46 @@ export function UserAuthForm({
           onCheckedChange={setAgreedToLegal}
           variant='inline'
         />
+
+        {passwordLoginEnabled ? (
+          <>
+            <HumanVerificationField verification={humanVerification} />
+
+            <Button
+              type='submit'
+              disabled={
+                isLoading || legalConsentMissing || !humanVerification.isReady
+              }
+              className='sf-btn-primary h-12 w-full rounded-xl border-0 text-base font-semibold transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:shadow-none'
+            >
+              {isLoading ? <Loader2 className='h-4 w-4 animate-spin' /> : null}
+              {t('Sign in now')}
+            </Button>
+
+            {loginMode === 'password' || showRegisterEntry ? (
+              <div className='-mt-1 flex min-h-5 items-center justify-between gap-4 text-sm'>
+                {loginMode === 'password' ? (
+                  <Link
+                    to='/forgot-password'
+                    className='text-primary focus-visible:ring-primary/40 rounded-sm transition-opacity outline-none hover:opacity-80 focus-visible:ring-2'
+                  >
+                    {t('Forgot password?')}
+                  </Link>
+                ) : (
+                  <span aria-hidden='true' />
+                )}
+                {showRegisterEntry ? (
+                  <Link
+                    to='/sign-up'
+                    className='text-primary focus-visible:ring-primary/40 rounded-sm transition-opacity outline-none hover:opacity-80 focus-visible:ring-2'
+                  >
+                    {t('Sign up')}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+          </>
+        ) : null}
 
         {hasAlternativeLogin ? (
           <div className='space-y-4 pt-1'>
