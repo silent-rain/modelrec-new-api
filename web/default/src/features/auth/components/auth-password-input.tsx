@@ -24,27 +24,37 @@ import { Input } from '@/components/ui/input'
 import { AUTH_INPUT_CLASS } from '@/features/auth/components/auth-form-styles'
 import { cn } from '@/lib/utils'
 
-type AuthPasswordInputProps = Omit<React.ComponentProps<'input'>, 'type'>
+type AuthPasswordInputProps = Omit<React.ComponentProps<'input'>, 'type'> & {
+  showLeadingIcon?: boolean
+}
 
 export function AuthPasswordInput({
   className,
   disabled,
+  showLeadingIcon,
   ...props
 }: AuthPasswordInputProps) {
   const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(false)
   const toggleLabel = isVisible ? t('Hide password') : t('Show password')
+  const leadingIconVisible = showLeadingIcon ?? true
 
   return (
     <div className='relative'>
-      <Lock
-        className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
-        aria-hidden='true'
-      />
+      {leadingIconVisible ? (
+        <Lock
+          className='pointer-events-none absolute top-1/2 left-4 z-10 h-[18px] w-[18px] -translate-y-1/2 text-[#a6afab] dark:text-white/55'
+          aria-hidden='true'
+        />
+      ) : null}
       <Input
         type={isVisible ? 'text' : 'password'}
         disabled={disabled}
-        className={cn(AUTH_INPUT_CLASS, 'pr-12', className)}
+        className={cn(
+          AUTH_INPUT_CLASS,
+          leadingIconVisible ? 'pr-12' : 'px-4 pr-12',
+          className
+        )}
         {...props}
       />
       <button

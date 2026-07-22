@@ -1,0 +1,48 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+import type { SystemStatus } from '@/features/auth/types'
+
+export type LoginMode = 'sms' | 'password'
+
+export const DEFAULT_LOGIN_MODE: LoginMode = 'sms'
+
+export function isPasswordLoginAvailable(status: SystemStatus | null): boolean {
+  return (
+    status?.password_login_enabled ??
+    status?.data?.password_login_enabled ??
+    true
+  )
+}
+
+export function isRegistrationEntryVisible(
+  status: SystemStatus | null
+): boolean {
+  const selfUseModeEnabled =
+    status?.self_use_mode_enabled ??
+    status?.data?.self_use_mode_enabled ??
+    false
+  const registerEnabled =
+    status?.register_enabled ?? status?.data?.register_enabled ?? true
+  const passwordRegisterEnabled =
+    status?.password_register_enabled ??
+    status?.data?.password_register_enabled ??
+    true
+
+  return !selfUseModeEnabled && registerEnabled && passwordRegisterEnabled
+}
