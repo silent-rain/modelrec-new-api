@@ -300,8 +300,10 @@ export interface TopupRecord {
   id: number
   /** User ID */
   user_id: number
-  /** Topup amount (quota) */
+  /** Topup amount (base unit; for CUSTOM display this is the credit/point count) */
   amount: number
+  /** Exact credited quota frozen at order creation (0 for legacy orders) */
+  quota?: number
   /** Payment amount (actual money paid) */
   money: number
   /** Trade/order number */

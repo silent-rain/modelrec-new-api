@@ -39,6 +39,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { formatNumber } from '@/lib/format'
 
 import {
   CUSTOM_AMOUNT_MAX,
@@ -84,6 +85,8 @@ interface RechargeFormCardProps {
   loading?: boolean
   priceRatio?: number
   usdExchangeRate?: number
+  /** When set (CUSTOM display), the "get" amount is shown with this symbol instead of ¥ */
+  topupCurrencySymbol?: string
   onOpenBilling?: () => void
   creemProducts?: CreemProduct[]
   enableCreemTopup?: boolean
@@ -114,6 +117,7 @@ export function RechargeFormCard({
   loading,
   priceRatio = 1,
   usdExchangeRate = 1,
+  topupCurrencySymbol,
   onOpenBilling,
   creemProducts,
   enableCreemTopup,
@@ -138,6 +142,13 @@ export function RechargeFormCard({
   const customAmountInvalid =
     customAmount !== '' && parseCustomAmount(customAmount) === 0
   const currencySymbol = getWalletCurrencySymbol()
+
+  // CUSTOM 展示类型下，预设卡片头部显示「获得的自定义货币数量」（如 燧点），
+  // 使用自定义符号；其它模式沿用人民币格式。
+  const formatTopupGetAmount = (value: number) =>
+    topupCurrencySymbol
+      ? `${topupCurrencySymbol} ${formatNumber(Math.round(value))}`
+      : formatWalletTopupAmount(value)
 
   if (loading) {
     return (
@@ -252,7 +263,7 @@ export function RechargeFormCard({
                       >
                         <div className='flex w-full items-center justify-between'>
                           <div className='text-base font-semibold sm:text-lg'>
-                            {formatWalletTopupAmount(displayValue)}
+                            {formatTopupGetAmount(displayValue)}
                           </div>
                           {hasDiscount && (
                             <div className='text-xs font-medium text-green-600'>
@@ -355,9 +366,13 @@ export function RechargeFormCard({
                       )
                       const disabled =
                         topupAmount <= 0 || methodMinTopup > topupAmount
-                      const formattedMinTopup = formatWalletTopupAmount(
-                        methodMinTopup * usdExchangeRate
-                      )
+                      // CUSTOM 模式下充值按人民币计价，最低值即人民币元数，直接以 ¥ 展示；
+                      // 其它模式沿用「基础单位 × 展示汇率」换算到展示货币。
+                      const formattedMinTopup = topupCurrencySymbol
+                        ? formatWalletPaymentAmount(methodMinTopup)
+                        : formatWalletTopupAmount(
+                            methodMinTopup * usdExchangeRate
+                          )
                       const disabledReason = disabled
                         ? t('Minimum topup amount: {{amount}}', {
                             amount: formattedMinTopup,
@@ -461,9 +476,9 @@ export function RechargeFormCard({
                         const waffoMin = waffoMinTopup || 0
                         const belowMin =
                           topupAmount <= 0 || waffoMin > topupAmount
-                        const formattedWaffoMin = formatWalletTopupAmount(
-                          waffoMin * usdExchangeRate
-                        )
+                        const formattedWaffoMin = topupCurrencySymbol
+                          ? formatWalletPaymentAmount(waffoMin)
+                          : formatWalletTopupAmount(waffoMin * usdExchangeRate)
                         const disabledReason = belowMin
                           ? t('Minimum topup amount: {{amount}}', {
                               amount: formattedWaffoMin,

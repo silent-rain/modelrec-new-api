@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatNumber } from '@/lib/format'
 
 import { DEFAULT_DISCOUNT_RATE } from '../../constants'
 import {
@@ -51,6 +52,8 @@ interface PaymentConfirmDialogProps {
   processing: boolean
   discountRate?: number
   usdExchangeRate?: number
+  /** When set (CUSTOM display), the topup/get amount is shown with this symbol instead of ¥ */
+  topupCurrencySymbol?: string
 }
 
 export function PaymentConfirmDialog({
@@ -64,8 +67,13 @@ export function PaymentConfirmDialog({
   processing,
   discountRate = DEFAULT_DISCOUNT_RATE,
   usdExchangeRate = 1,
+  topupCurrencySymbol,
 }: PaymentConfirmDialogProps) {
   const { t } = useTranslation()
+  const topupGetAmount = topupAmount * usdExchangeRate
+  const formattedTopupGetAmount = topupCurrencySymbol
+    ? `${topupCurrencySymbol} ${formatNumber(Math.round(topupGetAmount))}`
+    : formatWalletTopupAmount(topupGetAmount)
   const hasDiscount = discountRate > 0 && discountRate < 1 && paymentAmount > 0
   const originalAmount = hasDiscount ? paymentAmount / discountRate : 0
   const discountAmount = hasDiscount ? originalAmount - paymentAmount : 0
@@ -89,10 +97,10 @@ export function PaymentConfirmDialog({
         <div className='space-y-3 py-3 sm:space-y-4 sm:py-4'>
           <div className='flex items-center justify-between'>
             <span className='text-muted-foreground text-sm'>
-              {t('Topup Amount')}
+              {topupCurrencySymbol ? t('You Get') : t('Topup Amount')}
             </span>
             <span className='text-lg font-semibold'>
-              {formatWalletTopupAmount(topupAmount * usdExchangeRate)}
+              {formattedTopupGetAmount}
             </span>
           </div>
 

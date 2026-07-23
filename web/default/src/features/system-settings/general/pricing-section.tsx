@@ -69,6 +69,10 @@ const createPricingSchema = (t: (key: string) => string) =>
           .number()
           .min(0.0001, t('Exchange rate must be greater than 0'))
           .optional(),
+        points_per_cny: z.coerce
+          .number()
+          .min(0.0001, t('Exchange rate must be greater than 0'))
+          .optional(),
       }),
     })
     .superRefine((data, ctx) => {
@@ -87,6 +91,14 @@ const createPricingSchema = (t: (key: string) => string) =>
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['general_setting', 'custom_currency_exchange_rate'],
+            message: t('Exchange rate is required'),
+          })
+        }
+
+        if (data.general_setting.points_per_cny == null) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['general_setting', 'points_per_cny'],
             message: t('Exchange rate is required'),
           })
         }
@@ -259,38 +271,71 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
             )}
 
             {displayType === 'CUSTOM' && (
-              <div className='grid gap-4 sm:grid-cols-2'>
+              <>
+                <div className='grid gap-4 sm:grid-cols-2'>
+                  <FormField
+                    control={form.control}
+                    name='general_setting.custom_currency_symbol'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('Custom Currency Symbol')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='text'
+                            value={field.value ?? ''}
+                            onChange={field.onChange}
+                            name={field.name}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            maxLength={8}
+                            placeholder={t('e.g. ¥ or HK$')}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {t('Prefix used when displaying prices')}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name='general_setting.custom_currency_exchange_rate'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('Units per USD')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='number'
+                            step='0.01'
+                            value={field.value ?? ''}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === ''
+                                  ? undefined
+                                  : e.target.valueAsNumber
+                              )
+                            }
+                            name={field.name}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            placeholder={t('e.g. 8 means 1 USD = 8 units')}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {t('Conversion rate from USD to your custom currency')}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name='general_setting.custom_currency_symbol'
+                  name='general_setting.points_per_cny'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('Custom Currency Symbol')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='text'
-                          value={field.value ?? ''}
-                          onChange={field.onChange}
-                          name={field.name}
-                          onBlur={field.onBlur}
-                          ref={field.ref}
-                          maxLength={8}
-                          placeholder={t('e.g. ¥ or HK$')}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {t('Prefix used when displaying prices')}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='general_setting.custom_currency_exchange_rate'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('Units per USD')}</FormLabel>
+                      <FormLabel>{t('Units per CNY (Top-up)')}</FormLabel>
                       <FormControl>
                         <Input
                           type='number'
@@ -306,17 +351,19 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                           name={field.name}
                           onBlur={field.onBlur}
                           ref={field.ref}
-                          placeholder={t('e.g. 8 means 1 USD = 8 units')}
+                          placeholder={t('e.g. 1000 means ¥1 = 1000 units')}
                         />
                       </FormControl>
                       <FormDescription>
-                        {t('Conversion rate from USD to your custom currency')}
+                        {t(
+                          'Top-up conversion from CNY to your custom currency. Independent from the USD rate above; controls how much users pay in CNY.'
+                        )}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
+              </>
             )}
 
             {showDisplayInCurrencyOption && (

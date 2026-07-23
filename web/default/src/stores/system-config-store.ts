@@ -35,6 +35,8 @@ export interface CurrencyConfig {
   customCurrencySymbol: string
   /** Exchange rate from USD to the custom currency (used when type === CUSTOM) */
   customCurrencyExchangeRate: number
+  /** Custom-currency units granted per 1 CNY on top-up (used when type === CUSTOM) */
+  pointsPerCNY: number
 }
 
 export interface SystemConfig {
@@ -53,6 +55,7 @@ export const DEFAULT_CURRENCY_CONFIG: CurrencyConfig = {
   usdExchangeRate: 1,
   customCurrencySymbol: '¤',
   customCurrencyExchangeRate: 1,
+  pointsPerCNY: 0,
 }
 
 interface SystemConfigState {
