@@ -45,7 +45,7 @@ export function Hero(props: HeroProps) {
     <section className='relative overflow-hidden bg-[#f7f5f9] px-6 pt-12 pb-20 md:pb-14 dark:bg-[#17151a]'>
       <div className='mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:gap-10'>
         <div className='relative z-10'>
-          <h1 className='dark:text-foreground max-w-3xl text-4xl leading-[1.12] font-black tracking-[-0.045em] text-[#172033] md:text-5xl lg:text-6xl'>
+          <h1 className='text-primary max-w-3xl text-3xl leading-[1.12] font-black tracking-[-0.045em] md:text-4xl lg:text-5xl'>
             {t('AI Model Routing Value Distribution Platform')}
           </h1>
           <p className='text-muted-foreground mt-6 max-w-3xl text-base leading-8 md:text-lg'>

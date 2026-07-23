@@ -29,6 +29,16 @@ describe('header layout contract', () => {
     expect(theme).toContain('--app-header-height: var(--header-height);')
   })
 
+  test('keeps the homepage hero title compact and theme-aware', async () => {
+    const hero = await readSource('features/home/components/sections/hero.tsx')
+
+    expect(hero).toContain(
+      "className='text-primary max-w-3xl text-3xl leading-[1.12] font-black tracking-[-0.045em] md:text-4xl lg:text-5xl'"
+    )
+    expect(hero).not.toContain('text-[#172033]')
+    expect(hero).not.toContain('dark:text-foreground')
+  })
+
   test('keeps the existing headers on the sticky shared-height contract', async () => {
     const [homeHeader, publicHeader, appHeader] = await Promise.all([
       readSource('features/home/components/home-header.tsx'),
