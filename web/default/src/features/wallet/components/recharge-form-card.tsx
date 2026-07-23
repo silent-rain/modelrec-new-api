@@ -54,7 +54,7 @@ import {
   calculatePresetPricing,
   getAvailablePaymentMethods,
   parseCustomAmount,
-  usesAlipayWordmark,
+  usesPaymentWordmark,
 } from '../lib'
 import type {
   PaymentMethod,
@@ -366,7 +366,7 @@ export function RechargeFormCard({
                       const disabledLabel = disabled
                         ? `${t('Minimum:')} ${formattedMinTopup}`
                         : undefined
-                      const showAlipayWordmark = usesAlipayWordmark(
+                      const showPaymentWordmark = usesPaymentWordmark(
                         method.type,
                         method.icon
                       )
@@ -398,17 +398,17 @@ export function RechargeFormCard({
                             ) : (
                               getPaymentIcon(
                                 method.type,
-                                showAlipayWordmark
-                                  ? 'h-8 w-auto max-w-[92px] object-contain'
+                                showPaymentWordmark
+                                  ? 'h-7 w-auto max-w-[122px] object-contain'
                                   : 'h-5 w-5',
                                 method.icon,
                                 method.name
                               )
                             )}
                           </span>
-                          {(!showAlipayWordmark || disabledLabel) && (
+                          {(!showPaymentWordmark || disabledLabel) && (
                             <span className='flex min-w-0 flex-col items-start gap-0.5'>
-                              {!showAlipayWordmark && (
+                              {!showPaymentWordmark && (
                                 <span className='max-w-full truncate'>
                                   {method.name}
                                 </span>

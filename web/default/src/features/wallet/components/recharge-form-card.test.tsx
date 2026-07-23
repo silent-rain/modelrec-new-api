@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, test } from 'node:test'
 
 import { createInstance } from 'i18next'
@@ -64,6 +65,8 @@ interface RenderOverrides {
   customAmount?: string
   topupAmount?: number
   minTopup?: number
+  paymentName?: string
+  paymentType?: string
   paymentIcon?: string
 }
 
@@ -73,8 +76,8 @@ function renderCard(overrides: RenderOverrides): string {
     min_topup: overrides.minTopup ?? topupInfo.min_topup,
     pay_methods: [
       {
-        name: 'Alipay',
-        type: 'alipay',
+        name: overrides.paymentName ?? 'Alipay',
+        type: overrides.paymentType ?? 'alipay',
         icon: overrides.paymentIcon,
         min_topup: overrides.minTopup,
       },
@@ -187,6 +190,28 @@ describe('wallet recharge amount controls', () => {
 
     assert.match(markup, /src="\/pay-alipay\.svg"/)
     assert.doesNotMatch(markup, />Alipay<\/span>/)
+  })
+
+  test('renders the full WeChat Pay wordmark without duplicate visible name', () => {
+    const markup = renderCard({
+      selectedPreset: 10,
+      paymentName: '微信支付',
+      paymentType: 'wxpay',
+      paymentIcon: 'SiWechat',
+    })
+
+    assert.match(markup, /src="\/pay-wechat\.svg"/)
+    assert.doesNotMatch(markup, />微信支付<\/span>/)
+    assert.match(markup, /h-7 w-auto max-w-\[122px\] object-contain/)
+  })
+
+  test('keeps payment wordmarks at equal visual height in the confirmation dialog', () => {
+    const dialogSource = readFileSync(
+      new URL('./dialogs/payment-confirm-dialog.tsx', import.meta.url),
+      'utf8'
+    )
+
+    assert.match(dialogSource, /h-5 w-auto max-w-\[88px\] object-contain/)
   })
 
   test('uses neutral disabled payment styling below the channel minimum', () => {

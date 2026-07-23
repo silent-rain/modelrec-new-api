@@ -16,10 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { ReactNode } from 'react'
 import i18next from 'i18next'
 import { CreditCard, Landmark } from 'lucide-react'
-import { SiWechat, SiStripe } from 'react-icons/si'
+import type { ReactNode } from 'react'
+import { SiStripe } from 'react-icons/si'
 
 import { ReactIconByName } from '@/components/react-icon-by-name'
 
@@ -55,14 +55,16 @@ function normalizeHttpIconUrl(raw: string | undefined | null): string | null {
   return url.toString()
 }
 
-export function usesAlipayWordmark(
+export function usesPaymentWordmark(
   paymentType: string | undefined,
   icon?: string
 ): boolean {
   const iconValue = icon?.trim()
   return (
-    paymentType === PAYMENT_TYPES.ALIPAY &&
-    (!iconValue || iconValue === 'SiAlipay')
+    (paymentType === PAYMENT_TYPES.ALIPAY &&
+      (!iconValue || iconValue === 'SiAlipay')) ||
+    (paymentType === PAYMENT_TYPES.WECHAT &&
+      (!iconValue || iconValue === 'SiWechat'))
   )
 }
 
@@ -80,11 +82,17 @@ export function getPaymentIcon(
   altName?: string
 ): ReactNode {
   const iconValue = icon?.trim()
-  if (usesAlipayWordmark(paymentType, iconValue)) {
+  if (usesPaymentWordmark(paymentType, iconValue)) {
+    const src =
+      paymentType === PAYMENT_TYPES.WECHAT
+        ? '/pay-wechat.svg'
+        : '/pay-alipay.svg'
+    const fallbackAlt =
+      paymentType === PAYMENT_TYPES.WECHAT ? '微信支付' : 'Alipay'
     return (
       <img
-        src='/pay-alipay.svg'
-        alt={altName || 'Alipay'}
+        src={src}
+        alt={altName || fallbackAlt}
         className={className}
         loading='lazy'
         decoding='async'
@@ -121,13 +129,6 @@ export function getPaymentIcon(
   }
 
   switch (paymentType) {
-    case PAYMENT_TYPES.WECHAT:
-      return (
-        <SiWechat
-          className={className}
-          style={{ color: PAYMENT_ICON_COLORS[PAYMENT_TYPES.WECHAT] }}
-        />
-      )
     case PAYMENT_TYPES.STRIPE:
       return (
         <SiStripe

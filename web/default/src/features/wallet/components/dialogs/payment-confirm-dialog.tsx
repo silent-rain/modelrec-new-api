@@ -36,7 +36,7 @@ import {
   formatWalletPaymentAmount,
   formatWalletTopupAmount,
   getPaymentIcon,
-  usesAlipayWordmark,
+  usesPaymentWordmark,
 } from '../../lib'
 import type { PaymentMethod } from '../../types'
 
@@ -69,7 +69,7 @@ export function PaymentConfirmDialog({
   const hasDiscount = discountRate > 0 && discountRate < 1 && paymentAmount > 0
   const originalAmount = hasDiscount ? paymentAmount / discountRate : 0
   const discountAmount = hasDiscount ? originalAmount - paymentAmount : 0
-  const showAlipayWordmark = usesAlipayWordmark(
+  const showPaymentWordmark = usesPaymentWordmark(
     paymentMethod?.type,
     paymentMethod?.icon
   )
@@ -135,13 +135,13 @@ export function PaymentConfirmDialog({
               <div className='flex items-center gap-2'>
                 {getPaymentIcon(
                   paymentMethod?.type,
-                  showAlipayWordmark
-                    ? 'h-6 w-auto max-w-[72px] object-contain'
+                  showPaymentWordmark
+                    ? 'h-5 w-auto max-w-[88px] object-contain'
                     : 'h-4 w-4',
                   paymentMethod?.icon,
                   paymentMethod?.name
                 )}
-                {!showAlipayWordmark && (
+                {!showPaymentWordmark && (
                   <span className='font-medium'>{paymentMethod?.name}</span>
                 )}
               </div>
