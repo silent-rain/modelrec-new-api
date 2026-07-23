@@ -172,6 +172,35 @@ func FormatQuota(quota int) string {
 	}
 }
 
+// FormatCreditAmount formats a credited quota for user-facing top-up logs.
+// It mirrors FormatQuota's currency conversion but renders whole display units
+// without the quota round-trip's fractional noise: CUSTOM and TOKENS show
+// integers (matching the integer credit users see), currency modes keep two
+// decimals.
+func FormatCreditAmount(quota int) string {
+	q := float64(quota)
+	switch operation_setting.GetQuotaDisplayType() {
+	case operation_setting.QuotaDisplayTypeCNY:
+		usd := q / common.QuotaPerUnit
+		return fmt.Sprintf("¥%.2f", usd*operation_setting.USDExchangeRate)
+	case operation_setting.QuotaDisplayTypeCustom:
+		usd := q / common.QuotaPerUnit
+		rate := operation_setting.GetGeneralSetting().CustomCurrencyExchangeRate
+		symbol := operation_setting.GetGeneralSetting().CustomCurrencySymbol
+		if symbol == "" {
+			symbol = "¤"
+		}
+		if rate <= 0 {
+			rate = 1
+		}
+		return fmt.Sprintf("%s%.0f", symbol, usd*rate)
+	case operation_setting.QuotaDisplayTypeTokens:
+		return fmt.Sprintf("%d", quota)
+	default:
+		return fmt.Sprintf("＄%.2f", q/common.QuotaPerUnit)
+	}
+}
+
 // LogJson 仅供测试使用 only for test
 func LogJson(ctx context.Context, msg string, obj any) {
 	if !common.DebugEnabled {
