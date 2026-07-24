@@ -395,6 +395,15 @@ func ManualCompleteTopUp(tradeNo string, callerIp string) error {
 		return err
 	}
 
+	// 补单在事务内直接改库（未走 IncreaseUserQuota），主动失效用户缓存，
+	// 避免开启 Redis 余额缓存时补单后余额显示旧值；下次读取会从库重建缓存。
+	// 仅在实际到账时处理（幂等命中已成功订单时 quotaToAdd/userId 为 0，跳过）。
+	if quotaToAdd > 0 {
+		if cacheErr := invalidateUserCache(userId); cacheErr != nil {
+			common.SysLog(fmt.Sprintf("补单后失效用户缓存失败 user_id=%d: %s", userId, cacheErr.Error()))
+		}
+	}
+
 	// 事务外记录日志，避免阻塞
 	RecordTopupLog(userId, fmt.Sprintf("管理员补单成功，获得 %s，支付金额 %.2f", logger.FormatCreditAmount(quotaToAdd), payMoney), callerIp, paymentMethod, "admin")
 	return nil
