@@ -296,8 +296,14 @@ function formatCurrencyValue(
     )
   }
 
+  // 自定义货币（燧点）按整数展示，避免冻结额度换算回来的亚单位误差（如 50,000.006）
+  // 泄露成 "50,000.01"。燧点内部仍以更细的 quota 精度记账，仅显示取整。
   const digits =
-    Math.abs(value) >= 1 ? options.digitsLarge : options.digitsSmall
+    meta.kind === 'custom'
+      ? 0
+      : Math.abs(value) >= 1
+        ? options.digitsLarge
+        : options.digitsSmall
   const adjustedValue = adjustForMinimum(value, digits, options.minimumNonZero)
 
   if (meta.kind === 'currency') {
