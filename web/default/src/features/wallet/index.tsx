@@ -110,6 +110,18 @@ export function Wallet(props: WalletProps) {
     currency?.usdExchangeRate,
     currency?.customCurrencyExchangeRate,
   ])
+
+  // CUSTOM 展示类型下，充值按人民币计价：预设/输入的 amount 即人民币元数。
+  // - 应付倍率取 1（实付 = 元 × 折扣，不叠加 USD Price）
+  // - 「获得数量」按每元燧点数换算（元 × PointsPerCNY），并以自定义符号展示
+  const isCustomCurrency = currency?.quotaDisplayType === 'CUSTOM'
+  const topupPriceRatio = isCustomCurrency ? 1 : (status?.price as number) || 1
+  const topupDisplayRate = isCustomCurrency
+    ? currency?.pointsPerCNY || 0
+    : effectiveUsdExchangeRate
+  const topupCurrencySymbol = isCustomCurrency
+    ? currency?.customCurrencySymbol || ''
+    : undefined
   const {
     amount: paymentAmount,
     calculating,
@@ -373,8 +385,9 @@ export function Wallet(props: WalletProps) {
                   redeeming={redeeming}
                   topupLink={topupInfo?.topup_link}
                   loading={topupLoading}
-                  priceRatio={(status?.price as number) || 1}
-                  usdExchangeRate={effectiveUsdExchangeRate}
+                  priceRatio={topupPriceRatio}
+                  usdExchangeRate={topupDisplayRate}
+                  topupCurrencySymbol={topupCurrencySymbol}
                   onOpenBilling={() => setBillingDialogOpen(true)}
                   creemProducts={topupInfo?.creem_products}
                   enableCreemTopup={topupInfo?.enable_creem_topup}
@@ -425,7 +438,8 @@ export function Wallet(props: WalletProps) {
           desktopAlipay.processing
         }
         discountRate={getDiscountRate()}
-        usdExchangeRate={effectiveUsdExchangeRate}
+        usdExchangeRate={topupDisplayRate}
+        topupCurrencySymbol={topupCurrencySymbol}
       />
 
       <AlipayPaymentDialog

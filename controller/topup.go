@@ -147,21 +147,11 @@ func GetEpayClient() *epay.Client {
 }
 
 func getPayMoney(amount int64, group string) float64 {
-	dAmount := decimal.NewFromInt(amount)
-	// 充值金额以“展示类型”为准：
-	// - USD/CNY: 前端传 amount 为金额单位；TOKENS: 前端传 tokens，需要换成 USD 金额
-	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
-		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-		dAmount = dAmount.Div(dQuotaPerUnit)
-	}
-
 	topupGroupRatio := common.GetTopupGroupRatio(group)
 	if topupGroupRatio == 0 {
 		topupGroupRatio = 1
 	}
-
 	dTopupGroupRatio := decimal.NewFromFloat(topupGroupRatio)
-	dPrice := decimal.NewFromFloat(operation_setting.Price)
 	// apply optional preset discount by the original request amount (if configured), default 1.0
 	discount := 1.0
 	if ds, ok := operation_setting.GetPaymentSetting().AmountDiscount[int(amount)]; ok {
@@ -171,12 +161,29 @@ func getPayMoney(amount int64, group string) float64 {
 	}
 	dDiscount := decimal.NewFromFloat(discount)
 
+	// CUSTOM 展示类型：前端传 amount 为人民币元数，
+	// 实付人民币 = 元 × 分组倍率 × 折扣（不走 Price；到账燧点由 PointsPerCNY 换算，见 RequestEpay）。
+	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeCustom {
+		payMoney := decimal.NewFromInt(amount).Mul(dTopupGroupRatio).Mul(dDiscount)
+		return payMoney.InexactFloat64()
+	}
+
+	dAmount := decimal.NewFromInt(amount)
+	// 充值金额以“展示类型”为准：
+	// - USD/CNY: 前端传 amount 为金额单位；TOKENS: 前端传 tokens，需要换成 USD 金额
+	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
+		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
+		dAmount = dAmount.Div(dQuotaPerUnit)
+	}
+
+	dPrice := decimal.NewFromFloat(operation_setting.Price)
 	payMoney := dAmount.Mul(dPrice).Mul(dTopupGroupRatio).Mul(dDiscount)
 
 	return payMoney.InexactFloat64()
 }
 
 func getMinTopup() int64 {
+	// CUSTOM 下 amount 为人民币元数，最低充值直接沿用 MinTopUp（元），与默认一致。
 	minTopup := operation_setting.MinTopUp
 	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
 		dMinTopup := decimal.NewFromInt(int64(minTopup))
@@ -240,14 +247,34 @@ func RequestEpay(c *gin.Context) {
 		return
 	}
 	amount := req.Amount
-	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
+	var frozenQuota int64
+	switch operation_setting.GetQuotaDisplayType() {
+	case operation_setting.QuotaDisplayTypeTokens:
 		dAmount := decimal.NewFromInt(int64(amount))
 		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
 		amount = dAmount.Div(dQuotaPerUnit).IntPart()
+	case operation_setting.QuotaDisplayTypeCustom:
+		// CUSTOM：req.Amount 为人民币元数。获得燧点 = 元 × 每元燧点数；
+		// amount 存燧点（展示用），到账额度在此冻结到订单上。
+		pointsPerCNY := operation_setting.GetGeneralSetting().PointsPerCNY
+		if pointsPerCNY <= 0 {
+			logger.LogError(c.Request.Context(), fmt.Sprintf("易支付 未配置每元燧点数 user_id=%d amount=%d", id, req.Amount))
+			c.JSON(http.StatusOK, gin.H{"message": "error", "data": "充值额度计算异常，请联系管理员检查兑换配置"})
+			return
+		}
+		points := decimal.NewFromInt(req.Amount).Mul(decimal.NewFromFloat(pointsPerCNY)).Round(0).IntPart()
+		amount = points
+		frozenQuota = operation_setting.CustomPointsToQuota(points)
+		if frozenQuota <= 0 {
+			logger.LogError(c.Request.Context(), fmt.Sprintf("易支付 燧点到账额度计算异常 user_id=%d amount=%d points=%d", id, req.Amount, points))
+			c.JSON(http.StatusOK, gin.H{"message": "error", "data": "充值额度计算异常，请联系管理员检查兑换配置"})
+			return
+		}
 	}
 	topUp := &model.TopUp{
 		UserId:          id,
 		Amount:          amount,
+		Quota:           frozenQuota,
 		Money:           payMoney,
 		TradeNo:         tradeNo,
 		PaymentMethod:   req.PaymentMethod,
@@ -395,16 +422,26 @@ func EpayNotify(c *gin.Context) {
 			}
 			//user, _ := model.GetUserById(topUp.UserId, false)
 			//user.Quota += topUp.Amount * 500000
-			dAmount := decimal.NewFromInt(int64(topUp.Amount))
-			dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-			quotaToAdd := int(dAmount.Mul(dQuotaPerUnit).IntPart())
+			// 优先使用下单时冻结的到账额度。
+			// 回落场景（Quota=0，仅限本次上线前的旧订单）：CUSTOM 下 Amount 存的是燧点，
+			// 必须按燧点换算，绝不能当作美元单位乘 QuotaPerUnit（否则会超额到账数千倍）。
+			var quotaToAdd int
+			if topUp.Quota > 0 {
+				quotaToAdd = int(topUp.Quota)
+			} else if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeCustom {
+				quotaToAdd = int(operation_setting.CustomPointsToQuota(topUp.Amount))
+			} else {
+				dAmount := decimal.NewFromInt(int64(topUp.Amount))
+				dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
+				quotaToAdd = int(dAmount.Mul(dQuotaPerUnit).IntPart())
+			}
 			err = model.IncreaseUserQuota(topUp.UserId, quotaToAdd, true)
 			if err != nil {
 				logger.LogError(c.Request.Context(), fmt.Sprintf("易支付 更新用户额度失败 trade_no=%s user_id=%d client_ip=%s quota_to_add=%d error=%q topup=%q", topUp.TradeNo, topUp.UserId, c.ClientIP(), quotaToAdd, err.Error(), common.GetJsonString(topUp)))
 				return
 			}
 			logger.LogInfo(c.Request.Context(), fmt.Sprintf("易支付 充值成功 trade_no=%s user_id=%d client_ip=%s quota_to_add=%d money=%.2f topup=%q", topUp.TradeNo, topUp.UserId, c.ClientIP(), quotaToAdd, topUp.Money, common.GetJsonString(topUp)))
-			model.RecordTopupLog(topUp.UserId, fmt.Sprintf("使用在线充值成功，充值金额: %v，支付金额：%f", logger.LogQuota(quotaToAdd), topUp.Money), c.ClientIP(), topUp.PaymentMethod, "epay")
+			model.RecordTopupLog(topUp.UserId, fmt.Sprintf("在线充值成功，获得 %s，实付 ¥%.2f", logger.FormatCreditAmount(quotaToAdd), topUp.Money), c.ClientIP(), topUp.PaymentMethod, "epay")
 		}
 	} else {
 		logger.LogInfo(c.Request.Context(), fmt.Sprintf("易支付 webhook 忽略事件 trade_no=%s callback_type=%s trade_status=%s client_ip=%s verify_info=%q", verifyInfo.ServiceTradeNo, verifyInfo.Type, verifyInfo.TradeStatus, c.ClientIP(), common.GetJsonString(verifyInfo)))

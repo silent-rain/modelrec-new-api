@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getUserQuotaDates } from '@/features/dashboard/api'
 import { useModelStatCardsConfig } from '@/features/dashboard/hooks/use-dashboard-config'
+import { useRefreshCurrentUser } from '@/features/auth/hooks/use-refresh-current-user'
 import {
   buildQueryParams,
   calculateDashboardStats,
@@ -58,6 +59,9 @@ function formatStatNumber(value: number, locale: Intl.LocalesArgument) {
 export function LogStatCards(props: LogStatCardsProps) {
   const { i18n } = useTranslation()
   const statCardsConfig = useModelStatCardsConfig()
+  // 挂载时刷新当前用户，使「充值余额」卡片反映最新值（余额读自登录快照的 auth store，
+  // 切页不会自动刷新；补单/充值后无需强制刷新页面即可看到最新余额）
+  useRefreshCurrentUser()
   const user = useAuthStore((state) => state.auth.user)
   const isAdmin = !!(user?.role && user.role >= 10)
   const [stats, setStats] = useState<{

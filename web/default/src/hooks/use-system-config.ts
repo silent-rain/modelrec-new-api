@@ -46,6 +46,7 @@ interface StatusApiResponse {
     usd_exchange_rate?: number
     custom_currency_symbol?: string
     custom_currency_exchange_rate?: number
+    points_per_cny?: number
   }
 }
 
@@ -88,6 +89,10 @@ export function mapStatusDataToConfig(
     customCurrencyExchangeRate: toNumber(
       data.custom_currency_exchange_rate,
       DEFAULT_CURRENCY_CONFIG.customCurrencyExchangeRate
+    ),
+    pointsPerCNY: toNumber(
+      data.points_per_cny,
+      DEFAULT_CURRENCY_CONFIG.pointsPerCNY
     ),
   }
 
