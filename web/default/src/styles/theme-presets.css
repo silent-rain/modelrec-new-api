@@ -544,6 +544,14 @@ body[data-theme-preset='orange-green'] [data-state='open'].bg-sidebar,
   cursor: not-allowed !important;
 }
 
+/* Wallet payment methods use a neutral disabled state so an unavailable
+   channel cannot be mistaken for a themed call to action. */
+[data-theme-preset='orange-green'] [data-component='button'][data-wallet-payment-method]:disabled {
+  background: #F4F4F5 !important;
+  color: #A1A1AA !important;
+  border-color: #E4E4E7 !important;
+}
+
 /* Enabled default-variant buttons keep the orange primary fill — the white-card
    override must not wash them out to white-on-white. `[class~="bg-primary"]`
    matches the exact token (not `bg-primary/10`), so selected payment-method
@@ -921,6 +929,12 @@ html:has(.dark [data-theme-preset='orange-green']) body {
   color: #E8C39A !important;
   border-color: transparent !important;
   cursor: not-allowed !important;
+}
+
+.dark [data-theme-preset='orange-green'] [data-component='button'][data-wallet-payment-method]:disabled {
+  background: rgba(39, 39, 42, 0.7) !important;
+  color: #71717A !important;
+  border-color: #3F3F46 !important;
 }
 
 /* Enabled default-variant buttons keep the orange primary fill (dark). */

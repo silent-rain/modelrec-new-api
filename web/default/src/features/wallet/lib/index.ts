@@ -22,6 +22,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 export * from './affiliate'
 export * from './alipay-desktop-payment'
+export * from './amount-selection'
 export * from './format'
 export * from './payment'
 export * from './ui'

@@ -16,8 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export const AUTH_INPUT_CLASS =
-  'sf-auth-input h-14 rounded-2xl border-transparent bg-[#f5f7f8] pl-12 text-[15px] shadow-none transition-[border-color,box-shadow,background-color] duration-200 hover:bg-[#f1f4f4] focus-visible:border-[#ffb45e] focus-visible:bg-white focus-visible:ring-[#ff8a00]/12 dark:bg-white/6 dark:hover:bg-white/9 dark:focus-visible:bg-white/10'
+import assert from 'node:assert/strict'
+import { describe, test } from 'node:test'
 
-export const SIGN_IN_INPUT_CLASS =
-  'sf-sign-in-input h-12 rounded-xl border-[#e3e6e4] bg-white px-4 text-[15px] shadow-none transition-[border-color,box-shadow,background-color] duration-200 hover:border-[#d5dad7] focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/14 dark:bg-white/4 dark:hover:bg-white/6 dark:focus-visible:bg-white/8'
+import { AUTH_INPUT_CLASS, SIGN_IN_INPUT_CLASS } from './auth-form-styles'
+
+describe('auth form styles', () => {
+  test('keeps the outlined sign-in input isolated from legacy auth overrides', () => {
+    assert.match(AUTH_INPUT_CLASS, /\bsf-auth-input\b/)
+    assert.match(SIGN_IN_INPUT_CLASS, /\bsf-sign-in-input\b/)
+    assert.doesNotMatch(SIGN_IN_INPUT_CLASS, /\bsf-auth-input\b/)
+  })
+})

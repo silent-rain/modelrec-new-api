@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SectionPageLayout } from '@/components/layout'
@@ -48,10 +48,13 @@ import {
   useAlipayPayment,
 } from './hooks'
 import {
+  INITIAL_RECHARGE_AMOUNT_STATE,
   getDefaultPaymentType,
   getMinTopupAmount,
   isWaffoPancakePayment,
   openPaymentWindow,
+  parseCustomAmount,
+  rechargeAmountReducer,
   redirectPaymentWindow,
   requireDesktopAlipayRefreshData,
 } from './lib'
@@ -71,8 +74,11 @@ export function Wallet(props: WalletProps) {
   const isMobile = useIsMobile()
   const [user, setUser] = useState<UserWalletData | null>(null)
   const [userLoading, setUserLoading] = useState(true)
-  const [topupAmount, setTopupAmount] = useState(0)
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
+  const [amountState, dispatchAmount] = useReducer(
+    rechargeAmountReducer,
+    INITIAL_RECHARGE_AMOUNT_STATE
+  )
+  const topupAmount = amountState.topupAmount
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod>()
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null)
@@ -110,6 +116,7 @@ export function Wallet(props: WalletProps) {
     processing,
     calculatePaymentAmount,
     processPayment,
+    setAmount: setPaymentAmount,
   } = usePayment()
   const {
     affiliateLink,
@@ -162,17 +169,16 @@ export function Wallet(props: WalletProps) {
 
   // Initialize topup amount when topup info is loaded
   useEffect(() => {
-    if (topupInfo && topupAmount === 0) {
-      const minTopup = getMinTopupAmount(topupInfo)
-      setTopupAmount(minTopup)
+    const initialPreset = presetAmounts[0]
+    if (!topupInfo || !initialPreset || amountState.selection !== null) return
 
-      // Calculate initial payment amount with default payment type
-      const defaultPaymentType = getDefaultPaymentType(topupInfo)
-      if (defaultPaymentType) {
-        calculatePaymentAmount(minTopup, defaultPaymentType)
-      }
+    dispatchAmount({ type: 'initialize', amount: initialPreset.value })
+
+    const defaultPaymentType = getDefaultPaymentType(topupInfo)
+    if (defaultPaymentType) {
+      calculatePaymentAmount(initialPreset.value, defaultPaymentType)
     }
-  }, [topupInfo, topupAmount, calculatePaymentAmount])
+  }, [topupInfo, presetAmounts, amountState.selection, calculatePaymentAmount])
 
   // Get current payment type (selected or default)
   const getCurrentPaymentType = useCallback(() => {
@@ -181,16 +187,28 @@ export function Wallet(props: WalletProps) {
 
   // Handle preset selection
   const handleSelectPreset = (preset: PresetAmount) => {
-    setTopupAmount(preset.value)
-    setSelectedPreset(preset.value)
+    dispatchAmount({ type: 'select-preset', amount: preset.value })
     calculatePaymentAmount(preset.value, getCurrentPaymentType())
   }
 
-  // Handle topup amount change
-  const handleTopupAmountChange = (amount: number) => {
-    setTopupAmount(amount)
-    setSelectedPreset(null)
-    calculatePaymentAmount(amount, getCurrentPaymentType())
+  const handleSelectCustom = () => {
+    dispatchAmount({ type: 'select-custom' })
+    const customAmount = parseCustomAmount(amountState.customAmount)
+    if (customAmount === 0) {
+      setPaymentAmount(0)
+      return
+    }
+    calculatePaymentAmount(customAmount, getCurrentPaymentType())
+  }
+
+  const handleCustomAmountChange = (value: string) => {
+    dispatchAmount({ type: 'edit-custom', value })
+    const customAmount = parseCustomAmount(value)
+    if (customAmount === 0) {
+      setPaymentAmount(0)
+      return
+    }
+    calculatePaymentAmount(customAmount, getCurrentPaymentType())
   }
 
   // Handle payment method selection
@@ -341,12 +359,12 @@ export function Wallet(props: WalletProps) {
                 <RechargeFormCard
                   topupInfo={topupInfo}
                   presetAmounts={presetAmounts}
-                  selectedPreset={selectedPreset}
+                  selectedPreset={amountState.selection}
                   onSelectPreset={handleSelectPreset}
+                  onSelectCustom={handleSelectCustom}
                   topupAmount={topupAmount}
-                  onTopupAmountChange={handleTopupAmountChange}
-                  paymentAmount={paymentAmount}
-                  calculating={calculating}
+                  customAmount={amountState.customAmount}
+                  onCustomAmountChange={handleCustomAmountChange}
                   onPaymentMethodSelect={handlePaymentMethodSelect}
                   paymentLoading={paymentLoading}
                   redemptionCode={redemptionCode}

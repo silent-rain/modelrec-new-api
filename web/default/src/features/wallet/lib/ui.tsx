@@ -16,11 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import i18next from 'i18next'
 import { CreditCard, Landmark } from 'lucide-react'
-import { SiAlipay, SiWechat, SiStripe } from 'react-icons/si'
+import { SiWechat, SiStripe } from 'react-icons/si'
+
 import { ReactIconByName } from '@/components/react-icon-by-name'
+
 import { PAYMENT_TYPES, PAYMENT_ICON_COLORS } from '../constants'
 
 // ============================================================================
@@ -53,6 +55,17 @@ function normalizeHttpIconUrl(raw: string | undefined | null): string | null {
   return url.toString()
 }
 
+export function usesAlipayWordmark(
+  paymentType: string | undefined,
+  icon?: string
+): boolean {
+  const iconValue = icon?.trim()
+  return (
+    paymentType === PAYMENT_TYPES.ALIPAY &&
+    (!iconValue || iconValue === 'SiAlipay')
+  )
+}
+
 /**
  * Get payment method icon component
  *
@@ -67,6 +80,18 @@ export function getPaymentIcon(
   altName?: string
 ): ReactNode {
   const iconValue = icon?.trim()
+  if (usesAlipayWordmark(paymentType, iconValue)) {
+    return (
+      <img
+        src='/pay-alipay.svg'
+        alt={altName || 'Alipay'}
+        className={className}
+        loading='lazy'
+        decoding='async'
+      />
+    )
+  }
+
   const safeIconUrl = normalizeHttpIconUrl(iconValue)
   if (safeIconUrl) {
     return (
@@ -96,13 +121,6 @@ export function getPaymentIcon(
   }
 
   switch (paymentType) {
-    case PAYMENT_TYPES.ALIPAY:
-      return (
-        <SiAlipay
-          className={className}
-          style={{ color: PAYMENT_ICON_COLORS[PAYMENT_TYPES.ALIPAY] }}
-        />
-      )
     case PAYMENT_TYPES.WECHAT:
       return (
         <SiWechat
