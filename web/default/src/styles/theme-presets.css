@@ -636,16 +636,14 @@ body[data-theme-preset='orange-green'] [data-slot='dialog-content'] [data-border
 }
 
 /* Buttons: orange primary — brand #FF8A00 (theme --primary), hover uses
-   #f97316 for tactile feedback. Slightly lower specificity than the SDK-level
-   `bg-primary` token so this stays the visible default in orange-green. */
-[data-theme-preset='orange-green'] button.bg-primary,
-[data-theme-preset='orange-green'] button[class*="bg-primary"] {
+   #f97316 for tactile feedback. Match only the exact `bg-primary` token so
+   utilities such as `hover:bg-primary/10` keep their translucent state. */
+[data-theme-preset='orange-green'] button[class~="bg-primary"] {
   background: var(--primary) !important;
   background-color: var(--primary) !important;
   box-shadow: 0 2px 4px rgba(255, 138, 0, 0.25) !important;
 }
-[data-theme-preset='orange-green'] button.bg-primary:hover,
-[data-theme-preset='orange-green'] button[class*="bg-primary"]:hover {
+[data-theme-preset='orange-green'] button[class~="bg-primary"]:hover {
   background: #f97316 !important;
   background-color: #f97316 !important;
 }
@@ -997,15 +995,13 @@ html:has(.dark [data-theme-preset='orange-green']) body {
   background: rgba(26, 24, 19, 0.40) !important;
 }
 
-/* Buttons */
-.dark [data-theme-preset='orange-green'] button.bg-primary,
-.dark [data-theme-preset='orange-green'] button[class*="bg-primary"] {
+/* Buttons: keep the exact-token guard used by the light theme. */
+.dark [data-theme-preset='orange-green'] button[class~="bg-primary"] {
   background: var(--primary) !important;
   background-color: var(--primary) !important;
   box-shadow: 0 2px 4px rgba(255, 138, 0, 0.28) !important;
 }
-.dark [data-theme-preset='orange-green'] button.bg-primary:hover,
-.dark [data-theme-preset='orange-green'] button[class*="bg-primary"]:hover {
+.dark [data-theme-preset='orange-green'] button[class~="bg-primary"]:hover {
   background: #f97316 !important;
   background-color: #f97316 !important;
 }

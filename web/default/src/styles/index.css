@@ -720,6 +720,53 @@ For commercial licensing, please contact support@quantumnous.com
   will-change: transform;
 }
 
+/* Compact sign-in inputs keep one outlined surface for text and password
+ * fields instead of inheriting the theme preset's generic warm treatment. */
+[data-theme-preset='orange-green']
+  input.sf-sign-in-input:not([type='checkbox']):not([type='radio']) {
+  background: #ffffff !important;
+  border-color: #e3e6e4 !important;
+  box-shadow: none !important;
+}
+
+[data-theme-preset='orange-green']
+  input.sf-sign-in-input:not([type='checkbox']):not([type='radio']):hover {
+  background: #ffffff !important;
+  border-color: #d5dad7 !important;
+}
+
+[data-theme-preset='orange-green']
+  input.sf-sign-in-input:not([type='checkbox']):not(
+    [type='radio']
+  ):focus-visible {
+  background: #ffffff !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.15) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-sign-in-input:not([type='checkbox']):not([type='radio']) {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-sign-in-input:not([type='checkbox']):not([type='radio']):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark
+  [data-theme-preset='orange-green']
+  input.sf-sign-in-input:not([type='checkbox']):not(
+    [type='radio']
+  ):focus-visible {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.15) !important;
+}
+
 /* Auth inputs intentionally follow the prototype's cool neutral surface instead
  * of the active theme preset's warm form treatment. */
 [data-theme-preset='orange-green']

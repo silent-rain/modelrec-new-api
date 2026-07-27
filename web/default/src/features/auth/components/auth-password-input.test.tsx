@@ -38,12 +38,18 @@ await testI18n.use(initReactI18next).init({
   },
 })
 
-function renderPasswordInput(showLeadingIcon?: boolean): string {
+interface RenderPasswordInputOptions {
+  appearance?: 'default' | 'sign-in'
+  showLeadingIcon?: boolean
+}
+
+function renderPasswordInput(options: RenderPasswordInputOptions = {}): string {
   return renderToStaticMarkup(
     <I18nextProvider i18n={testI18n}>
       <AuthPasswordInput
         aria-label='Password'
-        showLeadingIcon={showLeadingIcon}
+        appearance={options.appearance}
+        showLeadingIcon={options.showLeadingIcon}
       />
     </I18nextProvider>
   )
@@ -55,9 +61,19 @@ describe('AuthPasswordInput', () => {
   })
 
   test('can hide the lock icon for the compact login design', () => {
-    const markup = renderPasswordInput(false)
+    const markup = renderPasswordInput({ showLeadingIcon: false })
 
     assert.doesNotMatch(markup, /lucide-lock/)
     assert.doesNotMatch(markup, /showLeadingIcon/)
+  })
+
+  test('uses the dedicated sign-in surface without legacy auth overrides', () => {
+    const markup = renderPasswordInput({
+      appearance: 'sign-in',
+      showLeadingIcon: false,
+    })
+
+    assert.match(markup, /\bsf-sign-in-input\b/)
+    assert.doesNotMatch(markup, /\bsf-auth-input\b/)
   })
 })
