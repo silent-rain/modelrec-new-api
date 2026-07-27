@@ -21,14 +21,19 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Input } from '@/components/ui/input'
-import { AUTH_INPUT_CLASS } from '@/features/auth/components/auth-form-styles'
+import {
+  AUTH_INPUT_CLASS,
+  SIGN_IN_INPUT_CLASS,
+} from '@/features/auth/components/auth-form-styles'
 import { cn } from '@/lib/utils'
 
 type AuthPasswordInputProps = Omit<React.ComponentProps<'input'>, 'type'> & {
+  appearance?: 'default' | 'sign-in'
   showLeadingIcon?: boolean
 }
 
 export function AuthPasswordInput({
+  appearance = 'default',
   className,
   disabled,
   showLeadingIcon,
@@ -51,7 +56,7 @@ export function AuthPasswordInput({
         type={isVisible ? 'text' : 'password'}
         disabled={disabled}
         className={cn(
-          AUTH_INPUT_CLASS,
+          appearance === 'sign-in' ? SIGN_IN_INPUT_CLASS : AUTH_INPUT_CLASS,
           leadingIconVisible ? 'pr-12' : 'px-4 pr-12',
           className
         )}

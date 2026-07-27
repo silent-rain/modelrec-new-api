@@ -286,11 +286,11 @@ export function UserAuthForm({
                   <FormControl>
                     {loginMode === 'password' ? (
                       <AuthPasswordInput
+                        appearance='sign-in'
                         showLeadingIcon={false}
                         autoComplete='current-password'
                         aria-label={t('Password')}
                         placeholder={t('Enter password')}
-                        className={SIGN_IN_INPUT_CLASS}
                         {...field}
                       />
                     ) : (
