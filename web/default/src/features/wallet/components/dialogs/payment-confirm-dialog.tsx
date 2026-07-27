@@ -30,11 +30,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatCurrencyFromUSD } from '@/lib/currency'
 
 import { DEFAULT_DISCOUNT_RATE } from '../../constants'
 import {
   formatWalletPaymentAmount,
-  formatWalletTopupAmount,
   getPaymentIcon,
   usesPaymentWordmark,
 } from '../../lib'
@@ -51,6 +51,7 @@ interface PaymentConfirmDialogProps {
   processing: boolean
   discountRate?: number
   usdExchangeRate?: number
+  paymentCurrencySymbol?: string
 }
 
 export function PaymentConfirmDialog({
@@ -64,6 +65,7 @@ export function PaymentConfirmDialog({
   processing,
   discountRate = DEFAULT_DISCOUNT_RATE,
   usdExchangeRate = 1,
+  paymentCurrencySymbol = '¥',
 }: PaymentConfirmDialogProps) {
   const { t } = useTranslation()
   const hasDiscount = discountRate > 0 && discountRate < 1 && paymentAmount > 0
@@ -92,7 +94,7 @@ export function PaymentConfirmDialog({
               {t('Topup Amount')}
             </span>
             <span className='text-lg font-semibold'>
-              {formatWalletTopupAmount(topupAmount * usdExchangeRate)}
+              {formatCurrencyFromUSD(topupAmount)}
             </span>
           </div>
 

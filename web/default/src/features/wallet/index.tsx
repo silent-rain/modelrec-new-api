@@ -48,6 +48,7 @@ import {
   useAlipayPayment,
 } from './hooks'
 import {
+  CUSTOM_AMOUNT_SELECTION,
   INITIAL_RECHARGE_AMOUNT_STATE,
   getDefaultPaymentType,
   getMinTopupAmount,
@@ -78,7 +79,6 @@ export function Wallet(props: WalletProps) {
     rechargeAmountReducer,
     INITIAL_RECHARGE_AMOUNT_STATE
   )
-  const topupAmount = amountState.topupAmount
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod>()
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null)
@@ -110,6 +110,28 @@ export function Wallet(props: WalletProps) {
     currency?.usdExchangeRate,
     currency?.customCurrencyExchangeRate,
   ])
+
+  // Payment currency: the fiat currency actually charged (¥ / $ / €).
+  // Driven by usdExchangeRate (USD -> payment currency) and decoupled from the
+  // quota display unit, so the recharge input stays correct when deployed overseas.
+  const paymentRate = currency?.usdExchangeRate || 1
+  const paymentCurrencySymbol =
+    currency?.paymentCurrencySymbol?.trim() ||
+    (currency?.quotaDisplayType === 'CNY'
+      ? '¥'
+      : currency?.quotaDisplayType === 'USD'
+        ? '$'
+        : '¥')
+
+  // Normalise to display type units:
+  // - Presets (number selection) are already in display type units (USD from amount_options).
+  // - Custom amounts are entered in payment currency (e.g. ¥) — divide by paymentRate.
+  const topupAmount = useMemo(() => {
+    if (amountState.selection !== CUSTOM_AMOUNT_SELECTION || paymentRate <= 0) {
+      return amountState.topupAmount
+    }
+    return amountState.topupAmount / paymentRate
+  }, [amountState.selection, amountState.topupAmount, paymentRate])
   const {
     amount: paymentAmount,
     calculating,
@@ -198,7 +220,9 @@ export function Wallet(props: WalletProps) {
       setPaymentAmount(0)
       return
     }
-    calculatePaymentAmount(customAmount, getCurrentPaymentType())
+    const displayTypeAmount =
+      paymentRate > 0 ? customAmount / paymentRate : customAmount
+    calculatePaymentAmount(displayTypeAmount, getCurrentPaymentType())
   }
 
   const handleCustomAmountChange = (value: string) => {
@@ -208,7 +232,9 @@ export function Wallet(props: WalletProps) {
       setPaymentAmount(0)
       return
     }
-    calculatePaymentAmount(customAmount, getCurrentPaymentType())
+    const displayTypeAmount =
+      paymentRate > 0 ? customAmount / paymentRate : customAmount
+    calculatePaymentAmount(displayTypeAmount, getCurrentPaymentType())
   }
 
   // Handle payment method selection
@@ -375,6 +401,7 @@ export function Wallet(props: WalletProps) {
                   loading={topupLoading}
                   priceRatio={(status?.price as number) || 1}
                   usdExchangeRate={effectiveUsdExchangeRate}
+                  paymentCurrencySymbol={paymentCurrencySymbol}
                   onOpenBilling={() => setBillingDialogOpen(true)}
                   creemProducts={topupInfo?.creem_products}
                   enableCreemTopup={topupInfo?.enable_creem_topup}
@@ -426,6 +453,7 @@ export function Wallet(props: WalletProps) {
         }
         discountRate={getDiscountRate()}
         usdExchangeRate={effectiveUsdExchangeRate}
+        paymentCurrencySymbol={paymentCurrencySymbol}
       />
 
       <AlipayPaymentDialog

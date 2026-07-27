@@ -20,6 +20,8 @@ type GeneralSetting struct {
 	CustomCurrencySymbol string `json:"custom_currency_symbol"`
 	// 自定义货币与美元汇率（1 USD = X Custom）
 	CustomCurrencyExchangeRate float64 `json:"custom_currency_exchange_rate"`
+	// 支付货币符号，用于充值输入框与支付金额展示（与额度展示单位 quotaDisplayType 解耦）
+	PaymentCurrencySymbol string `json:"payment_currency_symbol"`
 }
 
 // 默认配置
@@ -30,6 +32,7 @@ var generalSetting = GeneralSetting{
 	QuotaDisplayType:           QuotaDisplayTypeUSD,
 	CustomCurrencySymbol:       "¤",
 	CustomCurrencyExchangeRate: 1.0,
+	PaymentCurrencySymbol:      "¥",
 }
 
 func init() {
@@ -71,6 +74,14 @@ func GetCurrencySymbol() string {
 	default:
 		return ""
 	}
+}
+
+// GetPaymentCurrencySymbol 返回支付货币符号（充值支付所用法币符号，与额度展示单位解耦）
+func GetPaymentCurrencySymbol() string {
+	if generalSetting.PaymentCurrencySymbol != "" {
+		return generalSetting.PaymentCurrencySymbol
+	}
+	return "¥"
 }
 
 // GetUsdToCurrencyRate 返回 1 USD = X <currency> 的 X（TOKENS 不适用）

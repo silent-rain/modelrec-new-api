@@ -84,6 +84,7 @@ interface RechargeFormCardProps {
   loading?: boolean
   priceRatio?: number
   usdExchangeRate?: number
+  paymentCurrencySymbol?: string
   onOpenBilling?: () => void
   creemProducts?: CreemProduct[]
   enableCreemTopup?: boolean
@@ -114,6 +115,7 @@ export function RechargeFormCard({
   loading,
   priceRatio = 1,
   usdExchangeRate = 1,
+  paymentCurrencySymbol,
   onOpenBilling,
   creemProducts,
   enableCreemTopup,
@@ -137,7 +139,7 @@ export function RechargeFormCard({
   const redemptionEnabled = topupInfo?.enable_redemption !== false
   const customAmountInvalid =
     customAmount !== '' && parseCustomAmount(customAmount) === 0
-  const currencySymbol = getWalletCurrencySymbol()
+  const currencySymbol = paymentCurrencySymbol || getWalletCurrencySymbol()
 
   if (loading) {
     return (

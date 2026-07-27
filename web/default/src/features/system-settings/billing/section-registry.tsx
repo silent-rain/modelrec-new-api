@@ -95,6 +95,8 @@ const BILLING_SECTIONS = [
               settings['general_setting.custom_currency_symbol'] ?? '¤',
             custom_currency_exchange_rate:
               settings['general_setting.custom_currency_exchange_rate'] ?? 1,
+            payment_currency_symbol:
+              settings['general_setting.payment_currency_symbol'] ?? '¥',
           },
         }}
       />
