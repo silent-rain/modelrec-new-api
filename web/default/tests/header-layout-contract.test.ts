@@ -61,6 +61,30 @@ describe('header layout contract', () => {
     )
   })
 
+  test('matches the prototype navigation typography', async () => {
+    const [homeHeader, publicHeader, theme, stylesheet] = await Promise.all([
+      readSource('features/home/components/home-header.tsx'),
+      readSource('components/layout/components/public-header.tsx'),
+      readSource('styles/theme.css'),
+      readSource('styles/index.css'),
+    ])
+
+    expect(theme).toContain('--font-navigation:')
+    expect(theme).toContain("'Inter Variable', 'Inter', system-ui")
+    expect(stylesheet).toContain("@import '@fontsource-variable/inter';")
+
+    for (const header of [homeHeader, publicHeader]) {
+      expect(header).toContain('[font-family:var(--font-navigation)]')
+      expect(header).toContain('text-xl font-bold tracking-tight')
+      expect(header).toContain('text-sm font-medium')
+      expect(header).not.toContain('text-[13px] font-medium')
+    }
+
+    expect(publicHeader).toContain(
+      'text-foreground nav-link-active font-semibold'
+    )
+  })
+
   test('removes fixed-header compensation from public page content', async () => {
     const [layout, pricing, rankings, hero, docs] = await Promise.all([
       readSource('components/layout/components/public-layout.tsx'),
