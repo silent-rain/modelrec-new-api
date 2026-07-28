@@ -39,6 +39,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import {
+  DEFAULT_CURRENCY_CONFIG,
+  type CurrencyConfig,
+} from '@/stores/system-config-store'
 
 import {
   CUSTOM_AMOUNT_MAX,
@@ -46,6 +50,7 @@ import {
   CUSTOM_AMOUNT_SELECTION,
   type RechargeAmountSelection,
   formatWalletPaymentAmount,
+  formatWalletQuotaAmount,
   formatWalletTopupAmount,
   getWalletCurrencySymbol,
   getDiscountLabel,
@@ -54,7 +59,7 @@ import {
   calculatePresetPricing,
   getAvailablePaymentMethods,
   parseCustomAmount,
-  usesAlipayWordmark,
+  usesPaymentWordmark,
 } from '../lib'
 import type {
   PaymentMethod,
@@ -83,7 +88,7 @@ interface RechargeFormCardProps {
   topupLink?: string
   loading?: boolean
   priceRatio?: number
-  usdExchangeRate?: number
+  currencyConfig?: CurrencyConfig
   onOpenBilling?: () => void
   creemProducts?: CreemProduct[]
   enableCreemTopup?: boolean
@@ -113,7 +118,7 @@ export function RechargeFormCard({
   topupLink,
   loading,
   priceRatio = 1,
-  usdExchangeRate = 1,
+  currencyConfig = DEFAULT_CURRENCY_CONFIG,
   onOpenBilling,
   creemProducts,
   enableCreemTopup,
@@ -135,9 +140,12 @@ export function RechargeFormCard({
     Array.isArray(waffoPayMethods) && waffoPayMethods.length > 0
   const minTopup = getMinTopupAmount(topupInfo)
   const redemptionEnabled = topupInfo?.enable_redemption !== false
+  const parsedCustomAmount = parseCustomAmount(customAmount)
   const customAmountInvalid =
-    customAmount !== '' && parseCustomAmount(customAmount) === 0
+    customAmount !== '' && parsedCustomAmount === 0
   const currencySymbol = getWalletCurrencySymbol()
+  const paymentCurrencySymbol =
+    currencyConfig.paymentCurrencySymbol?.trim() || '¥'
 
   if (loading) {
     return (
@@ -226,17 +234,8 @@ export function RechargeFormCard({
                       preset.discount ||
                       topupInfo?.discount?.[preset.value] ||
                       1.0
-                    const {
-                      displayValue,
-                      actualPrice,
-                      savedAmount,
-                      hasDiscount,
-                    } = calculatePresetPricing(
-                      preset.value,
-                      priceRatio,
-                      discount,
-                      usdExchangeRate
-                    )
+                    const { actualPrice, savedAmount, hasDiscount } =
+                      calculatePresetPricing(preset.value, priceRatio, discount)
                     return (
                       <Button
                         key={preset.value}
@@ -251,8 +250,11 @@ export function RechargeFormCard({
                         onClick={() => onSelectPreset(preset)}
                       >
                         <div className='flex w-full items-center justify-between'>
-                          <div className='text-base font-semibold sm:text-lg'>
-                            {formatWalletTopupAmount(displayValue)}
+                          <div className='text-sm font-medium sm:text-base'>
+                            {formatWalletQuotaAmount(
+                              preset.value,
+                              currencyConfig
+                            )}
                           </div>
                           {hasDiscount && (
                             <div className='text-xs font-medium text-green-600'>
@@ -260,13 +262,19 @@ export function RechargeFormCard({
                             </div>
                           )}
                         </div>
-                        <div className='text-muted-foreground mt-1.5 w-full text-xs sm:mt-2'>
-                          {t('Pay')} {formatWalletPaymentAmount(actualPrice)}
+                        <div className='text-foreground mt-1.5 w-full text-base font-semibold sm:mt-2 sm:text-lg'>
+                          {formatWalletPaymentAmount(
+                            actualPrice,
+                            paymentCurrencySymbol
+                          )}
                           {hasDiscount && savedAmount > 0 && (
-                            <span className='text-green-600'>
+                            <span className='text-xs font-medium text-green-600'>
                               {' '}
                               • {t('You save')}{' '}
-                              {formatWalletPaymentAmount(savedAmount)}
+                              {formatWalletPaymentAmount(
+                                savedAmount,
+                                paymentCurrencySymbol
+                              )}
                             </span>
                           )}
                         </div>
@@ -328,6 +336,18 @@ export function RechargeFormCard({
                       className='text-base sm:text-lg'
                     />
                   </InputGroup>
+                  {parsedCustomAmount > 0 && (
+                    <p
+                      data-testid='custom-amount-quota'
+                      className='text-muted-foreground text-sm'
+                    >
+                      ={' '}
+                      {formatWalletQuotaAmount(
+                        parsedCustomAmount,
+                        currencyConfig
+                      )}
+                    </p>
+                  )}
                   <p
                     id='topup-amount-help'
                     className={cn(
@@ -337,7 +357,7 @@ export function RechargeFormCard({
                         : 'text-muted-foreground'
                     )}
                   >
-                    {t('Please enter an amount between 1 and 100000 yuan.')}
+                    {t('Please enter a USD amount between 1 and 100000.')}
                   </p>
                 </div>
               )}
@@ -355,9 +375,8 @@ export function RechargeFormCard({
                       )
                       const disabled =
                         topupAmount <= 0 || methodMinTopup > topupAmount
-                      const formattedMinTopup = formatWalletTopupAmount(
-                        methodMinTopup * usdExchangeRate
-                      )
+                      const formattedMinTopup =
+                        formatWalletTopupAmount(methodMinTopup)
                       const disabledReason = disabled
                         ? t('Minimum topup amount: {{amount}}', {
                             amount: formattedMinTopup,
@@ -366,7 +385,7 @@ export function RechargeFormCard({
                       const disabledLabel = disabled
                         ? `${t('Minimum:')} ${formattedMinTopup}`
                         : undefined
-                      const showAlipayWordmark = usesAlipayWordmark(
+                      const showPaymentWordmark = usesPaymentWordmark(
                         method.type,
                         method.icon
                       )
@@ -398,17 +417,17 @@ export function RechargeFormCard({
                             ) : (
                               getPaymentIcon(
                                 method.type,
-                                showAlipayWordmark
-                                  ? 'h-8 w-auto max-w-[92px] object-contain'
+                                showPaymentWordmark
+                                  ? 'h-7 w-auto max-w-[122px] object-contain'
                                   : 'h-5 w-5',
                                 method.icon,
                                 method.name
                               )
                             )}
                           </span>
-                          {(!showAlipayWordmark || disabledLabel) && (
+                          {(!showPaymentWordmark || disabledLabel) && (
                             <span className='flex min-w-0 flex-col items-start gap-0.5'>
-                              {!showAlipayWordmark && (
+                              {!showPaymentWordmark && (
                                 <span className='max-w-full truncate'>
                                   {method.name}
                                 </span>
@@ -461,9 +480,8 @@ export function RechargeFormCard({
                         const waffoMin = waffoMinTopup || 0
                         const belowMin =
                           topupAmount <= 0 || waffoMin > topupAmount
-                        const formattedWaffoMin = formatWalletTopupAmount(
-                          waffoMin * usdExchangeRate
-                        )
+                        const formattedWaffoMin =
+                          formatWalletTopupAmount(waffoMin)
                         const disabledReason = belowMin
                           ? t('Minimum topup amount: {{amount}}', {
                               amount: formattedWaffoMin,

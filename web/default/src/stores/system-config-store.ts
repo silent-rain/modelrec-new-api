@@ -35,6 +35,8 @@ export interface CurrencyConfig {
   customCurrencySymbol: string
   /** Exchange rate from USD to the custom currency (used when type === CUSTOM) */
   customCurrencyExchangeRate: number
+  /** Payment currency symbol (the fiat currency actually charged, decoupled from quotaDisplayType) */
+  paymentCurrencySymbol: string
 }
 
 export interface SystemConfig {
@@ -53,6 +55,7 @@ export const DEFAULT_CURRENCY_CONFIG: CurrencyConfig = {
   usdExchangeRate: 1,
   customCurrencySymbol: '¤',
   customCurrencyExchangeRate: 1,
+  paymentCurrencySymbol: '¥',
 }
 
 interface SystemConfigState {

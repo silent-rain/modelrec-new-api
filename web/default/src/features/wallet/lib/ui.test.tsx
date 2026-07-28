@@ -21,12 +21,12 @@ import { describe, test } from 'node:test'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 
-import { getPaymentIcon, usesAlipayWordmark } from './ui'
+import { getPaymentIcon, usesPaymentWordmark } from './ui'
 
 describe('payment brand icons', () => {
   test('uses the local horizontal Alipay wordmark for the default config', () => {
-    assert.equal(usesAlipayWordmark('alipay'), true)
-    assert.equal(usesAlipayWordmark('alipay', 'SiAlipay'), true)
+    assert.equal(usesPaymentWordmark('alipay'), true)
+    assert.equal(usesPaymentWordmark('alipay', 'SiAlipay'), true)
 
     const markup = renderToStaticMarkup(
       <>{getPaymentIcon('alipay', 'h-8 w-auto', 'SiAlipay', '支付宝')}</>
@@ -35,13 +35,33 @@ describe('payment brand icons', () => {
     assert.match(markup, /alt="支付宝"/)
   })
 
+  test('uses the local horizontal WeChat Pay wordmark for the default config', () => {
+    assert.equal(usesPaymentWordmark('wxpay'), true)
+    assert.equal(usesPaymentWordmark('wxpay', 'SiWechat'), true)
+
+    const markup = renderToStaticMarkup(
+      <>{getPaymentIcon('wxpay', 'h-8 w-auto', 'SiWechat', '微信支付')}</>
+    )
+    assert.match(markup, /src="\/pay-wechat\.svg"/)
+    assert.match(markup, /alt="微信支付"/)
+
+    const fallbackMarkup = renderToStaticMarkup(
+      <>{getPaymentIcon('wxpay', 'h-8 w-auto', 'SiWechat')}</>
+    )
+    assert.match(fallbackMarkup, /alt="微信支付"/)
+  })
+
   test('keeps administrator-provided Alipay assets and other icons', () => {
     assert.equal(
-      usesAlipayWordmark('alipay', 'https://cdn.example.com/pay.svg'),
+      usesPaymentWordmark('alipay', 'https://cdn.example.com/pay.svg'),
       false
     )
-    assert.equal(usesAlipayWordmark('alipay', 'SiCreditCard'), false)
-    assert.equal(usesAlipayWordmark('wxpay', 'SiWechat'), false)
+    assert.equal(usesPaymentWordmark('alipay', 'SiCreditCard'), false)
+    assert.equal(usesPaymentWordmark('wxpay', 'SiCreditCard'), false)
+    assert.equal(
+      usesPaymentWordmark('wxpay', 'https://cdn.example.com/wechat-pay.svg'),
+      false
+    )
 
     const markup = renderToStaticMarkup(
       <>

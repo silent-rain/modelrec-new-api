@@ -26,6 +26,7 @@ import {
 
 import {
   formatWalletPaymentAmount,
+  formatWalletQuotaAmount,
   formatWalletTopupAmount,
   getWalletCurrencySymbol,
 } from './format'
@@ -53,27 +54,40 @@ afterEach(() => {
 })
 
 describe('wallet currency presentation', () => {
-  test('uses yuan for wallet amounts without converting values again', () => {
+  test('separates the USD top-up, CNY payment, and custom quota units', () => {
     setCurrency('CUSTOM', {
       customCurrencySymbol: '燧点',
-      customCurrencyExchangeRate: 10000,
+      customCurrencyExchangeRate: 7000,
+      usdExchangeRate: 7,
+      paymentCurrencySymbol: '¥',
     })
+    const currency = useSystemConfigStore.getState().config.currency
 
-    assert.equal(formatWalletTopupAmount(10), '¥10')
-    assert.equal(formatWalletPaymentAmount(50), '¥50')
-    assert.equal(getWalletCurrencySymbol(), '¥')
+    assert.equal(formatWalletTopupAmount(10), '$10')
+    assert.equal(formatWalletQuotaAmount(10, currency), '70,000燧点')
+    assert.equal(formatWalletPaymentAmount(70, '¥'), '¥70')
+    assert.equal(getWalletCurrencySymbol(), '$')
   })
 
-  test('keeps payment currency independent from quota display settings', () => {
+  test('formats other quota display modes without changing the USD input unit', () => {
     setCurrency('USD')
-    assert.equal(formatWalletTopupAmount(10), '¥10')
-    assert.equal(formatWalletPaymentAmount('8.5'), '¥8.5')
-    assert.equal(getWalletCurrencySymbol(), '¥')
+    assert.equal(
+      formatWalletQuotaAmount(
+        10,
+        useSystemConfigStore.getState().config.currency
+      ),
+      '$10'
+    )
 
-    setCurrency('TOKENS')
-    assert.equal(formatWalletTopupAmount(10), '¥10')
-    assert.equal(formatWalletPaymentAmount(10), '¥10')
-    assert.equal(getWalletCurrencySymbol(), '¥')
+    setCurrency('TOKENS', { quotaPerUnit: 500000 })
+    assert.equal(
+      formatWalletQuotaAmount(
+        10,
+        useSystemConfigStore.getState().config.currency
+      ),
+      '5,000,000'
+    )
+    assert.equal(formatWalletTopupAmount(10), '$10')
   })
 
   test('rejects non-finite payment values', () => {

@@ -20,7 +20,6 @@ import {
   Hash,
   Coins,
   Layers,
-  WalletCards,
   Gauge,
   Zap,
   Flame,
@@ -29,6 +28,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
 import { safeDivide } from '@/features/dashboard/lib'
 
 interface StatCardConfig {
@@ -43,13 +43,6 @@ export function useModelStatCardsConfig(): StatCardConfig[] {
   const { t } = useTranslation()
 
   return [
-    {
-      key: 'balance',
-      title: t('Top-up Balance'),
-      description: t('Remaining quota'),
-      icon: WalletCards,
-      getValue: (stat) => stat?.balance ?? 0,
-    },
     {
       key: 'count',
       title: t('Total Count'),

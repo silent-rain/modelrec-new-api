@@ -30,13 +30,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  DEFAULT_CURRENCY_CONFIG,
+  type CurrencyConfig,
+} from '@/stores/system-config-store'
 
 import { DEFAULT_DISCOUNT_RATE } from '../../constants'
 import {
   formatWalletPaymentAmount,
-  formatWalletTopupAmount,
+  formatWalletQuotaAmount,
   getPaymentIcon,
-  usesAlipayWordmark,
+  usesPaymentWordmark,
 } from '../../lib'
 import type { PaymentMethod } from '../../types'
 
@@ -50,7 +54,7 @@ interface PaymentConfirmDialogProps {
   calculating: boolean
   processing: boolean
   discountRate?: number
-  usdExchangeRate?: number
+  currencyConfig?: CurrencyConfig
 }
 
 export function PaymentConfirmDialog({
@@ -63,16 +67,18 @@ export function PaymentConfirmDialog({
   calculating,
   processing,
   discountRate = DEFAULT_DISCOUNT_RATE,
-  usdExchangeRate = 1,
+  currencyConfig = DEFAULT_CURRENCY_CONFIG,
 }: PaymentConfirmDialogProps) {
   const { t } = useTranslation()
   const hasDiscount = discountRate > 0 && discountRate < 1 && paymentAmount > 0
   const originalAmount = hasDiscount ? paymentAmount / discountRate : 0
   const discountAmount = hasDiscount ? originalAmount - paymentAmount : 0
-  const showAlipayWordmark = usesAlipayWordmark(
+  const showPaymentWordmark = usesPaymentWordmark(
     paymentMethod?.type,
     paymentMethod?.icon
   )
+  const paymentCurrencySymbol =
+    currencyConfig.paymentCurrencySymbol?.trim() || '¥'
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -92,7 +98,7 @@ export function PaymentConfirmDialog({
               {t('Topup Amount')}
             </span>
             <span className='text-lg font-semibold'>
-              {formatWalletTopupAmount(topupAmount * usdExchangeRate)}
+              {formatWalletQuotaAmount(topupAmount, currencyConfig)}
             </span>
           </div>
 
@@ -105,11 +111,17 @@ export function PaymentConfirmDialog({
             ) : (
               <div className='flex items-baseline gap-2'>
                 <span className='text-2xl font-semibold'>
-                  {formatWalletPaymentAmount(paymentAmount)}
+                  {formatWalletPaymentAmount(
+                    paymentAmount,
+                    paymentCurrencySymbol
+                  )}
                 </span>
                 {hasDiscount && (
                   <span className='text-muted-foreground text-sm line-through'>
-                    {formatWalletPaymentAmount(originalAmount)}
+                    {formatWalletPaymentAmount(
+                      originalAmount,
+                      paymentCurrencySymbol
+                    )}
                   </span>
                 )}
               </div>
@@ -121,7 +133,10 @@ export function PaymentConfirmDialog({
               <div className='flex items-center justify-between text-sm'>
                 <span className='text-muted-foreground'>{t('You save')}</span>
                 <span className='font-semibold text-green-600'>
-                  {formatWalletPaymentAmount(discountAmount)}
+                  {formatWalletPaymentAmount(
+                    discountAmount,
+                    paymentCurrencySymbol
+                  )}
                 </span>
               </div>
             </div>
@@ -135,13 +150,13 @@ export function PaymentConfirmDialog({
               <div className='flex items-center gap-2'>
                 {getPaymentIcon(
                   paymentMethod?.type,
-                  showAlipayWordmark
-                    ? 'h-6 w-auto max-w-[72px] object-contain'
+                  showPaymentWordmark
+                    ? 'h-5 w-auto max-w-[88px] object-contain'
                     : 'h-4 w-4',
                   paymentMethod?.icon,
                   paymentMethod?.name
                 )}
-                {!showAlipayWordmark && (
+                {!showPaymentWordmark && (
                   <span className='font-medium'>{paymentMethod?.name}</span>
                 )}
               </div>

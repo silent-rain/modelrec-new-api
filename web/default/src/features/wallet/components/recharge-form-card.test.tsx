@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, test } from 'node:test'
 
 import { createInstance } from 'i18next'
@@ -39,9 +40,10 @@ await testI18n.use(initReactI18next).init({
     en: {
       translation: {
         'Custom Amount': 'Custom Amount',
-        'Please enter an amount between 1 and 100000 yuan.':
-          'Please enter an amount between 1 and 100000 yuan.',
+        'Please enter a USD amount between 1 and 100000.':
+          'Please enter a USD amount between 1 and 100000.',
         Pay: 'Pay',
+        'Minimum:': 'Minimum:',
         'You save': 'You save',
       },
     },
@@ -64,7 +66,11 @@ interface RenderOverrides {
   customAmount?: string
   topupAmount?: number
   minTopup?: number
+  paymentName?: string
+  paymentType?: string
   paymentIcon?: string
+  paymentMinTopup?: number
+  priceRatio?: number
 }
 
 function renderCard(overrides: RenderOverrides): string {
@@ -73,10 +79,10 @@ function renderCard(overrides: RenderOverrides): string {
     min_topup: overrides.minTopup ?? topupInfo.min_topup,
     pay_methods: [
       {
-        name: 'Alipay',
-        type: 'alipay',
+        name: overrides.paymentName ?? 'Alipay',
+        type: overrides.paymentType ?? 'alipay',
         icon: overrides.paymentIcon,
-        min_topup: overrides.minTopup,
+        min_topup: overrides.paymentMinTopup,
       },
     ],
   }
@@ -95,6 +101,8 @@ function renderCard(overrides: RenderOverrides): string {
     onRedemptionCodeChange: (_code: string) => undefined,
     onRedeem: () => undefined,
     redeeming: false,
+    priceRatio: overrides.priceRatio ?? 7,
+    currencyConfig: useSystemConfigStore.getState().config.currency,
   }
 
   return renderToStaticMarkup(
@@ -115,9 +123,10 @@ beforeEach(() => {
       currency: {
         ...DEFAULT_CURRENCY_CONFIG,
         quotaDisplayType: 'CUSTOM',
-        usdExchangeRate: 1,
+        usdExchangeRate: 7,
         customCurrencySymbol: '燧点',
-        customCurrencyExchangeRate: 10000,
+        customCurrencyExchangeRate: 7000,
+        paymentCurrencySymbol: '¥',
       },
     },
   }))
@@ -150,7 +159,7 @@ describe('wallet recharge amount controls', () => {
     assert.ok(markup.includes('step="1"'))
     assert.ok(markup.includes('aria-describedby="topup-amount-help"'))
     assert.ok(
-      markup.includes('Please enter an amount between 1 and 100000 yuan.')
+      markup.includes('Please enter a USD amount between 1 and 100000.')
     )
     assert.equal(markup.includes('Amount to pay:'), false)
   })
@@ -165,18 +174,54 @@ describe('wallet recharge amount controls', () => {
     assert.ok(markup.includes('text-destructive'))
   })
 
-  test('shows configured currency on preset, payment, and custom input amounts', () => {
+  test('shows CNY payment, custom quota, and USD custom input units', () => {
     const presetMarkup = renderCard({ selectedPreset: 10 })
-    assert.match(presetMarkup, /¥10/)
-    assert.match(presetMarkup, /Pay.*¥10/)
+    const quotaPosition = presetMarkup.indexOf('70,000燧点')
+    const paymentPosition = presetMarkup.indexOf('¥70')
+
+    assert.notEqual(quotaPosition, -1)
+    assert.notEqual(paymentPosition, -1)
+    assert.ok(quotaPosition < paymentPosition)
 
     const customMarkup = renderCard({
       selectedPreset: CUSTOM_AMOUNT_SELECTION,
-      customAmount: '57',
+      customAmount: '1',
     })
     assert.match(customMarkup, /data-testid="custom-amount-currency-symbol"/)
-    assert.match(customMarkup, />¥<\/span>/)
-    assert.match(customMarkup, /value="57"/)
+    assert.match(customMarkup, />\$<\/span>/)
+    assert.match(customMarkup, /value="1"/)
+    assert.match(
+      customMarkup,
+      /data-testid="custom-amount-quota"[^>]*>= 7,000燧点<\/p>/
+    )
+  })
+
+  test('hides the quota conversion for an empty or invalid custom amount', () => {
+    const emptyMarkup = renderCard({
+      selectedPreset: CUSTOM_AMOUNT_SELECTION,
+      customAmount: '',
+      topupAmount: 0,
+    })
+    const invalidMarkup = renderCard({
+      selectedPreset: CUSTOM_AMOUNT_SELECTION,
+      customAmount: '100001',
+      topupAmount: 0,
+    })
+
+    assert.doesNotMatch(emptyMarkup, /data-testid="custom-amount-quota"/)
+    assert.doesNotMatch(invalidMarkup, /data-testid="custom-amount-quota"/)
+  })
+
+  test('shows the payment-gateway minimum in the USD top-up unit', () => {
+    const markup = renderCard({
+      selectedPreset: 10,
+      topupAmount: 10,
+      minTopup: 1,
+      paymentMinTopup: 50,
+    })
+
+    assert.match(markup, /title="Minimum topup amount: \$50"/)
+    assert.doesNotMatch(markup, /¥350,000/)
   })
 
   test('renders the full Alipay wordmark without duplicate visible name', () => {
@@ -187,6 +232,28 @@ describe('wallet recharge amount controls', () => {
 
     assert.match(markup, /src="\/pay-alipay\.svg"/)
     assert.doesNotMatch(markup, />Alipay<\/span>/)
+  })
+
+  test('renders the full WeChat Pay wordmark without duplicate visible name', () => {
+    const markup = renderCard({
+      selectedPreset: 10,
+      paymentName: '微信支付',
+      paymentType: 'wxpay',
+      paymentIcon: 'SiWechat',
+    })
+
+    assert.match(markup, /src="\/pay-wechat\.svg"/)
+    assert.doesNotMatch(markup, />微信支付<\/span>/)
+    assert.match(markup, /h-7 w-auto max-w-\[122px\] object-contain/)
+  })
+
+  test('keeps payment wordmarks at equal visual height in the confirmation dialog', () => {
+    const dialogSource = readFileSync(
+      new URL('./dialogs/payment-confirm-dialog.tsx', import.meta.url),
+      'utf8'
+    )
+
+    assert.match(dialogSource, /h-5 w-auto max-w-\[88px\] object-contain/)
   })
 
   test('uses neutral disabled payment styling below the channel minimum', () => {

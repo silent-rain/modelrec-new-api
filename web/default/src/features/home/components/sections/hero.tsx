@@ -19,13 +19,14 @@ For commercial licensing, please contact support@quantumnous.com
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 
 import { getApiKeyDestination } from '../../lib/navigation'
 import { CapabilityMap } from '../capability-map'
-import { Stats } from './stats'
+// TODO: Restore homepage stats after the values are backed by real data.
+// import { Stats } from './stats'
 
 interface HeroProps {
   isAuthenticated: boolean
@@ -45,16 +46,13 @@ export function Hero(props: HeroProps) {
     <section className='relative overflow-hidden bg-[#f7f5f9] px-6 pt-12 pb-20 md:pb-14 dark:bg-[#17151a]'>
       <div className='mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:gap-10'>
         <div className='relative z-10'>
-          <h1 className='dark:text-foreground max-w-3xl text-4xl leading-[1.12] font-black tracking-[-0.045em] text-[#172033] md:text-5xl lg:text-6xl'>
+          <h1 className='max-w-3xl text-3xl leading-[1.12] font-bold tracking-normal text-[#FF8A00] md:text-4xl lg:text-[45px]'>
             {t('AI Model Routing Value Distribution Platform')}
           </h1>
           <p className='text-muted-foreground mt-6 max-w-3xl text-base leading-8 md:text-lg'>
-            <Trans
-              i18nKey='Discover, evaluate, route, and deliver AI models through one API, with access to <highlight>400+</highlight> models.'
-              components={{
-                highlight: <strong className='font-bold text-[#ff8700]' />,
-              }}
-            />
+            {t(
+              'Discover, evaluate, route, and deliver AI models through one API.'
+            )}
           </p>
 
           <div className='mt-9 flex flex-wrap items-center gap-4'>
@@ -80,7 +78,7 @@ export function Hero(props: HeroProps) {
             </Button>
           </div>
 
-          <Stats />
+          {/* <Stats /> */}
         </div>
 
         <CapabilityMap />

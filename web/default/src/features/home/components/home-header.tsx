@@ -16,17 +16,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import {
-  Cancel01Icon,
-  Menu01Icon,
-} from '@hugeicons/core-free-icons'
+import { Cancel01Icon, Menu01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { ProfileDropdown } from '@/components/profile-dropdown'
 import { HeaderLogo } from '@/components/layout'
+import { ProfileDropdown } from '@/components/profile-dropdown'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { formatQuota } from '@/lib/format'
@@ -52,12 +49,12 @@ export function HomeHeader() {
 
   return (
     <>
-      <header className='sticky top-0 z-50 h-[var(--header-height,4rem)] sf-header-transparent backdrop-blur-xl'>
-        <nav className='flex h-full items-center gap-8 px-6'>
+      <header className='sf-header-transparent sticky top-0 z-50 h-[var(--header-height,4rem)] backdrop-blur-xl'>
+        <nav className='flex h-full items-center gap-8 px-6 [font-family:var(--font-navigation)]'>
           <div className='flex shrink-0 items-center gap-1.5'>
             <Link
               to='/'
-              className='flex items-center gap-2 text-lg font-bold tracking-tight text-[#ff8700]'
+              className='flex items-center gap-2 text-xl font-bold tracking-tight text-[#ff8700]'
             >
               <HeaderLogo
                 src={logo}
@@ -84,7 +81,7 @@ export function HomeHeader() {
                   aria-disabled={link.disabled}
                   tabIndex={link.disabled ? -1 : undefined}
                   className={cn(
-                    'dark:text-muted-foreground dark:hover:text-foreground rounded-lg px-3.5 py-2 text-[13px] font-medium whitespace-nowrap text-[#374151] transition-colors hover:bg-black/5 hover:text-[#111827] dark:hover:bg-white/10',
+                    'dark:text-muted-foreground dark:hover:text-foreground rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap text-[#374151] transition-colors hover:bg-black/5 hover:text-[#111827] dark:hover:bg-white/10',
                     link.disabled && 'pointer-events-none opacity-50'
                   )}
                 >
@@ -96,7 +93,7 @@ export function HomeHeader() {
                   to={link.href}
                   disabled={link.disabled}
                   className={cn(
-                    'dark:text-muted-foreground dark:hover:text-foreground rounded-lg px-3.5 py-2 text-[13px] font-medium whitespace-nowrap text-[#374151] transition-colors hover:bg-black/5 hover:text-[#111827] dark:hover:bg-white/10',
+                    'dark:text-muted-foreground dark:hover:text-foreground rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap text-[#374151] transition-colors hover:bg-black/5 hover:text-[#111827] dark:hover:bg-white/10',
                     link.disabled && 'pointer-events-none opacity-50'
                   )}
                 >

@@ -29,6 +29,17 @@ describe('header layout contract', () => {
     expect(theme).toContain('--app-header-height: var(--header-height);')
   })
 
+  test('keeps the homepage hero title compact and brand orange', async () => {
+    const hero = await readSource('features/home/components/sections/hero.tsx')
+
+    expect(hero).toContain(
+      "className='max-w-3xl text-3xl leading-[1.12] font-bold tracking-normal text-[#FF8A00] md:text-4xl lg:text-[45px]'"
+    )
+    expect(hero).toContain("// import { Stats } from './stats'")
+    expect(hero).toContain('{/* <Stats /> */}')
+    expect(hero).not.toContain('<highlight>400+</highlight>')
+  })
+
   test('keeps the existing headers on the sticky shared-height contract', async () => {
     const [homeHeader, publicHeader, appHeader] = await Promise.all([
       readSource('features/home/components/home-header.tsx'),
@@ -47,6 +58,30 @@ describe('header layout contract', () => {
     )
     expect(appHeader).toContain(
       'sticky top-0 z-50 h-[var(--header-height,4rem)]'
+    )
+  })
+
+  test('matches the prototype navigation typography', async () => {
+    const [homeHeader, publicHeader, theme, stylesheet] = await Promise.all([
+      readSource('features/home/components/home-header.tsx'),
+      readSource('components/layout/components/public-header.tsx'),
+      readSource('styles/theme.css'),
+      readSource('styles/index.css'),
+    ])
+
+    expect(theme).toContain('--font-navigation:')
+    expect(theme).toContain("'Inter Variable', 'Inter', system-ui")
+    expect(stylesheet).toContain("@import '@fontsource-variable/inter';")
+
+    for (const header of [homeHeader, publicHeader]) {
+      expect(header).toContain('[font-family:var(--font-navigation)]')
+      expect(header).toContain('text-xl font-bold tracking-tight')
+      expect(header).toContain('text-sm font-medium')
+      expect(header).not.toContain('text-[13px] font-medium')
+    }
+
+    expect(publicHeader).toContain(
+      'text-foreground nav-link-active font-semibold'
     )
   })
 

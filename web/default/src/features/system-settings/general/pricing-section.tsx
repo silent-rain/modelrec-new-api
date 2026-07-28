@@ -69,6 +69,7 @@ const createPricingSchema = (t: (key: string) => string) =>
           .number()
           .min(0.0001, t('Exchange rate must be greater than 0'))
           .optional(),
+        payment_currency_symbol: z.string().max(8).optional(),
       }),
     })
     .superRefine((data, ctx) => {
@@ -311,6 +312,34 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                       </FormControl>
                       <FormDescription>
                         {t('Conversion rate from USD to your custom currency')}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='general_setting.payment_currency_symbol'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('Payment Currency Symbol')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='text'
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          name={field.name}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                          maxLength={8}
+                          placeholder={t('e.g. ¥ or € or $')}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t(
+                          'Symbol of the fiat currency you actually charge (decoupled from the display unit above). Used for the recharge input and payment amount.'
+                        )}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
