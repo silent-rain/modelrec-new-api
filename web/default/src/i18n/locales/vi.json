@@ -1203,7 +1203,7 @@
     "Custom": "Tùy chỉnh",
     "Custom (seconds)": "Tùy chỉnh (giây)",
     "Custom Amount": "Số tiền tùy chỉnh",
-    "Please enter an amount between 1 and 100000 yuan.": "Vui lòng nhập số tiền từ 1 đến 100000 nhân dân tệ.",
+    "Please enter a USD amount between 1 and 100000.": "Vui lòng nhập số tiền USD từ 1 đến 100000.",
     "Custom Amount (Minimum 10 CNY)": "Custom Amount (Minimum 10 CNY)",
     "Custom API base URL. For official channels, New API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "URL cơ sở API tùy chỉnh. Đối với các kênh chính thức, New API có địa chỉ tích hợp sẵn. Chỉ điền thông tin này cho các trang proxy của bên thứ ba hoặc các điểm cuối đặc biệt. Không thêm /v1 hoặc dấu gạch chéo cuối cùng.",
     "Custom API base URL. Leave empty to use provider default.": "URL cơ sở API tùy chỉnh. Để trống để sử dụng mặc định của nhà cung cấp.",

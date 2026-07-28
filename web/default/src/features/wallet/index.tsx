@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect, useCallback, useMemo, useReducer } from 'react'
+import { useState, useEffect, useCallback, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SectionPageLayout } from '@/components/layout'
@@ -48,7 +48,6 @@ import {
   useAlipayPayment,
 } from './hooks'
 import {
-  CUSTOM_AMOUNT_SELECTION,
   INITIAL_RECHARGE_AMOUNT_STATE,
   getDefaultPaymentType,
   getMinTopupAmount,
@@ -95,43 +94,7 @@ export function Wallet(props: WalletProps) {
   const { status } = useStatus()
   const { currency } = useSystemConfig()
   const { topupInfo, presetAmounts, loading: topupLoading } = useTopupInfo()
-
-  // Calculate effective exchange rate for display
-  // - USD: ratio of 1 (base unit)
-  // - CUSTOM: use customCurrencyExchangeRate for display
-  // - Other (CNY/TOKENS): use usdExchangeRate
-  const effectiveUsdExchangeRate = useMemo(() => {
-    if (currency?.quotaDisplayType === 'USD') return 1
-    if (currency?.quotaDisplayType === 'CUSTOM')
-      return currency?.customCurrencyExchangeRate || 1
-    return currency?.usdExchangeRate || 1
-  }, [
-    currency?.quotaDisplayType,
-    currency?.usdExchangeRate,
-    currency?.customCurrencyExchangeRate,
-  ])
-
-  // Payment currency: the fiat currency actually charged (¥ / $ / €).
-  // Driven by usdExchangeRate (USD -> payment currency) and decoupled from the
-  // quota display unit, so the recharge input stays correct when deployed overseas.
-  const paymentRate = currency?.usdExchangeRate || 1
-  const paymentCurrencySymbol =
-    currency?.paymentCurrencySymbol?.trim() ||
-    (currency?.quotaDisplayType === 'CNY'
-      ? '¥'
-      : currency?.quotaDisplayType === 'USD'
-        ? '$'
-        : '¥')
-
-  // Normalise to display type units:
-  // - Presets (number selection) are already in display type units (USD from amount_options).
-  // - Custom amounts are entered in payment currency (e.g. ¥) — divide by paymentRate.
-  const topupAmount = useMemo(() => {
-    if (amountState.selection !== CUSTOM_AMOUNT_SELECTION || paymentRate <= 0) {
-      return amountState.topupAmount
-    }
-    return amountState.topupAmount / paymentRate
-  }, [amountState.selection, amountState.topupAmount, paymentRate])
+  const topupAmount = amountState.topupAmount
   const {
     amount: paymentAmount,
     calculating,
@@ -220,9 +183,7 @@ export function Wallet(props: WalletProps) {
       setPaymentAmount(0)
       return
     }
-    const displayTypeAmount =
-      paymentRate > 0 ? customAmount / paymentRate : customAmount
-    calculatePaymentAmount(displayTypeAmount, getCurrentPaymentType())
+    calculatePaymentAmount(customAmount, getCurrentPaymentType())
   }
 
   const handleCustomAmountChange = (value: string) => {
@@ -232,9 +193,7 @@ export function Wallet(props: WalletProps) {
       setPaymentAmount(0)
       return
     }
-    const displayTypeAmount =
-      paymentRate > 0 ? customAmount / paymentRate : customAmount
-    calculatePaymentAmount(displayTypeAmount, getCurrentPaymentType())
+    calculatePaymentAmount(customAmount, getCurrentPaymentType())
   }
 
   // Handle payment method selection
@@ -400,8 +359,7 @@ export function Wallet(props: WalletProps) {
                   topupLink={topupInfo?.topup_link}
                   loading={topupLoading}
                   priceRatio={(status?.price as number) || 1}
-                  usdExchangeRate={effectiveUsdExchangeRate}
-                  paymentCurrencySymbol={paymentCurrencySymbol}
+                  currencyConfig={currency}
                   onOpenBilling={() => setBillingDialogOpen(true)}
                   creemProducts={topupInfo?.creem_products}
                   enableCreemTopup={topupInfo?.enable_creem_topup}
@@ -452,8 +410,7 @@ export function Wallet(props: WalletProps) {
           desktopAlipay.processing
         }
         discountRate={getDiscountRate()}
-        usdExchangeRate={effectiveUsdExchangeRate}
-        paymentCurrencySymbol={paymentCurrencySymbol}
+        currencyConfig={currency}
       />
 
       <AlipayPaymentDialog

@@ -16,51 +16,69 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import type { CurrencyConfig } from '@/stores/system-config-store'
+
 import { DEFAULT_DISCOUNT_RATE } from '../constants'
 
 // ============================================================================
 // Wallet-specific Formatting Functions
 // ============================================================================
 
-const WALLET_PAYMENT_CURRENCY = 'CNY'
-
-function formatWalletYuan(amount: number): string {
+function formatWalletNumber(amount: number): string {
   return new Intl.NumberFormat('zh-CN', {
-    style: 'currency',
-    currency: WALLET_PAYMENT_CURRENCY,
-    currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: 0,
     maximumFractionDigits: Math.abs(amount) >= 1 ? 2 : 4,
   }).format(amount)
 }
 
 /**
- * Format a recharge value in the ordinary wallet payment unit (yuan).
- *
- * Wallet payment money is intentionally independent from the global quota
- * display type: a balance may be shown as tokens or a custom credit label,
- * while Epay/Alipay still settles the order in CNY.
+ * Format the USD base amount submitted to the top-up API.
  */
 export function formatWalletTopupAmount(amount: number): string {
-  return formatWalletYuan(amount)
+  return `$${formatWalletNumber(amount)}`
 }
 
 /**
- * Format money that is already expressed in yuan.
+ * Format the quota credited by a USD top-up using the configured display unit.
  */
-export function formatWalletPaymentAmount(amount: number | string): string {
+export function formatWalletQuotaAmount(
+  amountUSD: number,
+  currency: CurrencyConfig
+): string {
+  switch (currency.quotaDisplayType) {
+    case 'CNY':
+      return `¥${formatWalletNumber(amountUSD * currency.usdExchangeRate)}`
+    case 'TOKENS':
+      return formatWalletNumber(amountUSD * currency.quotaPerUnit)
+    case 'CUSTOM':
+      return `${formatWalletNumber(
+        amountUSD * currency.customCurrencyExchangeRate
+      )}${currency.customCurrencySymbol}`
+    case 'USD':
+    default:
+      return formatWalletTopupAmount(amountUSD)
+  }
+}
+
+/**
+ * Format money that is already expressed in the payment currency.
+ */
+export function formatWalletPaymentAmount(
+  amount: number | string,
+  currencySymbol = '¥'
+): string {
   const numeric =
     typeof amount === 'number' ? amount : Number.parseFloat(String(amount))
   if (!Number.isFinite(numeric)) return '-'
 
-  return formatWalletYuan(numeric)
+  return `${currencySymbol}${formatWalletNumber(numeric)}`
 }
 
 /**
  * Get the non-editable prefix for a recharge amount input.
  */
 export function getWalletCurrencySymbol(): string {
-  return '¥'
+  return '$'
 }
 
 /**
@@ -104,17 +122,14 @@ export function getDiscountLabel(discount: number): string {
 export function calculatePresetPricing(
   presetValue: number,
   priceRatio: number,
-  discount: number,
-  usdExchangeRate: number = 1
+  discount: number
 ) {
   const originalPrice = presetValue * priceRatio
   const actualPrice = originalPrice * discount
   const savedAmount = originalPrice - actualPrice
   const hasDiscount = discount < 1.0
-  const displayValue = presetValue * usdExchangeRate
 
   return {
-    displayValue,
     originalPrice,
     actualPrice,
     savedAmount,

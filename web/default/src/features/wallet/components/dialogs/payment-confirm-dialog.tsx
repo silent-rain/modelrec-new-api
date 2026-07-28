@@ -30,11 +30,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatCurrencyFromUSD } from '@/lib/currency'
+import {
+  DEFAULT_CURRENCY_CONFIG,
+  type CurrencyConfig,
+} from '@/stores/system-config-store'
 
 import { DEFAULT_DISCOUNT_RATE } from '../../constants'
 import {
   formatWalletPaymentAmount,
+  formatWalletQuotaAmount,
   getPaymentIcon,
   usesPaymentWordmark,
 } from '../../lib'
@@ -50,8 +54,7 @@ interface PaymentConfirmDialogProps {
   calculating: boolean
   processing: boolean
   discountRate?: number
-  usdExchangeRate?: number
-  paymentCurrencySymbol?: string
+  currencyConfig?: CurrencyConfig
 }
 
 export function PaymentConfirmDialog({
@@ -64,8 +67,7 @@ export function PaymentConfirmDialog({
   calculating,
   processing,
   discountRate = DEFAULT_DISCOUNT_RATE,
-  usdExchangeRate = 1,
-  paymentCurrencySymbol = '¥',
+  currencyConfig = DEFAULT_CURRENCY_CONFIG,
 }: PaymentConfirmDialogProps) {
   const { t } = useTranslation()
   const hasDiscount = discountRate > 0 && discountRate < 1 && paymentAmount > 0
@@ -75,6 +77,8 @@ export function PaymentConfirmDialog({
     paymentMethod?.type,
     paymentMethod?.icon
   )
+  const paymentCurrencySymbol =
+    currencyConfig.paymentCurrencySymbol?.trim() || '¥'
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -94,7 +98,7 @@ export function PaymentConfirmDialog({
               {t('Topup Amount')}
             </span>
             <span className='text-lg font-semibold'>
-              {formatCurrencyFromUSD(topupAmount)}
+              {formatWalletQuotaAmount(topupAmount, currencyConfig)}
             </span>
           </div>
 
@@ -107,11 +111,17 @@ export function PaymentConfirmDialog({
             ) : (
               <div className='flex items-baseline gap-2'>
                 <span className='text-2xl font-semibold'>
-                  {formatWalletPaymentAmount(paymentAmount)}
+                  {formatWalletPaymentAmount(
+                    paymentAmount,
+                    paymentCurrencySymbol
+                  )}
                 </span>
                 {hasDiscount && (
                   <span className='text-muted-foreground text-sm line-through'>
-                    {formatWalletPaymentAmount(originalAmount)}
+                    {formatWalletPaymentAmount(
+                      originalAmount,
+                      paymentCurrencySymbol
+                    )}
                   </span>
                 )}
               </div>
@@ -123,7 +133,10 @@ export function PaymentConfirmDialog({
               <div className='flex items-center justify-between text-sm'>
                 <span className='text-muted-foreground'>{t('You save')}</span>
                 <span className='font-semibold text-green-600'>
-                  {formatWalletPaymentAmount(discountAmount)}
+                  {formatWalletPaymentAmount(
+                    discountAmount,
+                    paymentCurrencySymbol
+                  )}
                 </span>
               </div>
             </div>

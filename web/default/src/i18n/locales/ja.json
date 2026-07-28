@@ -1203,7 +1203,7 @@
     "Custom": "カスタム",
     "Custom (seconds)": "カスタム（秒）",
     "Custom Amount": "カスタム金額",
-    "Please enter an amount between 1 and 100000 yuan.": "1元から100000元の範囲で金額を入力してください。",
+    "Please enter a USD amount between 1 and 100000.": "1米ドルから100000米ドルの範囲で金額を入力してください。",
     "Custom Amount (Minimum 10 CNY)": "Custom Amount (Minimum 10 CNY)",
     "Custom API base URL. For official channels, New API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "カスタムAPIベースURL。公式チャネルの場合、New APIには組み込みのアドレスがあります。これは、サードパーティのプロキシサイトまたは特別なエンドポイントに対してのみ入力してください。/v1 や末尾のスラッシュを追加しないでください。",
     "Custom API base URL. Leave empty to use provider default.": "カスタム API ベース URL。プロバイダのデフォルトを使用する場合は空にしてください。",
