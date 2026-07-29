@@ -17,9 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useMemo, useState } from 'react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { useTranslation } from 'react-i18next'
+
 import {
   Branch,
   BranchMessages,
@@ -48,6 +47,10 @@ import {
   SourcesContent,
   SourcesTrigger,
 } from '@/components/ai-elements/sources'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
+
 import { MESSAGE_ROLES } from '../constants'
 import { getMessageContentStyles } from '../lib/message-styles'
 import { parseThinkTags } from '../lib/message-utils'
@@ -80,6 +83,7 @@ export function PlaygroundChat({
   onCancelEdit,
   onSaveEditAndSubmit,
 }: PlaygroundChatProps) {
+  const { t } = useTranslation()
   const [editText, setEditText] = useState('')
   const [originalText, setOriginalText] = useState('')
 
@@ -170,10 +174,14 @@ export function PlaygroundChat({
                                 (message.status === 'loading' ||
                                   (message.status === 'streaming' &&
                                     !version.content))
+                              const images = isAssistant
+                                ? []
+                                : (message.images ?? [])
+                              const hasImages = images.length > 0
                               const showMessageContent =
                                 (message.from === MESSAGE_ROLES.USER ||
                                   !message.isReasoningStreaming) &&
-                                !!version.content
+                                (!!version.content || hasImages)
 
                               // Extract visible content (remove <think> tags for assistant messages)
                               const displayContent = isAssistant
@@ -256,7 +264,33 @@ export function PlaygroundChat({
                                             getMessageContentStyles()
                                           )}
                                         >
-                                          <Response>{displayContent}</Response>
+                                          {hasImages && (
+                                            <div
+                                              className={cn(
+                                                'mb-2 grid gap-2',
+                                                images.length === 1
+                                                  ? 'grid-cols-1'
+                                                  : 'grid-cols-2'
+                                              )}
+                                            >
+                                              {images.map(
+                                                (image, imageIndex) => (
+                                                  <img
+                                                    alt={`${t('Image')} ${imageIndex + 1}`}
+                                                    className='max-h-72 w-full rounded-lg border object-contain'
+                                                    key={image.id}
+                                                    loading='lazy'
+                                                    src={image.url}
+                                                  />
+                                                )
+                                              )}
+                                            </div>
+                                          )}
+                                          {displayContent && (
+                                            <Response>
+                                              {displayContent}
+                                            </Response>
+                                          )}
                                         </MessageContent>
                                         {actions}
                                       </>

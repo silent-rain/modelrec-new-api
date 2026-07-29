@@ -16,10 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+
 import { getUserModels, getUserGroups } from './api'
 import { PlaygroundChat } from './components/playground-chat'
 import { PlaygroundInput } from './components/playground-input'
@@ -114,8 +115,8 @@ export function Playground() {
     }
   }, [groupsData, setGroups, config.group, updateConfig])
 
-  const handleSendMessage = (text: string) => {
-    const userMessage = createUserMessage(text)
+  const handleSendMessage = (text: string, imageUrls: string[] = []) => {
+    const userMessage = createUserMessage(text, imageUrls)
     const assistantMessage = createLoadingAssistantMessage()
 
     const newMessages = [...messages, userMessage, assistantMessage]

@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState } from 'react'
 import {
   PaperclipIcon,
   FileIcon,
@@ -32,28 +31,36 @@ import {
   CodeSquareIcon,
   GraduationCapIcon,
 } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+
+import {
+  PromptInput,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputButton,
+  PromptInputFooter,
+  PromptInputHeader,
+  PromptInputTextarea,
+  PromptInputTools,
+  usePromptInputAttachments,
+  type PromptInputMessage,
+} from '@/components/ai-elements/prompt-input'
+import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
+import { ModelGroupSelector } from '@/components/model-group-selector'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  PromptInput,
-  PromptInputButton,
-  PromptInputFooter,
-  PromptInputTextarea,
-  PromptInputTools,
-  type PromptInputMessage,
-} from '@/components/ai-elements/prompt-input'
-import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
-import { ModelGroupSelector } from '@/components/model-group-selector'
+
 import type { ModelOption, GroupOption } from '../types'
+import { PlaygroundImageDropzone } from './playground-image-dropzone'
 
 interface PlaygroundInputProps {
-  onSubmit: (text: string) => void
+  onSubmit: (text: string, imageUrls?: string[]) => void
   onStop?: () => void
   disabled?: boolean
   isGenerating?: boolean
@@ -64,6 +71,47 @@ interface PlaygroundInputProps {
   groups: GroupOption[]
   groupValue: string
   onGroupChange: (value: string) => void
+}
+
+interface PlaygroundSubmitButtonProps {
+  disabled?: boolean
+  text: string
+}
+
+const MAX_IMAGE_FILES = 4
+const MAX_IMAGE_SIZE_MB = 5
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
+
+function PlaygroundSubmitButton(props: PlaygroundSubmitButtonProps) {
+  const { t } = useTranslation()
+  const attachments = usePromptInputAttachments()
+  const hasContent =
+    props.text.trim().length > 0 || attachments.files.length > 0
+
+  return (
+    <PromptInputButton
+      className='text-foreground font-medium'
+      disabled={props.disabled || !hasContent}
+      type='submit'
+      variant='secondary'
+    >
+      <SendIcon size={16} />
+      <span className='hidden sm:inline'>{t('Send')}</span>
+      <span className='sr-only sm:hidden'>{t('Send')}</span>
+    </PromptInputButton>
+  )
+}
+
+function PlaygroundUploadPhotoItem() {
+  const { t } = useTranslation()
+  const attachments = usePromptInputAttachments()
+
+  return (
+    <DropdownMenuItem onClick={attachments.openFileDialog}>
+      <ImageIcon className='mr-2' size={16} />
+      {t('Upload photo')}
+    </DropdownMenuItem>
+  )
 }
 
 const suggestions = [
@@ -96,8 +144,14 @@ export function PlaygroundInput({
   const isGroupSelectDisabled = disabled || groups.length === 0
 
   const handleSubmit = (message: PromptInputMessage) => {
-    if (!message.text?.trim() || disabled) return
-    onSubmit(message.text)
+    const imageUrls = (message.files ?? [])
+      .filter(
+        (file) => file.mediaType?.startsWith('image/') && Boolean(file.url)
+      )
+      .map((file) => file.url)
+
+    if ((!message.text?.trim() && imageUrls.length === 0) || disabled) return
+    onSubmit(message.text ?? '', imageUrls)
     setText('')
   }
 
@@ -108,12 +162,32 @@ export function PlaygroundInput({
   }
 
   const handleSuggestionClick = (suggestion: string) => {
-    onSubmit(suggestion)
+    onSubmit(suggestion, [])
   }
 
   return (
     <div className='grid shrink-0 gap-4 px-1 md:pb-4'>
-      <PromptInput groupClassName='rounded-xl overflow-hidden' onSubmit={handleSubmit}>
+      <PromptInput
+        accept='image/*'
+        groupClassName='rounded-xl overflow-hidden'
+        maxFiles={MAX_IMAGE_FILES}
+        maxFileSize={MAX_IMAGE_SIZE_BYTES}
+        multiple
+        onError={(error) => toast.error(error.message)}
+        onSubmit={handleSubmit}
+      >
+        <PlaygroundImageDropzone
+          disabled={disabled}
+          maxFiles={MAX_IMAGE_FILES}
+          maxFileSizeMb={MAX_IMAGE_SIZE_MB}
+        />
+
+        <PromptInputHeader className='gap-1.5 px-3 pt-3'>
+          <PromptInputAttachments>
+            {(attachment) => <PromptInputAttachment data={attachment} />}
+          </PromptInputAttachments>
+        </PromptInputHeader>
+
         <PromptInputTextarea
           autoComplete='off'
           autoCorrect='off'
@@ -149,12 +223,7 @@ export function PlaygroundInput({
                   <FileIcon className='mr-2' size={16} />
                   {t('Upload file')}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleFileAction('upload-photo')}
-                >
-                  <ImageIcon className='mr-2' size={16} />
-                  {t('Upload photo')}
-                </DropdownMenuItem>
+                <PlaygroundUploadPhotoItem />
                 <DropdownMenuItem
                   onClick={() => handleFileAction('take-screenshot')}
                 >
@@ -204,16 +273,7 @@ export function PlaygroundInput({
                 <span className='sr-only sm:hidden'>{t('Stop')}</span>
               </PromptInputButton>
             ) : (
-              <PromptInputButton
-                className='text-foreground font-medium'
-                disabled={disabled || !text.trim()}
-                type='submit'
-                variant='secondary'
-              >
-                <SendIcon size={16} />
-                <span className='hidden sm:inline'>{t('Send')}</span>
-                <span className='sr-only sm:hidden'>{t('Send')}</span>
-              </PromptInputButton>
+              <PlaygroundSubmitButton disabled={disabled} text={text} />
             )}
           </div>
         </PromptInputFooter>
