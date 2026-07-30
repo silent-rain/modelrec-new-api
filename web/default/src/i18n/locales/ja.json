@@ -1444,6 +1444,7 @@
     "Drawing Logs": "画像生成履歴",
     "Drawing task records": "描画タスク記録",
     "Drawing task polling": "描画タスクのポーリング",
+    "Drop images here to attach": "ここに画像をドロップして添付",
     "Duplicate": "複製",
     "Duplicate group names: {{names}}": "重複するグループ名: {{names}}",
     "Duplicate source model mappings are not allowed": "重複したソースモデルのマッピングは許可されていません",
@@ -4590,6 +4591,7 @@
     "Untrusted upstream data:": "信頼されていないアップストリームデータ:",
     "Unused": "未使用",
     "Up to 4 strings that stop generation": "生成を停止する文字列を最大 4 個まで",
+    "Up to {{count}} images, {{size}} MB each": "最大 {{count}} 枚、1枚あたり {{size}} MB",
     "Update": "更新",
     "Update All Balances": "すべての残高を更新",
     "Update API Key": "API キーを更新",
@@ -4971,6 +4973,14 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "SMS Login": "SMSログイン",
+    "Allow users to log in with SMS verification codes": "SMS認証コードでのログインを許可します",
+    "SMS Auto Registration": "SMS自動登録",
+    "Automatically create an account after verifying an unregistered phone number": "未登録の電話番号を認証した後、自動的にアカウントを作成します",
+    "Unregistered phone numbers will create an account after verification.": "未登録の電話番号は、認証後にアカウントが作成されます。",
+    "Only registered phone numbers can sign in.": "登録済みの電話番号のみログインできます。",
+    "Account created and signed in!": "アカウントを作成してログインしました！",
+    "Password and SMS login are currently unavailable.": "パスワードログインとSMSログインは現在利用できません。"
   }
 }

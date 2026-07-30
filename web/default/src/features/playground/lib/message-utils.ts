@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { nanoid } from 'nanoid'
+
 import { MESSAGE_ROLES, MESSAGE_STATUS, ERROR_MESSAGES } from '../constants'
 import type {
   Message,
@@ -59,11 +60,18 @@ export function updateCurrentVersionContent(
 /**
  * Create a user message
  */
-export function createUserMessage(content: string): Message {
+export function createUserMessage(
+  content: string,
+  imageUrls: string[] = []
+): Message {
   return {
     key: nanoid(),
     from: MESSAGE_ROLES.USER,
     versions: [createMessageVersion(content)],
+    images:
+      imageUrls.length > 0
+        ? imageUrls.map((url) => ({ id: nanoid(), url }))
+        : undefined,
   }
 }
 
@@ -133,7 +141,10 @@ export function formatMessageForAPI(message: Message): ChatCompletionMessage {
   const currentVersion = getCurrentVersion(message)
   return {
     role: message.from,
-    content: currentVersion.content,
+    content: buildMessageContent(
+      currentVersion.content,
+      message.images?.map((image) => image.url)
+    ),
   }
 }
 

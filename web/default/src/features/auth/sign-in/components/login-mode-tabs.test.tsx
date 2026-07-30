@@ -39,10 +39,13 @@ await testI18n.use(initReactI18next).init({
   },
 })
 
-function renderTabs(mode: 'sms' | 'password'): string {
+function renderTabs(
+  mode: 'sms' | 'password',
+  modes?: Array<'sms' | 'password'>
+): string {
   return renderToStaticMarkup(
     <I18nextProvider i18n={testI18n}>
-      <LoginModeTabs mode={mode} onModeChange={() => undefined} />
+      <LoginModeTabs mode={mode} modes={modes} onModeChange={() => undefined} />
     </I18nextProvider>
   )
 }
@@ -63,5 +66,12 @@ describe('LoginModeTabs', () => {
 
     assert.match(markup, /aria-selected="false"[^>]*>Phone Login/)
     assert.match(markup, /aria-selected="true"[^>]*>Password Login/)
+  })
+
+  test('renders only modes enabled by system status', () => {
+    const markup = renderTabs('sms', ['sms'])
+
+    assert.match(markup, />Phone Login</)
+    assert.doesNotMatch(markup, />Password Login</)
   })
 })

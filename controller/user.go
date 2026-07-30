@@ -16,10 +16,7 @@ import (
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/service"
-	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
-
-	"github.com/QuantumNous/new-api/constant"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -31,10 +28,6 @@ type LoginRequest struct {
 }
 
 func Login(c *gin.Context) {
-	if !common.PasswordLoginEnabled {
-		common.ApiErrorI18n(c, i18n.MsgUserPasswordLoginDisabled)
-		return
-	}
 	var loginRequest LoginRequest
 	err := json.NewDecoder(c.Request.Body).Decode(&loginRequest)
 	if err != nil {
@@ -55,6 +48,10 @@ func Login(c *gin.Context) {
 	}
 
 	// 原有用户名/邮箱+密码登录
+	if !common.PasswordLoginEnabled {
+		common.ApiErrorI18n(c, i18n.MsgUserPasswordLoginDisabled)
+		return
+	}
 	if password == "" {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
@@ -83,6 +80,7 @@ func Login(c *gin.Context) {
 		session := sessions.Default(c)
 		session.Set("pending_username", user.Username)
 		session.Set("pending_user_id", user.Id)
+		session.Set("pending_login_method", "password")
 		err := session.Save()
 		if err != nil {
 			common.ApiErrorI18n(c, i18n.MsgUserSessionSaveFailed)
@@ -126,12 +124,23 @@ func loginMethodFromContext(c *gin.Context) string {
 }
 
 // recordLoginAudit 记录登录成功审计日志（对所有用户启用，仅记录成功，不记录失败）。
-func recordLoginAudit(user *model.User, c *gin.Context) {
-	method := loginMethodFromContext(c)
+type LoginMeta struct {
+	Method         string
+	AccountCreated bool
+	SecondFactor   bool
+}
+
+func recordLoginAudit(user *model.User, c *gin.Context, meta LoginMeta) {
+	method := meta.Method
+	if method == "" {
+		method = loginMethodFromContext(c)
+	}
 	ip := c.ClientIP()
 	extra := map[string]interface{}{
-		"login_method": method,
-		"user_agent":   c.Request.UserAgent(),
+		"login_method":    method,
+		"user_agent":      c.Request.UserAgent(),
+		"account_created": meta.AccountCreated,
+		"second_factor":   meta.SecondFactor,
 	}
 	content := fmt.Sprintf("Logged in successfully via %s", method)
 	model.RecordLoginLog(user.Id, user.Username, content, ip, "login", map[string]interface{}{
@@ -141,6 +150,10 @@ func recordLoginAudit(user *model.User, c *gin.Context) {
 
 // setup session & cookies and then return user info
 func setupLogin(user *model.User, c *gin.Context) {
+	setupLoginWithMeta(user, c, LoginMeta{})
+}
+
+func setupLoginWithMeta(user *model.User, c *gin.Context, meta LoginMeta) {
 	model.UpdateUserLastLoginAt(user.Id)
 	session := sessions.Default(c)
 	session.Set("id", user.Id)
@@ -153,87 +166,30 @@ func setupLogin(user *model.User, c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserSessionSaveFailed)
 		return
 	}
-	recordLoginAudit(user, c)
+	recordLoginAudit(user, c, meta)
+	method := meta.Method
+	if method == "" {
+		method = loginMethodFromContext(c)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "",
 		"success": true,
 		"data": map[string]any{
-			"id":           user.Id,
-			"username":     user.Username,
-			"display_name": user.DisplayName,
-			"role":         user.Role,
-			"status":       user.Status,
-			"group":        user.Group,
+			"id":                  user.Id,
+			"username":            user.Username,
+			"display_name":        user.DisplayName,
+			"role":                user.Role,
+			"status":              user.Status,
+			"group":               user.Group,
+			"auth_method":         method,
+			"account_created":     meta.AccountCreated,
+			"onboarding_required": meta.AccountCreated,
 		},
 	})
 }
 
-// handlePhoneLogin 手机号登录：调用微服务验证验证码，验证通过后登录
-func handlePhoneLogin(c *gin.Context, phone string, code string) {
-	// 1. 验证码不能为空
-	if code == "" {
-		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
-		return
-	}
-
-	// 2. 调用微服务验证验证码
-	valid, err := common.VerifySMSCode(phone, code)
-	if err != nil || !valid {
-		if err != nil {
-			common.ApiError(c, err)
-		} else {
-			common.ApiErrorI18n(c, i18n.MsgInvalidParams)
-		}
-		return
-	}
-
-	// 3. 查找用户
-	user, err := model.GetUserByPhone(phone)
-	if err != nil {
-		common.ApiErrorI18n(c, i18n.MsgUserNotExists)
-		return
-	}
-
-	// 4. 检查用户状态
-	if user.Status != common.UserStatusEnabled {
-		common.ApiErrorI18n(c, i18n.MsgAuthUserBanned)
-		return
-	}
-
-	// 5. 检查是否启用2FA
-	if model.IsTwoFAEnabled(user.Id) {
-		session := sessions.Default(c)
-		session.Set("pending_username", user.Username)
-		session.Set("pending_user_id", user.Id)
-		err := session.Save()
-		if err != nil {
-			common.ApiErrorI18n(c, i18n.MsgUserSessionSaveFailed)
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"message": i18n.T(c, i18n.MsgUserRequire2FA),
-			"success": true,
-			"data": map[string]interface{}{
-				"require_2fa": true,
-			},
-		})
-		return
-	}
-
-	setupLogin(user, c)
-}
-
-// isValidPhone 验证手机号格式（纯数字，6-15位）
 func isValidPhone(phone string) bool {
-	if len(phone) < 6 || len(phone) > 15 {
-		return false
-	}
-	for _, ch := range phone {
-		if ch < '0' || ch > '9' {
-			return false
-		}
-	}
-	return true
+	return common.IsValidMainlandChinaPhone(phone)
 }
 
 func Logout(c *gin.Context) {
@@ -298,7 +254,8 @@ func Register(c *gin.Context) {
 			common.SysLog("Phone registration failed: verification code is empty")
 			return
 		}
-		valid, err := common.VerifySMSCode(user.Phone, user.VerificationCode)
+		gatewayContext := common.WithSMSGatewayClientIP(c.Request.Context(), c.ClientIP())
+		valid, err := common.VerifySMSCodeWithContext(gatewayContext, user.Phone, user.VerificationCode)
 		if err != nil || !valid {
 			if err != nil {
 				common.ApiError(c, err)
@@ -329,59 +286,23 @@ func Register(c *gin.Context) {
 	}
 	affCode := user.AffCode // this code is the inviter's code, not the user's own code
 	inviterId, _ := model.GetUserIdByAffCode(affCode)
-	cleanUser := model.User{
-		Username:    user.Username,
-		Password:    user.Password,
-		DisplayName: user.Username,
-		InviterId:   inviterId,
-		Role:        common.RoleCommonUser, // 明确设置角色为普通用户
-	}
+	email := ""
 	if common.EmailVerificationEnabled {
-		cleanUser.Email = user.Email
+		email = user.Email
 	}
-	// 保存手机号（如果提供了手机号）
-	if user.Phone != "" {
-		cleanUser.Phone = user.Phone
-		cleanUser.PhoneVerified = user.PhoneVerified
-	}
-	if err := cleanUser.Insert(inviterId); err != nil {
+	_, err = service.ProvisionUser(service.ProvisionUserInput{
+		Username:       user.Username,
+		Password:       user.Password,
+		DisplayName:    user.Username,
+		Email:          email,
+		Phone:          user.Phone,
+		PhoneVerified:  user.PhoneVerified,
+		InviterID:      inviterId,
+		CreationSource: "password_registration",
+	})
+	if err != nil {
 		common.ApiError(c, err)
 		return
-	}
-
-	// 获取插入后的用户ID
-	var insertedUser model.User
-	if err := model.DB.Where("username = ?", cleanUser.Username).First(&insertedUser).Error; err != nil {
-		common.ApiErrorI18n(c, i18n.MsgUserRegisterFailed)
-		return
-	}
-	// 生成默认令牌
-	if constant.GenerateDefaultToken {
-		key, err := common.GenerateKey()
-		if err != nil {
-			common.ApiErrorI18n(c, i18n.MsgUserDefaultTokenFailed)
-			common.SysLog("failed to generate token key: " + err.Error())
-			return
-		}
-		// 生成默认令牌
-		token := model.Token{
-			UserId:             insertedUser.Id, // 使用插入后的用户ID
-			Name:               cleanUser.Username + "的初始令牌",
-			Key:                key,
-			CreatedTime:        common.GetTimestamp(),
-			AccessedTime:       common.GetTimestamp(),
-			ExpiredTime:        -1,     // 永不过期
-			RemainQuota:        500000, // 示例额度
-			UnlimitedQuota:     true,
-			ModelLimitsEnabled: false,
-		}
-		if setting.DefaultUseAutoGroup {
-			token.Group = "auto"
-		}
-		if err := token.Insert(); err != nil {
-			common.ApiErrorI18n(c, i18n.MsgCreateDefaultTokenErr)
-			return
-		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

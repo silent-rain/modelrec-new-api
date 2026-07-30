@@ -54,7 +54,7 @@ export function HomeHeader() {
           <div className='flex shrink-0 items-center gap-1.5'>
             <Link
               to='/'
-              className='flex items-center gap-2 text-xl font-bold tracking-tight text-[#ff8700]'
+              className='flex items-center gap-0.5 text-xl font-bold tracking-tight text-[#ff8700]'
             >
               <HeaderLogo
                 src={logo}
