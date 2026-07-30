@@ -25,8 +25,7 @@ import { Button } from '@/components/ui/button'
 
 import { getApiKeyDestination } from '../../lib/navigation'
 import { CapabilityMap } from '../capability-map'
-// TODO: Restore homepage stats after the values are backed by real data.
-// import { Stats } from './stats'
+import { Stats } from './stats'
 
 interface HeroProps {
   isAuthenticated: boolean
@@ -78,7 +77,7 @@ export function Hero(props: HeroProps) {
             </Button>
           </div>
 
-          {/* <Stats /> */}
+          <Stats />
         </div>
 
         <CapabilityMap />
