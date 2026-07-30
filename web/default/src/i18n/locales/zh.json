@@ -5206,6 +5206,14 @@
     "Text conversation": "文本对话",
     "Visual generation": "视觉生成",
     "Test prompts and model responses in real time": "实时验证提示词与模型响应",
-    "Create visual content and track asynchronous tasks": "创作视觉内容并跟踪异步任务"
+    "Create visual content and track asynchronous tasks": "创作视觉内容并跟踪异步任务",
+    "SMS Login": "短信登录",
+    "Allow users to log in with SMS verification codes": "允许用户使用短信验证码登录",
+    "SMS Auto Registration": "短信自动注册",
+    "Automatically create an account after verifying an unregistered phone number": "验证未注册手机号后自动创建账户",
+    "Unregistered phone numbers will create an account after verification.": "未注册手机号验证通过后将自动创建账户。",
+    "Only registered phone numbers can sign in.": "仅已注册的手机号可以登录。",
+    "Account created and signed in!": "账号已创建并登录！",
+    "Password and SMS login are currently unavailable.": "密码登录和短信登录当前均不可用。"
   }
 }

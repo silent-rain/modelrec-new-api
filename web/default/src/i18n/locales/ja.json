@@ -4973,6 +4973,14 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "SMS Login": "SMSログイン",
+    "Allow users to log in with SMS verification codes": "SMS認証コードでのログインを許可します",
+    "SMS Auto Registration": "SMS自動登録",
+    "Automatically create an account after verifying an unregistered phone number": "未登録の電話番号を認証した後、自動的にアカウントを作成します",
+    "Unregistered phone numbers will create an account after verification.": "未登録の電話番号は、認証後にアカウントが作成されます。",
+    "Only registered phone numbers can sign in.": "登録済みの電話番号のみログインできます。",
+    "Account created and signed in!": "アカウントを作成してログインしました！",
+    "Password and SMS login are currently unavailable.": "パスワードログインとSMSログインは現在利用できません。"
   }
 }

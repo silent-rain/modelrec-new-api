@@ -4973,6 +4973,14 @@
     "Zero retention": "Aucune rétention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "SMS Login": "Connexion par SMS",
+    "Allow users to log in with SMS verification codes": "Autoriser les utilisateurs à se connecter avec des codes de vérification par SMS",
+    "SMS Auto Registration": "Inscription automatique par SMS",
+    "Automatically create an account after verifying an unregistered phone number": "Créer automatiquement un compte après vérification d'un numéro de téléphone non enregistré",
+    "Unregistered phone numbers will create an account after verification.": "Les numéros de téléphone non enregistrés créeront un compte après vérification.",
+    "Only registered phone numbers can sign in.": "Seuls les numéros de téléphone enregistrés peuvent se connecter.",
+    "Account created and signed in!": "Compte créé et connexion réussie !",
+    "Password and SMS login are currently unavailable.": "La connexion par mot de passe et par SMS est actuellement indisponible."
   }
 }

@@ -29,6 +29,12 @@ export interface LoginPayload {
   captcha_verify_param?: string
 }
 
+export interface SmsLoginPayload {
+  phone: string
+  verification_code: string
+  aff_code?: string
+}
+
 export type HumanVerificationProvider = 'none' | 'turnstile' | 'aliyun'
 
 export interface HumanVerificationPayload {
@@ -76,6 +82,14 @@ export interface LoginResponse {
   data?: {
     require_2fa?: boolean
     id?: number
+    username?: string
+    display_name?: string
+    role?: number
+    status?: number
+    group?: string
+    auth_method?: string
+    account_created?: boolean
+    onboarding_required?: boolean
   }
 }
 
@@ -153,6 +167,8 @@ export interface SystemStatus {
     register_enabled?: boolean
     password_login_enabled?: boolean
     password_register_enabled?: boolean
+    sms_login_enabled?: boolean
+    sms_auto_register_enabled?: boolean
     custom_oauth_providers?: CustomOAuthProviderInfo[]
     [key: string]: unknown
   }
@@ -201,6 +217,8 @@ export interface SystemStatus {
   register_enabled?: boolean
   password_login_enabled?: boolean
   password_register_enabled?: boolean
+  sms_login_enabled?: boolean
+  sms_auto_register_enabled?: boolean
   custom_oauth_providers?: CustomOAuthProviderInfo[]
   [key: string]: unknown
 }

@@ -5118,6 +5118,14 @@
     "Captcha SceneId": "Captcha SceneId",
     "Your Aliyun Captcha SceneId": "Your Aliyun Captcha SceneId",
     "Captcha SceneId is required": "Captcha SceneId is required",
-    "Aliyun AccessKey credentials remain in model-hub-rs and are not stored here.": "Aliyun AccessKey credentials remain in model-hub-rs and are not stored here."
+    "Aliyun AccessKey credentials remain in model-hub-rs and are not stored here.": "Aliyun AccessKey credentials remain in model-hub-rs and are not stored here.",
+    "SMS Login": "SMS Login",
+    "Allow users to log in with SMS verification codes": "Allow users to log in with SMS verification codes",
+    "SMS Auto Registration": "SMS Auto Registration",
+    "Automatically create an account after verifying an unregistered phone number": "Automatically create an account after verifying an unregistered phone number",
+    "Unregistered phone numbers will create an account after verification.": "Unregistered phone numbers will create an account after verification.",
+    "Only registered phone numbers can sign in.": "Only registered phone numbers can sign in.",
+    "Account created and signed in!": "Account created and signed in!",
+    "Password and SMS login are currently unavailable.": "Password and SMS login are currently unavailable."
   }
 }

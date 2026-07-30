@@ -23,8 +23,11 @@ import type { SystemStatus } from '@/features/auth/types'
 
 import {
   DEFAULT_LOGIN_MODE,
+  getAvailableLoginModes,
   isPasswordLoginAvailable,
   isRegistrationEntryVisible,
+  isSmsAutoRegistrationAvailable,
+  isSmsLoginAvailable,
 } from './login-page-options'
 
 describe('login page options', () => {
@@ -41,6 +44,27 @@ describe('login page options', () => {
     assert.equal(
       isPasswordLoginAvailable({ data: { password_login_enabled: false } }),
       false
+    )
+  })
+
+  test('keeps SMS login independent from password login', () => {
+    assert.equal(isSmsLoginAvailable(null), true)
+    assert.equal(isSmsAutoRegistrationAvailable(null), false)
+    assert.deepEqual(
+      getAvailableLoginModes({
+        sms_login_enabled: true,
+        password_login_enabled: false,
+      }),
+      ['sms']
+    )
+    assert.deepEqual(
+      getAvailableLoginModes({
+        data: {
+          sms_login_enabled: false,
+          password_login_enabled: true,
+        },
+      }),
+      ['password']
     )
   })
 

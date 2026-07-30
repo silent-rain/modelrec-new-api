@@ -34,7 +34,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { login } from '@/features/auth/api'
+import { login, loginWithSms } from '@/features/auth/api'
 import { SIGN_IN_INPUT_CLASS } from '@/features/auth/components/auth-form-styles'
 import { AuthPasswordInput } from '@/features/auth/components/auth-password-input'
 import { HumanVerificationField } from '@/features/auth/components/human-verification-field'
@@ -49,6 +49,11 @@ import {
 import { useAuthRedirect } from '@/features/auth/hooks/use-auth-redirect'
 import { useHumanVerification } from '@/features/auth/hooks/use-human-verification'
 import { useSmsVerification } from '@/features/auth/hooks/use-sms-verification'
+import {
+  getAffiliateCode,
+  removeAffiliateCode,
+  saveAffiliateCode,
+} from '@/features/auth/lib/storage'
 import { beginPasskeyLogin, finishPasskeyLogin } from '@/features/auth/passkey'
 import type { AuthFormProps } from '@/features/auth/types'
 import { useStatus } from '@/hooks/use-status'
@@ -61,8 +66,9 @@ import { cn } from '@/lib/utils'
 
 import {
   DEFAULT_LOGIN_MODE,
-  isPasswordLoginAvailable,
+  getAvailableLoginModes,
   isRegistrationEntryVisible,
+  isSmsAutoRegistrationAvailable,
   type LoginMode,
 } from '../lib/login-page-options'
 import { LoginModeTabs } from './login-mode-tabs'
@@ -92,7 +98,12 @@ export function UserAuthForm({
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
 
-  const passwordLoginEnabled = isPasswordLoginAvailable(status)
+  const smsAutoRegistrationEnabled = isSmsAutoRegistrationAvailable(status)
+  const availableLoginModes = useMemo(
+    () => getAvailableLoginModes(status),
+    [status]
+  )
+  const hasPrimaryLogin = availableLoginModes.length > 0
   const showRegisterEntry = isRegistrationEntryVisible(status)
   const passkeyLoginEnabled = Boolean(
     status?.passkey_login ?? status?.data?.passkey_login
@@ -127,7 +138,7 @@ export function UserAuthForm({
     secondsLeft: smsSecondsLeft,
     isActive: isSmsActive,
     sendCode: sendSmsLogin,
-  } = useSmsVerification()
+  } = useSmsVerification({ getVerification: humanVerification.verify })
   const smsButtonLabel = isSmsActive
     ? t('Resend ({{seconds}}s)', { seconds: smsSecondsLeft })
     : t('Send code')
@@ -142,6 +153,21 @@ export function UserAuthForm({
       .catch(() => setPasskeySupported(false))
   }, [])
 
+  useEffect(() => {
+    const affiliateCode = new URLSearchParams(window.location.search)
+      .get('aff')
+      ?.trim()
+    if (affiliateCode) saveAffiliateCode(affiliateCode)
+  }, [])
+
+  useEffect(() => {
+    if (availableLoginModes.includes(loginMode)) return
+    const nextMode = availableLoginModes[0]
+    if (!nextMode) return
+    setLoginMode(nextMode)
+    form.reset({ username: '', password: '' })
+  }, [availableLoginModes, form, loginMode])
+
   const switchLoginMode = (nextMode: LoginMode) => {
     setLoginMode(nextMode)
     form.reset({ username: '', password: '' })
@@ -152,16 +178,27 @@ export function UserAuthForm({
       toast.error(t('Please agree to the legal terms first'))
       return
     }
-    const verification = await humanVerification.verify()
-    if (!verification) return
+    let verification = {}
+    if (loginMode === 'password') {
+      const result = await humanVerification.verify()
+      if (!result) return
+      verification = result
+    }
 
     setIsLoading(true)
     try {
-      const response = await login({
-        username: data.username,
-        password: data.password,
-        ...verification,
-      })
+      const response =
+        loginMode === 'sms'
+          ? await loginWithSms({
+              phone: data.username.trim(),
+              verification_code: data.password.trim(),
+              aff_code: getAffiliateCode() || undefined,
+            })
+          : await login({
+              username: data.username,
+              password: data.password,
+              ...verification,
+            })
       if (!response.success) {
         toast.error(response.message || t('Login failed'))
         return
@@ -172,7 +209,12 @@ export function UserAuthForm({
       }
 
       await handleLoginSuccess(response.data ?? null, redirectTo)
-      toast.success(t('Welcome back!'))
+      if (response.data?.account_created) {
+        removeAffiliateCode()
+        toast.success(t('Account created and signed in!'))
+      } else {
+        toast.success(t('Welcome back!'))
+      }
     } catch {
       // The global API interceptor reports transport errors.
     } finally {
@@ -244,9 +286,15 @@ export function UserAuthForm({
         className={cn('grid gap-4', className)}
         {...props}
       >
-        {passwordLoginEnabled ? (
+        {hasPrimaryLogin ? (
           <>
-            <LoginModeTabs mode={loginMode} onModeChange={switchLoginMode} />
+            {availableLoginModes.length > 1 ? (
+              <LoginModeTabs
+                mode={loginMode}
+                modes={availableLoginModes}
+                onModeChange={switchLoginMode}
+              />
+            ) : null}
 
             <FormField
               control={form.control}
@@ -335,10 +383,20 @@ export function UserAuthForm({
                 </FormItem>
               )}
             />
+
+            {loginMode === 'sms' ? (
+              <p className='text-muted-foreground -mt-1 text-xs leading-5'>
+                {smsAutoRegistrationEnabled
+                  ? t(
+                      'Unregistered phone numbers will create an account after verification.'
+                    )
+                  : t('Only registered phone numbers can sign in.')}
+              </p>
+            ) : null}
           </>
         ) : (
           <div className='rounded-2xl border border-[#ecefeb] bg-[#f7f9f7] p-4 text-sm text-[#6f7874] dark:border-white/10 dark:bg-white/5 dark:text-white/65'>
-            {t('Password login is currently unavailable.')}
+            {t('Password and SMS login are currently unavailable.')}
           </div>
         )}
 
@@ -349,14 +407,16 @@ export function UserAuthForm({
           variant='inline'
         />
 
-        {passwordLoginEnabled ? (
+        {hasPrimaryLogin ? (
           <>
             <HumanVerificationField verification={humanVerification} />
 
             <Button
               type='submit'
               disabled={
-                isLoading || legalConsentMissing || !humanVerification.isReady
+                isLoading ||
+                legalConsentMissing ||
+                (loginMode === 'password' && !humanVerification.isReady)
               }
               className='sf-btn-primary h-12 w-full rounded-xl border-0 text-base font-semibold transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:shadow-none'
             >
@@ -364,18 +424,14 @@ export function UserAuthForm({
               {t('Sign in now')}
             </Button>
 
-            {loginMode === 'password' || showRegisterEntry ? (
+            {loginMode === 'password' ? (
               <div className='-mt-1 flex min-h-5 items-center justify-between gap-4 text-sm'>
-                {loginMode === 'password' ? (
-                  <Link
-                    to='/forgot-password'
-                    className='text-primary focus-visible:ring-primary/40 rounded-sm transition-opacity outline-none hover:opacity-80 focus-visible:ring-2'
-                  >
-                    {t('Forgot password?')}
-                  </Link>
-                ) : (
-                  <span aria-hidden='true' />
-                )}
+                <Link
+                  to='/forgot-password'
+                  className='text-primary focus-visible:ring-primary/40 rounded-sm transition-opacity outline-none hover:opacity-80 focus-visible:ring-2'
+                >
+                  {t('Forgot password?')}
+                </Link>
                 {showRegisterEntry ? (
                   <Link
                     to='/sign-up'

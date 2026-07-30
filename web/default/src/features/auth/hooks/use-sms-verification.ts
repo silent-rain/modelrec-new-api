@@ -25,10 +25,10 @@ import { useCountdown } from '@/hooks/use-countdown'
 
 import { sendSmsCode } from '../api'
 import { SMS_VERIFICATION_COUNTDOWN } from '../constants'
+import type { HumanVerificationPayload } from '../types'
 
 interface UseSmsVerificationOptions {
-  turnstileToken?: string
-  validateTurnstile?: () => boolean
+  getVerification?: () => Promise<HumanVerificationPayload | null>
 }
 
 /**
@@ -36,6 +36,7 @@ interface UseSmsVerificationOptions {
  */
 export function useSmsVerification(options?: UseSmsVerificationOptions) {
   const [isSending, setIsSending] = useState(false)
+  const [hasSentCode, setHasSentCode] = useState(false)
   const {
     secondsLeft,
     isActive,
@@ -58,23 +59,19 @@ export function useSmsVerification(options?: UseSmsVerificationOptions) {
       return false
     }
 
-    // Validate turnstile if validation function is provided
-    if (options?.validateTurnstile && !options.validateTurnstile()) {
-      return false
-    }
+    const verification = options?.getVerification
+      ? await options.getVerification()
+      : undefined
+    if (options?.getVerification && !verification) return false
 
     setIsSending(true)
     try {
-      const res = await sendSmsCode(
-        phoneNumber,
-        undefined,
-        undefined,
-        options?.turnstileToken
-      )
+      const res = await sendSmsCode(phoneNumber, verification ?? undefined)
       // 后端返回 {code:0, message:"ok", data:{success:true, message:"..."}}
       // 以 code===0 为成功判定，同时兼容 {success:true} 格式
       const isSuccess = res?.code === 0 || res?.success === true
       if (isSuccess) {
+        setHasSentCode(true)
         startCountdown()
         toast.success(i18next.t('SMS verification code sent'))
         return true
@@ -109,6 +106,7 @@ export function useSmsVerification(options?: UseSmsVerificationOptions) {
     isSending,
     secondsLeft,
     isActive,
+    hasSentCode,
     sendCode,
   }
 }
