@@ -62,12 +62,14 @@ describe('header layout contract', () => {
   })
 
   test('matches the prototype navigation typography', async () => {
-    const [homeHeader, publicHeader, theme, stylesheet] = await Promise.all([
-      readSource('features/home/components/home-header.tsx'),
-      readSource('components/layout/components/public-header.tsx'),
-      readSource('styles/theme.css'),
-      readSource('styles/index.css'),
-    ])
+    const [homeHeader, publicHeader, systemBrand, theme, stylesheet] =
+      await Promise.all([
+        readSource('features/home/components/home-header.tsx'),
+        readSource('components/layout/components/public-header.tsx'),
+        readSource('components/layout/components/system-brand.tsx'),
+        readSource('styles/theme.css'),
+        readSource('styles/index.css'),
+      ])
 
     expect(theme).toContain('--font-navigation:')
     expect(theme).toContain("'Inter Variable', 'Inter', system-ui")
@@ -80,6 +82,12 @@ describe('header layout contract', () => {
       expect(header).not.toContain('text-[13px] font-medium')
     }
 
+    expect(homeHeader).toContain(
+      'flex items-center gap-0.5 text-xl font-bold tracking-tight'
+    )
+    expect(systemBrand).toContain(
+      'inline-flex h-7 items-center gap-0.5 rounded-md'
+    )
     expect(publicHeader).toContain(
       'text-foreground nav-link-active font-semibold'
     )
