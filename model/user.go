@@ -459,7 +459,9 @@ func (user *User) InsertWithTx(tx *gorm.DB, inviterId int) error {
 
 	// 初始化用户设置
 	if user.Setting == "" {
-		defaultSetting := dto.UserSetting{}
+		defaultSetting := dto.UserSetting{
+			SidebarModules: generateDefaultSidebarConfigForRole(user.Role),
+		}
 		user.SetSetting(defaultSetting)
 	}
 
@@ -1090,6 +1092,19 @@ func GetUserByPhone(phone string) (*User, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("该手机号未注册")
 		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByPhoneUnscoped includes soft-deleted users so authentication flows
+// never recreate an account whose phone number is still reserved.
+func GetUserByPhoneUnscoped(phone string) (*User, error) {
+	if phone == "" {
+		return nil, errors.New("phone is empty")
+	}
+	var user User
+	if err := DB.Unscoped().Where("phone = ?", phone).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
