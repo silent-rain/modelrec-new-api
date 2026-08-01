@@ -16,28 +16,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { Dialog } from '@/components/dialog'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { NotificationPopover } from '@/components/notification-popover'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useNotifications } from '@/hooks/use-notifications'
-import { useSystemConfig } from '@/hooks/use-system-config'
-import { useTopNavLinks } from '@/hooks/use-top-nav-links'
-import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/auth-store'
+import { Dialog } from "@/components/dialog";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { NotificationPopover } from "@/components/notification-popover";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNotifications } from "@/hooks/use-notifications";
+import { useSystemConfig } from "@/hooks/use-system-config";
+import { useTopNavLinks } from "@/hooks/use-top-nav-links";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
 
-import { defaultTopNavLinks } from '../config/top-nav.config'
-import type { TopNavLink } from '../types'
-import { HeaderLogo } from './header-logo'
+import { defaultTopNavLinks } from "../config/top-nav.config";
+import type { TopNavLink } from "../types";
+import { HeaderLogo } from "./header-logo";
 
-const AUTH_PROMPT_SECONDS = 5
+const AUTH_PROMPT_SECONDS = 5;
 
 /**
  * 判断当前路径是否匹配链接（支持子路由）
@@ -48,57 +48,57 @@ const AUTH_PROMPT_SECONDS = 5
 function isPathActive(
   pathname: string,
   href: string,
-  allHrefs?: string[]
+  allHrefs?: string[],
 ): boolean {
-  if (href === '/') return pathname === '/'
-  if (pathname === href || pathname.startsWith(`${href}/`)) return true
+  if (href === "/") return pathname === "/";
+  if (pathname === href || pathname.startsWith(`${href}/`)) return true;
 
   // /dashboard 作为已认证内部页面的兜底激活项（覆盖 /dashboard 及其子路由，
   // 例如 Console 链接指向 /dashboard/models 时，用量之外的其他内部页也应保持高亮）
   if (
-    (href === '/dashboard' || href.startsWith('/dashboard/')) &&
+    (href === "/dashboard" || href.startsWith("/dashboard/")) &&
     allHrefs &&
     allHrefs.length > 0
   ) {
     // 主页 "/" 有自己的导航项，不应触发控制台兜底
-    if (pathname === '/') return false
-    const otherHrefs = allHrefs.filter((h) => h !== '/' && h !== '/dashboard')
+    if (pathname === "/") return false;
+    const otherHrefs = allHrefs.filter((h) => h !== "/" && h !== "/dashboard");
     const matchesOther = otherHrefs.some(
-      (h) => pathname === h || pathname.startsWith(`${h}/`)
-    )
+      (h) => pathname === h || pathname.startsWith(`${h}/`),
+    );
     const authExcluded = [
-      '/sign-in',
-      '/sign-up',
-      '/forgot-password',
-      '/reset-password',
-    ]
-    const isAuthPage = authExcluded.some((p) => pathname.startsWith(p))
-    return !matchesOther && !isAuthPage
+      "/sign-in",
+      "/sign-up",
+      "/forgot-password",
+      "/reset-password",
+    ];
+    const isAuthPage = authExcluded.some((p) => pathname.startsWith(p));
+    return !matchesOther && !isAuthPage;
   }
 
-  return false
+  return false;
 }
 
 type AuthPromptTarget = {
-  title: string
-  href: string
-}
+  title: string;
+  href: string;
+};
 
 export interface PublicHeaderProps {
-  navLinks?: TopNavLink[]
-  mobileLinks?: TopNavLink[]
-  navContent?: React.ReactNode
-  showThemeSwitch?: boolean
-  showLanguageSwitcher?: boolean
-  logo?: React.ReactNode
-  siteName?: string
-  homeUrl?: string
-  leftContent?: React.ReactNode
-  rightContent?: React.ReactNode
-  showNavigation?: boolean
-  showAuthButtons?: boolean
-  showNotifications?: boolean
-  className?: string
+  navLinks?: TopNavLink[];
+  mobileLinks?: TopNavLink[];
+  navContent?: React.ReactNode;
+  showThemeSwitch?: boolean;
+  showLanguageSwitcher?: boolean;
+  logo?: React.ReactNode;
+  siteName?: string;
+  homeUrl?: string;
+  leftContent?: React.ReactNode;
+  rightContent?: React.ReactNode;
+  showNavigation?: boolean;
+  showAuthButtons?: boolean;
+  showNotifications?: boolean;
+  className?: string;
 }
 
 export function PublicHeader(props: PublicHeaderProps) {
@@ -108,175 +108,172 @@ export function PublicHeader(props: PublicHeaderProps) {
     showLanguageSwitcher = true,
     logo: customLogo,
     siteName: customSiteName,
-    homeUrl = '/',
+    homeUrl = "/",
     showAuthButtons = true,
     showNotifications = true,
-  } = props
-  const [mobileOpen, setMobileOpen] = useState(false)
+  } = props;
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [authPromptTarget, setAuthPromptTarget] =
-    useState<AuthPromptTarget | null>(null)
+    useState<AuthPromptTarget | null>(null);
   const [authPromptSecondsLeft, setAuthPromptSecondsLeft] =
-    useState(AUTH_PROMPT_SECONDS)
-  const { auth } = useAuthStore()
+    useState(AUTH_PROMPT_SECONDS);
+  const { auth } = useAuthStore();
   const {
     systemName,
     logo: systemLogo,
     loading,
     logoLoaded,
-  } = useSystemConfig()
-  const dynamicLinks = useTopNavLinks()
-  const notifications = useNotifications()
-  const routerState = useRouterState()
-  const pathname = routerState.location.pathname
-  const { t } = useTranslation()
-  const navigate = useNavigate()
+  } = useSystemConfig();
+  const dynamicLinks = useTopNavLinks();
+  const notifications = useNotifications();
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const user = auth.user
-  const isAuthenticated = !!user
-  const displaySiteName = customSiteName || systemName
-  const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
-  const allHrefs = links.map((l) => l.href)
+  const user = auth.user;
+  const isAuthenticated = !!user;
+  const displaySiteName = customSiteName || systemName;
+  const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks;
+  const allHrefs = links.map((l) => l.href);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
-      document.body.style.overflow = ''
-    }
-  }, [mobileOpen])
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
-    if (!authPromptTarget) return
+    if (!authPromptTarget) return;
 
     const intervalId = window.setInterval(() => {
-      setAuthPromptSecondsLeft((seconds) => Math.max(seconds - 1, 0))
-    }, 1000)
+      setAuthPromptSecondsLeft((seconds) => Math.max(seconds - 1, 0));
+    }, 1000);
 
     const timeoutId = window.setTimeout(() => {
-      const redirect = authPromptTarget.href
-      setAuthPromptTarget(null)
-      navigate({ to: '/sign-in', search: { redirect } })
-    }, AUTH_PROMPT_SECONDS * 1000)
+      const redirect = authPromptTarget.href;
+      setAuthPromptTarget(null);
+      navigate({ to: "/sign-in", search: { redirect } });
+    }, AUTH_PROMPT_SECONDS * 1000);
 
     return () => {
-      window.clearInterval(intervalId)
-      window.clearTimeout(timeoutId)
-    }
-  }, [authPromptTarget, navigate])
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [authPromptTarget, navigate]);
 
   const closeAuthPrompt = useCallback(() => {
-    setAuthPromptTarget(null)
-    setAuthPromptSecondsLeft(AUTH_PROMPT_SECONDS)
-  }, [])
+    setAuthPromptTarget(null);
+    setAuthPromptSecondsLeft(AUTH_PROMPT_SECONDS);
+  }, []);
 
   const navigateToSignIn = useCallback(() => {
-    const redirect = authPromptTarget?.href || '/'
-    setAuthPromptTarget(null)
-    navigate({ to: '/sign-in', search: { redirect } })
-  }, [authPromptTarget?.href, navigate])
+    const redirect = authPromptTarget?.href || "/";
+    setAuthPromptTarget(null);
+    navigate({ to: "/sign-in", search: { redirect } });
+  }, [authPromptTarget?.href, navigate]);
 
   const handleNavLinkClick = useCallback(
     (
       event: React.MouseEvent<HTMLAnchorElement>,
       link: TopNavLink,
-      closeMobile = false
+      closeMobile = false,
     ) => {
       if (link.disabled) {
-        event.preventDefault()
-        return
+        event.preventDefault();
+        return;
       }
 
       if (link.requiresAuth) {
-        event.preventDefault()
+        event.preventDefault();
         if (closeMobile) {
-          setMobileOpen(false)
+          setMobileOpen(false);
         }
-        setAuthPromptSecondsLeft(AUTH_PROMPT_SECONDS)
+        setAuthPromptSecondsLeft(AUTH_PROMPT_SECONDS);
         setAuthPromptTarget({
           title: t(link.title),
           href: link.href,
-        })
-        return
+        });
+        return;
       }
 
       if (closeMobile) {
-        setMobileOpen(false)
+        setMobileOpen(false);
       }
     },
-    [t]
-  )
+    [t],
+  );
 
-  let logoContent: React.ReactNode
+  let logoContent: React.ReactNode;
   if (loading) {
-    logoContent = <Skeleton className='size-full rounded-lg' />
+    logoContent = <Skeleton className="size-full rounded-lg" />;
   } else if (customLogo) {
-    logoContent = customLogo
+    logoContent = customLogo;
   } else {
     logoContent = (
       <HeaderLogo
         src={systemLogo}
         loading={loading}
         logoLoaded={logoLoaded}
-        className='size-full rounded-lg object-contain'
+        className="size-full rounded-lg object-contain"
       />
-    )
+    );
   }
 
-  let desktopAuthControl: React.ReactNode
+  let desktopAuthControl: React.ReactNode;
   if (loading) {
-    desktopAuthControl = <Skeleton className='h-8 w-20 rounded-lg' />
+    desktopAuthControl = <Skeleton className="h-8 w-20 rounded-lg" />;
   } else if (isAuthenticated) {
-    desktopAuthControl = <ProfileDropdown />
+    desktopAuthControl = <ProfileDropdown />;
   } else {
     desktopAuthControl = (
       <Button
-        size='sm'
-        className='sf-btn-primary h-8 rounded-lg px-3.5 text-xs font-medium'
-        render={<Link to='/sign-in' />}
+        size="sm"
+        className="sf-btn-primary h-8 rounded-lg px-3.5 text-xs font-medium"
+        render={<Link to="/sign-in" />}
       >
-        {t('Sign in')}
+        {t("Sign in")}
       </Button>
-    )
+    );
   }
 
   return (
     <>
-      <header className='pointer-events-none sticky top-0 z-50 h-[var(--header-height,4rem)]'>
-        <nav className='sf-header-transparent pointer-events-auto flex h-full items-center justify-between px-6 [font-family:var(--font-navigation)] backdrop-blur-xl'>
+      <header className="pointer-events-none sticky top-0 z-50 h-[var(--header-height,4rem)]">
+        <nav className="sf-header-transparent pointer-events-auto flex h-full items-center justify-between px-6 [font-family:var(--font-navigation)] backdrop-blur-xl">
           {/* Logo */}
-          <Link
-            to={homeUrl}
-            className='group flex shrink-0 items-center gap-2.5'
-          >
-            <div className='flex size-7 shrink-0 items-center justify-center transition-all duration-300 group-hover:scale-105'>
+          <Link to={homeUrl} className="group flex shrink-0 items-center gap-0">
+            <div className="flex size-7 shrink-0 items-center justify-center transition-all duration-300 group-hover:scale-105">
               {logoContent}
             </div>
-            <span className='text-primary text-xl font-bold tracking-tight'>
-              {loading ? <Skeleton className='h-4 w-16' /> : displaySiteName}
+            <span className="text-primary text-xl font-bold tracking-tight">
+              {loading ? <Skeleton className="h-4 w-16" /> : displaySiteName}
             </span>
           </Link>
 
           {/* Desktop nav */}
-          <div className='top-nav-links hidden items-center gap-0.5 sm:flex'>
+          <div className="top-nav-links hidden items-center gap-0.5 sm:flex">
             {links.map((link) => {
-              const isActive = isPathActive(pathname, link.href, allHrefs)
+              const isActive = isPathActive(pathname, link.href, allHrefs);
               if (link.external) {
                 return (
                   <a
                     key={link.href}
                     href={link.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-disabled={link.disabled}
                     tabIndex={link.disabled ? -1 : undefined}
                     onClick={(event) => handleNavLinkClick(event, link)}
                     className={cn(
-                      'text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200',
-                      link.disabled && 'pointer-events-none opacity-50'
+                      "text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200",
+                      link.disabled && "pointer-events-none opacity-50",
                     )}
                   >
                     {t(link.title)}
                   </a>
-                )
+                );
               }
               return (
                 <Link
@@ -285,20 +282,20 @@ export function PublicHeader(props: PublicHeaderProps) {
                   disabled={link.disabled}
                   onClick={(event) => handleNavLinkClick(event, link)}
                   className={cn(
-                    'rounded-lg px-3 py-1.5 text-sm transition-colors duration-200',
+                    "rounded-lg px-3 py-1.5 text-sm transition-colors duration-200",
                     isActive
-                      ? 'text-foreground nav-link-active font-semibold'
-                      : 'text-muted-foreground hover:text-foreground font-medium',
-                    link.disabled && 'pointer-events-none opacity-50'
+                      ? "text-foreground nav-link-active font-semibold"
+                      : "text-muted-foreground hover:text-foreground font-medium",
+                    link.disabled && "pointer-events-none opacity-50",
                   )}
                 >
                   {t(link.title)}
                 </Link>
-              )
+              );
             })}
 
             {(showLanguageSwitcher || showThemeSwitch || showNotifications) && (
-              <div className='bg-border/40 mx-2 h-4 w-px' />
+              <div className="bg-border/40 mx-2 h-4 w-px" />
             )}
 
             {showLanguageSwitcher && <LanguageSwitcher />}
@@ -318,43 +315,43 @@ export function PublicHeader(props: PublicHeaderProps) {
 
             {showAuthButtons && (
               <>
-                <div className='bg-border/40 mx-1 h-4 w-px' />
+                <div className="bg-border/40 mx-1 h-4 w-px" />
                 {desktopAuthControl}
               </>
             )}
           </div>
 
           {/* Mobile: compact actions + hamburger */}
-          <div className='sf-public-mobile-actions items-center gap-2'>
+          <div className="sf-public-mobile-actions items-center gap-2">
             {showThemeSwitch && <ThemeSwitch />}
             {showAuthButtons && !loading && isAuthenticated && (
               <ProfileDropdown />
             )}
             <Button
-              type='button'
-              variant='ghost'
-              size='icon'
-              className='size-9'
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-9"
               onClick={() => setMobileOpen((v) => !v)}
-              aria-label={t('Toggle navigation menu')}
+              aria-label={t("Toggle navigation menu")}
             >
-              <div className='relative size-4'>
+              <div className="relative size-4">
                 <span
                   className={cn(
-                    'absolute inset-x-0 block h-[1.5px] origin-center rounded-full bg-current transition-all duration-300',
-                    mobileOpen ? 'top-[7px] rotate-45' : 'top-[3px]'
+                    "absolute inset-x-0 block h-[1.5px] origin-center rounded-full bg-current transition-all duration-300",
+                    mobileOpen ? "top-[7px] rotate-45" : "top-[3px]",
                   )}
                 />
                 <span
                   className={cn(
-                    'absolute inset-x-0 top-[7px] block h-[1.5px] rounded-full bg-current transition-all duration-300',
-                    mobileOpen ? 'scale-x-0 opacity-0' : 'opacity-100'
+                    "absolute inset-x-0 top-[7px] block h-[1.5px] rounded-full bg-current transition-all duration-300",
+                    mobileOpen ? "scale-x-0 opacity-0" : "opacity-100",
                   )}
                 />
                 <span
                   className={cn(
-                    'absolute inset-x-0 block h-[1.5px] origin-center rounded-full bg-current transition-all duration-300',
-                    mobileOpen ? 'top-[7px] -rotate-45' : 'top-[11px]'
+                    "absolute inset-x-0 block h-[1.5px] origin-center rounded-full bg-current transition-all duration-300",
+                    mobileOpen ? "top-[7px] -rotate-45" : "top-[11px]",
                   )}
                 />
               </div>
@@ -366,36 +363,36 @@ export function PublicHeader(props: PublicHeaderProps) {
       {/* Mobile full-screen overlay */}
       <div
         className={cn(
-          'bg-background/98 fixed inset-0 z-40 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:pointer-events-none sm:hidden',
+          "bg-background/98 fixed inset-0 z-40 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:pointer-events-none sm:hidden",
           mobileOpen
-            ? 'pointer-events-auto opacity-100'
-            : 'pointer-events-none opacity-0'
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0",
         )}
       >
-        <div className='flex h-full flex-col justify-between px-8 pt-20 pb-10'>
-          <nav className='top-nav-links flex flex-col gap-1'>
+        <div className="flex h-full flex-col justify-between px-8 pt-20 pb-10">
+          <nav className="top-nav-links flex flex-col gap-1">
             {links.map((link, i) => {
-              const isActive = isPathActive(pathname, link.href, allHrefs)
+              const isActive = isPathActive(pathname, link.href, allHrefs);
               const linkClassName = cn(
-                'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                "flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 mobileOpen
-                  ? 'translate-y-0 opacity-100'
-                  : 'translate-y-4 opacity-0',
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-4 opacity-0",
                 isActive
-                  ? 'text-foreground nav-link-active'
-                  : 'text-muted-foreground',
-                link.disabled && 'pointer-events-none opacity-50'
-              )
+                  ? "text-foreground nav-link-active"
+                  : "text-muted-foreground",
+                link.disabled && "pointer-events-none opacity-50",
+              );
               const transitionStyle = {
-                transitionDelay: mobileOpen ? `${100 + i * 50}ms` : '0ms',
-              }
+                transitionDelay: mobileOpen ? `${100 + i * 50}ms` : "0ms",
+              };
               if (link.external) {
                 return (
                   <a
                     key={link.href}
                     href={link.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-disabled={link.disabled}
                     tabIndex={link.disabled ? -1 : undefined}
                     onClick={(event) => handleNavLinkClick(event, link, true)}
@@ -404,7 +401,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                   >
                     {t(link.title)}
                   </a>
-                )
+                );
               }
               return (
                 <Link
@@ -417,26 +414,26 @@ export function PublicHeader(props: PublicHeaderProps) {
                 >
                   {t(link.title)}
                 </Link>
-              )
+              );
             })}
           </nav>
 
           <div
             className={cn(
-              'flex flex-col gap-3 transition-all duration-500',
+              "flex flex-col gap-3 transition-all duration-500",
               mobileOpen
-                ? 'translate-y-0 opacity-100'
-                : 'translate-y-4 opacity-0'
+                ? "translate-y-0 opacity-100"
+                : "translate-y-4 opacity-0",
             )}
-            style={{ transitionDelay: mobileOpen ? '250ms' : '0ms' }}
+            style={{ transitionDelay: mobileOpen ? "250ms" : "0ms" }}
           >
             {showAuthButtons && (
               <Link
-                to={isAuthenticated ? '/dashboard' : '/sign-in'}
+                to={isAuthenticated ? "/dashboard" : "/sign-in"}
                 onClick={() => setMobileOpen(false)}
-                className='sf-btn-primary inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80'
+                className="sf-btn-primary inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80"
               >
-                {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
+                {isAuthenticated ? t("Go to Dashboard") : t("Sign in")}
               </Link>
             )}
           </div>
@@ -447,30 +444,30 @@ export function PublicHeader(props: PublicHeaderProps) {
         open={!!authPromptTarget}
         onOpenChange={(open) => {
           if (!open) {
-            closeAuthPrompt()
+            closeAuthPrompt();
           }
         }}
-        title={t('Sign in required')}
-        description={t('Please sign in to view {{module}}.', {
-          module: authPromptTarget?.title || '',
+        title={t("Sign in required")}
+        description={t("Please sign in to view {{module}}.", {
+          module: authPromptTarget?.title || "",
         })}
-        contentClassName='sm:max-w-md'
-        contentHeight='auto'
+        contentClassName="sm:max-w-md"
+        contentHeight="auto"
         footer={
           <>
-            <Button variant='outline' onClick={closeAuthPrompt}>
-              {t('Cancel')}
+            <Button variant="outline" onClick={closeAuthPrompt}>
+              {t("Cancel")}
             </Button>
-            <Button onClick={navigateToSignIn}>{t('Sign in now')}</Button>
+            <Button onClick={navigateToSignIn}>{t("Sign in now")}</Button>
           </>
         }
       >
-        <div className='bg-muted/40 text-muted-foreground rounded-lg px-3 py-2 text-sm'>
-          {t('Redirecting to sign in in {{seconds}} seconds.', {
+        <div className="bg-muted/40 text-muted-foreground rounded-lg px-3 py-2 text-sm">
+          {t("Redirecting to sign in in {{seconds}} seconds.", {
             seconds: authPromptSecondsLeft,
           })}
         </div>
       </Dialog>
     </>
-  )
+  );
 }
