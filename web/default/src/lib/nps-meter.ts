@@ -16,60 +16,40 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from "@/stores/auth-store";
 
-const NPS_KEY = 'e6da5062ad4111b1'
-const NPS_SCRIPT_SRC = 'https://static.npsmeter.cn/npsmeter'
-const NPS_SV = '1.02'
+const NPS_KEY = "e6da5062ad4111b1";
 
-interface NpsMeterQueue {
-  (...args: unknown[]): void
-  q?: unknown[]
-}
-
-let scriptLoaded = false
-
-function loadNpsScript() {
-  if (scriptLoaded) return
-  scriptLoaded = true
-
-  const w = window as unknown as Record<string, NpsMeterQueue>
-  const d = document
-
-  w.npsmeter =
-    w.npsmeter ||
-    function (...args: unknown[]) {
-      ;(w.npsmeter.q = w.npsmeter.q || []).push(args)
-    }
-  ;(window as unknown as { _npsSettings: Record<string, string> })._npsSettings =
-    { npssv: NPS_SV }
-
-  const head = d.getElementsByTagName('head')[0]
-  const script = d.createElement('script')
-  script.async = 1
-  script.src =
-    NPS_SCRIPT_SRC +
-    '.js?sv=' +
-    (window as unknown as { _npsSettings: Record<string, string> })._npsSettings
-      .npssv +
-    '&npsid=' +
-    (window as unknown as { _npsSettings: Record<string, string> })._npsSettings
-      .npsid
-  head.appendChild(script)
-}
-
-// Loads the NPS meter (用户调研) script once and triggers the survey with
-// the current user's identity when available.
+// 直接使用 npsmeter 官方注入脚本，不做任何改写。
+// 仅将系统的 user_id / user_name 赋值到 npsmeter({...}) 调用中。
 export function initNpsMeter() {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return
+  if (typeof window === "undefined" || typeof document === "undefined") return;
 
-  loadNpsScript()
+  const user = useAuthStore.getState().auth.user;
+  const userId = user?.id != null ? String(user.id) : "";
+  const userName = user?.display_name || user?.username || "";
 
-  const w = window as unknown as { npsmeter?: NpsMeterQueue }
-  const user = useAuthStore.getState().auth.user
-  w.npsmeter?.({
-    key: NPS_KEY,
-    user_id: user?.id != null ? String(user.id) : '',
-    user_name: user?.display_name || user?.username || '',
-  })
+  // 保持与官方脚本等价的类型：npsmeter 既是一个函数，又挂载队列属性 q
+  const a = window as unknown as {
+    npsmeter: ((...args: unknown[]) => void) & { q?: unknown[] };
+    _npsSettings?: Record<string, string>;
+  };
+  const b = document;
+  const c = "https://static.npsmeter.cn/npsmeter";
+  const d = ".js?sv=";
+  const e = b.getElementsByTagName("head")[0];
+  const f = b.createElement("script");
+
+  a.npsmeter =
+    a.npsmeter ||
+    function () {
+      (a.npsmeter.q = a.npsmeter.q || []).push(arguments);
+    };
+  a._npsSettings = { npssv: "1.02" };
+
+  f.async = true;
+  f.src = c + d + a._npsSettings.npssv + "&npsid=" + a._npsSettings.npsid;
+  e.appendChild(f);
+
+  a.npsmeter({ key: NPS_KEY, user_id: userId, user_name: userName });
 }
