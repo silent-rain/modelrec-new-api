@@ -190,9 +190,67 @@ func sizeToResolution(size string) (string, error) {
 	return "", fmt.Errorf("invalid size: %s", size)
 }
 
+// applyWanFlatMetadata 兼容 wan2.6/wan2.5 等模型的扁平 metadata 传参：
+// 将顶层 key（如 negative_prompt / audio_url / shot_type / audio / template / seed）映射到对应的 input/parameters 层。
+func applyWanFlatMetadata(metadata map[string]any, aliReq *AliVideoRequest) {
+	inputKeys := map[string]string{
+		"negative_prompt": "negative_prompt",
+		"audio_url":       "audio_url",
+		"template":        "template",
+	}
+	paramKeys := map[string]string{
+		"audio": "audio",
+		"seed":  "seed",
+	}
+	for k, v := range metadata {
+		if target, ok := inputKeys[k]; ok {
+			applyWanInputValue(aliReq, target, v)
+		} else if target, ok := paramKeys[k]; ok {
+			applyWanParamValue(aliReq, target, v)
+		}
+	}
+}
+
+func applyWanInputValue(aliReq *AliVideoRequest, field string, v any) {
+	switch field {
+	case "negative_prompt":
+		if s, ok := v.(string); ok {
+			aliReq.Input.NegativePrompt = s
+		}
+	case "audio_url":
+		if s, ok := v.(string); ok {
+			aliReq.Input.AudioURL = s
+		}
+	case "template":
+		if s, ok := v.(string); ok {
+			aliReq.Input.Template = s
+		}
+	}
+}
+
+func applyWanParamValue(aliReq *AliVideoRequest, field string, v any) {
+	if aliReq.Parameters == nil {
+		aliReq.Parameters = &AliVideoParameters{}
+	}
+	switch field {
+	case "audio":
+		if b, ok := v.(bool); ok {
+			aliReq.Parameters.Audio = lo.ToPtr(b)
+		}
+	case "seed":
+		if n, ok := v.(float64); ok {
+			aliReq.Parameters.Seed = int(n)
+		}
+	}
+}
+
 func ProcessAliOtherRatios(aliReq *AliVideoRequest) (map[string]float64, error) {
 	otherRatios := make(map[string]float64)
 	aliRatios := map[string]map[string]float64{
+		"wan2.6-i2v-flash": {
+			"720P":  1,
+			"1080P": 1 / 0.6,
+		},
 		"wan2.6-i2v": {
 			"720P":  1,
 			"1080P": 1 / 0.6,
@@ -257,11 +315,18 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 	if info.IsModelMapped {
 		upstreamModel = info.UpstreamModelName
 	}
+	// 首帧图片输入：优先取 images[0]，其次兼容 input_reference / image 字段
+	imgURL := req.InputReference
+	if len(req.Images) > 0 {
+		imgURL = req.Images[0]
+	} else if req.Image != "" {
+		imgURL = req.Image
+	}
 	aliReq := &AliVideoRequest{
 		Model: upstreamModel,
 		Input: AliVideoInput{
 			Prompt: req.Prompt,
-			ImgURL: req.InputReference,
+			ImgURL: imgURL,
 		},
 		Parameters: &AliVideoParameters{
 			PromptExtend: true, // 默认开启智能改写
@@ -287,7 +352,7 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 		}
 	} else {
 		// 根据模型设置默认分辨率
-		if strings.Contains(req.Model, "t2v") { // image to video
+		if strings.Contains(req.Model, "t2v") { // text to video
 			if strings.HasPrefix(req.Model, "wan2.5") {
 				aliReq.Parameters.Size = "1920*1080"
 			} else if strings.HasPrefix(req.Model, "wan2.2") {
@@ -334,6 +399,8 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 		} else {
 			return nil, errors.Wrap(err, "marshal metadata failed")
 		}
+		// 兼容 wan2.6/wan2.5 等模型的扁平参数：自动将顶层 key 映射到 input/parameters 层
+		applyWanFlatMetadata(req.Metadata, aliReq)
 	}
 
 	if aliReq.Model != upstreamModel {
