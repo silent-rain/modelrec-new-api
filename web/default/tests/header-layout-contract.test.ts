@@ -105,6 +105,20 @@ describe('header layout contract', () => {
     )
   })
 
+  test('keeps language and theme controls available in the homepage header', async () => {
+    const [homeHeader, stylesheet] = await Promise.all([
+      readSource('features/home/components/home-header.tsx'),
+      readSource('styles/index.css'),
+    ])
+
+    expect(homeHeader.match(/<LanguageSwitcher \/>/g)).toHaveLength(2)
+    expect(homeHeader.match(/<ThemeSwitch \/>/g)).toHaveLength(2)
+    expect(homeHeader).toContain(
+      "className='sf-home-mobile-actions ml-auto shrink-0 items-center gap-1'"
+    )
+    expect(stylesheet).toContain('.sf-home-mobile-actions')
+  })
+
   test('removes fixed-header compensation from public page content', async () => {
     const [layout, pricing, rankings, hero, docs] = await Promise.all([
       readSource('components/layout/components/public-layout.tsx'),

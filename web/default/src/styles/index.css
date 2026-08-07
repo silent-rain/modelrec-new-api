@@ -865,6 +865,10 @@ For commercial licensing, please contact support@quantumnous.com
   display: flex;
 }
 
+.sf-home-mobile-actions {
+  display: flex;
+}
+
 .sf-public-mobile-actions {
   display: flex;
 }
@@ -876,7 +880,8 @@ For commercial licensing, please contact support@quantumnous.com
 }
 
 @media (min-width: 64rem) {
-  .sf-home-menu-trigger {
+  .sf-home-menu-trigger,
+  .sf-home-mobile-actions {
     display: none !important;
   }
 }
