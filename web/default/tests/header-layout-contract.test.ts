@@ -92,10 +92,13 @@ describe('header layout contract', () => {
     }
 
     expect(homeHeader).toContain(
-      'flex items-center gap-0.5 text-xl font-bold tracking-tight'
+      'flex items-center gap-0 text-xl font-bold tracking-tight'
     )
     expect(systemBrand).toContain(
-      'inline-flex h-7 items-center gap-0.5 rounded-md'
+      'inline-flex h-7 items-center gap-0 rounded-md'
+    )
+    expect(systemBrand).toContain(
+      "className='flex size-7 items-center justify-center overflow-hidden rounded-md'"
     )
     expect(publicHeader).toContain(
       'text-foreground nav-link-active font-semibold'
