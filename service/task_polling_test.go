@@ -135,7 +135,7 @@ func TestUpdateVideoTasksDefaultSleepWaitsBetweenTasks(t *testing.T) {
 
 	adaptor := &taskPollingFetchAdaptor{}
 	previousFactory := GetTaskAdaptorFunc
-	GetTaskAdaptorFunc = func(constant.TaskPlatform) TaskPollingAdaptor { return adaptor }
+	GetTaskAdaptorFunc = func(constant.TaskPlatform, string) TaskPollingAdaptor { return adaptor }
 	t.Cleanup(func() { GetTaskAdaptorFunc = previousFactory })
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
@@ -165,7 +165,7 @@ func TestUpdateVideoTasksCanSkipPollingSleepPerChannel(t *testing.T) {
 
 	adaptor := &taskPollingFetchAdaptor{}
 	previousFactory := GetTaskAdaptorFunc
-	GetTaskAdaptorFunc = func(constant.TaskPlatform) TaskPollingAdaptor { return adaptor }
+	GetTaskAdaptorFunc = func(constant.TaskPlatform, string) TaskPollingAdaptor { return adaptor }
 	t.Cleanup(func() { GetTaskAdaptorFunc = previousFactory })
 
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
@@ -199,7 +199,7 @@ func TestUpdateVideoTasksDefaultSleepDoesNotBlockOtherChannels(t *testing.T) {
 
 	adaptor := &taskPollingFetchAdaptor{}
 	previousFactory := GetTaskAdaptorFunc
-	GetTaskAdaptorFunc = func(constant.TaskPlatform) TaskPollingAdaptor { return adaptor }
+	GetTaskAdaptorFunc = func(constant.TaskPlatform, string) TaskPollingAdaptor { return adaptor }
 	t.Cleanup(func() { GetTaskAdaptorFunc = previousFactory })
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
@@ -250,7 +250,7 @@ func TestUpdateVideoTasksSlowChannelDoesNotBlockOtherChannels(t *testing.T) {
 	}
 	t.Cleanup(releaseBlockedTask)
 	previousFactory := GetTaskAdaptorFunc
-	GetTaskAdaptorFunc = func(constant.TaskPlatform) TaskPollingAdaptor { return adaptor }
+	GetTaskAdaptorFunc = func(constant.TaskPlatform, string) TaskPollingAdaptor { return adaptor }
 	t.Cleanup(func() { GetTaskAdaptorFunc = previousFactory })
 
 	errCh := make(chan error, 1)
@@ -306,7 +306,7 @@ func TestUpdateVideoTasksMixedChannelSleepSettings(t *testing.T) {
 
 	adaptor := &taskPollingFetchAdaptor{}
 	previousFactory := GetTaskAdaptorFunc
-	GetTaskAdaptorFunc = func(constant.TaskPlatform) TaskPollingAdaptor { return adaptor }
+	GetTaskAdaptorFunc = func(constant.TaskPlatform, string) TaskPollingAdaptor { return adaptor }
 	t.Cleanup(func() { GetTaskAdaptorFunc = previousFactory })
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)

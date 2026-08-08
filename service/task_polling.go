@@ -33,9 +33,9 @@ type TaskPollingAdaptor interface {
 	AdjustBillingOnComplete(task *model.Task, taskResult *relaycommon.TaskInfo) int
 }
 
-// GetTaskAdaptorFunc 由 main 包注入，用于获取指定平台的任务适配器。
+// GetTaskAdaptorFunc 由 main 包注入，用于获取指定平台与模型名的任务适配器。
 // 打破 service -> relay -> relay/channel -> service 的循环依赖。
-var GetTaskAdaptorFunc func(platform constant.TaskPlatform) TaskPollingAdaptor
+var GetTaskAdaptorFunc func(platform constant.TaskPlatform, model string) TaskPollingAdaptor
 
 // sweepTimedOutTasks 在主轮询之前独立清理超时任务。
 // 每次最多处理 100 条，剩余的下个周期继续处理。
@@ -231,7 +231,7 @@ func updateSunoTasks(ctx context.Context, channelId int, taskIds []string, taskM
 		}
 		return err
 	}
-	adaptor := GetTaskAdaptorFunc(constant.TaskPlatformSuno)
+	adaptor := GetTaskAdaptorFunc(constant.TaskPlatformSuno, "")
 	if adaptor == nil {
 		return errors.New("adaptor not found")
 	}
@@ -396,22 +396,12 @@ func updateVideoTasks(ctx context.Context, platform constant.TaskPlatform, chann
 		}
 		return fmt.Errorf("CacheGetChannel failed: %w", err)
 	}
-	adaptor := GetTaskAdaptorFunc(platform)
-	if adaptor == nil {
-		return fmt.Errorf("video adaptor not found")
-	}
-	info := &relaycommon.RelayInfo{}
-	info.ChannelMeta = &relaycommon.ChannelMeta{
-		ChannelBaseUrl: cacheGetChannel.GetBaseURL(),
-	}
-	info.ApiKey = cacheGetChannel.Key
-	adaptor.Init(info)
 	disablePollingSleep := cacheGetChannel.GetOtherSettings().DisableTaskPollingSleep
 	for i, taskId := range taskIds {
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		if err := updateVideoSingleTask(ctx, adaptor, cacheGetChannel, taskId, taskM); err != nil {
+		if err := updateVideoSingleTask(ctx, platform, cacheGetChannel, taskId, taskM); err != nil {
 			logger.LogError(ctx, fmt.Sprintf("Failed to update video task %s: %s", taskId, err.Error()))
 		}
 		if disablePollingSleep || i == len(taskIds)-1 {
@@ -428,7 +418,7 @@ func updateVideoTasks(ctx context.Context, platform constant.TaskPlatform, chann
 	return nil
 }
 
-func updateVideoSingleTask(ctx context.Context, adaptor TaskPollingAdaptor, ch *model.Channel, taskId string, taskM map[string]*model.Task) error {
+func updateVideoSingleTask(ctx context.Context, platform constant.TaskPlatform, ch *model.Channel, taskId string, taskM map[string]*model.Task) error {
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -443,6 +433,19 @@ func updateVideoSingleTask(ctx context.Context, adaptor TaskPollingAdaptor, ch *
 		logger.LogError(ctx, fmt.Sprintf("Task %s not found in taskM", taskId))
 		return fmt.Errorf("task %s not found", taskId)
 	}
+
+	// 按任务模型名选择适配器（同一渠道可能承载不同视频协议，如 MiniMax 的 H3 V2 与 Hailuo V1）
+	adaptor := GetTaskAdaptorFunc(platform, task.Properties.OriginModelName)
+	if adaptor == nil {
+		return fmt.Errorf("video adaptor not found for task %s", taskId)
+	}
+	info := &relaycommon.RelayInfo{}
+	info.ChannelMeta = &relaycommon.ChannelMeta{
+		ChannelBaseUrl: ch.GetBaseURL(),
+	}
+	info.ApiKey = ch.Key
+	adaptor.Init(info)
+
 	key := ch.Key
 
 	privateData := task.PrivateData

@@ -44,7 +44,7 @@ func updateVideoTaskAll(ctx context.Context, platform constant.TaskPlatform, cha
 		}
 		return fmt.Errorf("CacheGetChannel failed: %w", err)
 	}
-	adaptor := relay.GetTaskAdaptor(platform)
+	adaptor := relay.GetTaskAdaptor(platform, "")
 	if adaptor == nil {
 		return fmt.Errorf("video adaptor not found")
 	}
