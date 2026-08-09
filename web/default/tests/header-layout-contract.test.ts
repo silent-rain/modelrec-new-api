@@ -92,14 +92,31 @@ describe('header layout contract', () => {
     }
 
     expect(homeHeader).toContain(
-      'flex items-center gap-0.5 text-xl font-bold tracking-tight'
+      'flex items-center gap-0 text-xl font-bold tracking-tight'
     )
     expect(systemBrand).toContain(
-      'inline-flex h-7 items-center gap-0.5 rounded-md'
+      'inline-flex h-7 items-center gap-0 rounded-md'
+    )
+    expect(systemBrand).toContain(
+      "className='flex size-7 items-center justify-center overflow-hidden rounded-md'"
     )
     expect(publicHeader).toContain(
       'text-foreground nav-link-active font-semibold'
     )
+  })
+
+  test('keeps language and theme controls available in the homepage header', async () => {
+    const [homeHeader, stylesheet] = await Promise.all([
+      readSource('features/home/components/home-header.tsx'),
+      readSource('styles/index.css'),
+    ])
+
+    expect(homeHeader.match(/<LanguageSwitcher \/>/g)).toHaveLength(2)
+    expect(homeHeader.match(/<ThemeSwitch \/>/g)).toHaveLength(2)
+    expect(homeHeader).toContain(
+      "className='sf-home-mobile-actions ml-auto shrink-0 items-center gap-1'"
+    )
+    expect(stylesheet).toContain('.sf-home-mobile-actions')
   })
 
   test('removes fixed-header compensation from public page content', async () => {
