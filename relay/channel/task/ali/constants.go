@@ -8,6 +8,7 @@ var ModelList = []string{
 	"wan2.2-i2v-plus",    // 万相2.2专业版（无声视频）
 	"wanx2.1-i2v-plus",   // 万相2.1专业版（无声视频）
 	"wanx2.1-i2v-turbo",  // 万相2.1极速版（无声视频）
+	"wan3.0-video",       // 万相3.0 全能参考视频生成模型（All-in-One）
 }
 
 var ChannelName = "ali"
