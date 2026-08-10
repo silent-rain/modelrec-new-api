@@ -106,8 +106,9 @@ export function SignUpForm({
     isSending: isSendingSms,
     secondsLeft: smsSecondsLeft,
     isActive: isSmsActive,
+    hasSentCode: hasSentSmsCode,
     sendCode: sendSms,
-  } = useSmsVerification()
+  } = useSmsVerification({ getVerification: humanVerification.verify })
   const {
     isSending: isSendingEmail,
     secondsLeft: emailSecondsLeft,
@@ -165,8 +166,12 @@ export function SignUpForm({
       toast.error(t('Please agree to the legal terms first'))
       return
     }
-    const verification = await humanVerification.verify()
-    if (!verification) return
+    let verification = {}
+    if (registrationMethod !== 'phone' || !hasSentSmsCode) {
+      const result = await humanVerification.verify()
+      if (!result) return
+      verification = result
+    }
 
     setIsLoading(true)
     try {

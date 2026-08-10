@@ -30,6 +30,29 @@ export function isPasswordLoginAvailable(status: SystemStatus | null): boolean {
   )
 }
 
+export function isSmsLoginAvailable(status: SystemStatus | null): boolean {
+  return status?.sms_login_enabled ?? status?.data?.sms_login_enabled ?? true
+}
+
+export function isSmsAutoRegistrationAvailable(
+  status: SystemStatus | null
+): boolean {
+  return (
+    status?.sms_auto_register_enabled ??
+    status?.data?.sms_auto_register_enabled ??
+    false
+  )
+}
+
+export function getAvailableLoginModes(
+  status: SystemStatus | null
+): LoginMode[] {
+  const modes: LoginMode[] = []
+  if (isSmsLoginAvailable(status)) modes.push('sms')
+  if (isPasswordLoginAvailable(status)) modes.push('password')
+  return modes
+}
+
 export function isRegistrationEntryVisible(
   status: SystemStatus | null
 ): boolean {

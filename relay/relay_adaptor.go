@@ -2,6 +2,7 @@ package relay
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/relay/channel"
@@ -37,6 +38,7 @@ import (
 	"github.com/QuantumNous/new-api/relay/channel/task/hailuo"
 	taskjimeng "github.com/QuantumNous/new-api/relay/channel/task/jimeng"
 	"github.com/QuantumNous/new-api/relay/channel/task/kling"
+	minimaxh3 "github.com/QuantumNous/new-api/relay/channel/task/minimax_h3"
 	tasksora "github.com/QuantumNous/new-api/relay/channel/task/sora"
 	"github.com/QuantumNous/new-api/relay/channel/task/suno"
 	taskvertex "github.com/QuantumNous/new-api/relay/channel/task/vertex"
@@ -135,7 +137,9 @@ func GetTaskPlatform(c *gin.Context) constant.TaskPlatform {
 	return constant.TaskPlatform(c.GetString("platform"))
 }
 
-func GetTaskAdaptor(platform constant.TaskPlatform) channel.TaskAdaptor {
+// GetTaskAdaptor 根据平台（渠道类型）与模型名返回对应的异步任务适配器。
+// model 参数用于区分同一渠道类型下的不同视频协议（如 MiniMax 渠道的 H3 V2 与 Hailuo V1）。
+func GetTaskAdaptor(platform constant.TaskPlatform, model string) channel.TaskAdaptor {
 	switch platform {
 	//case constant.APITypeAIProxyLibrary:
 	//	return &aiproxy.Adaptor{}
@@ -161,8 +165,18 @@ func GetTaskAdaptor(platform constant.TaskPlatform) channel.TaskAdaptor {
 		case constant.ChannelTypeGemini:
 			return &taskGemini.TaskAdaptor{}
 		case constant.ChannelTypeMiniMax:
+			// MiniMax 渠道同时承载 Hailuo V1（MiniMax-Hailuo-* 等）与 MiniMax-H3 V2。
+			// 按模型名分发：H3 使用 /v2/video_generation，其余回退到 hailuo V1。
+			if isMiniMaxH3Model(model) {
+				return &minimaxh3.TaskAdaptor{}
+			}
 			return &hailuo.TaskAdaptor{}
 		}
 	}
 	return nil
+}
+
+// isMiniMaxH3Model 判断模型名是否为 MiniMax-H3 系列（V2 API）。
+func isMiniMaxH3Model(model string) bool {
+	return strings.HasPrefix(strings.TrimSpace(model), "MiniMax-H3")
 }

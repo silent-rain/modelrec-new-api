@@ -35,13 +35,22 @@ type AliVideoRequest struct {
 
 // AliVideoInput 视频输入参数
 type AliVideoInput struct {
-	Prompt         string `json:"prompt,omitempty"`          // 文本提示词
-	ImgURL         string `json:"img_url,omitempty"`         // 首帧图像URL或Base64（图生视频）
-	FirstFrameURL  string `json:"first_frame_url,omitempty"` // 首帧图片URL（首尾帧生视频）
-	LastFrameURL   string `json:"last_frame_url,omitempty"`  // 尾帧图片URL（首尾帧生视频）
-	AudioURL       string `json:"audio_url,omitempty"`       // 音频URL（wan2.5支持）
-	NegativePrompt string `json:"negative_prompt,omitempty"` // 反向提示词
-	Template       string `json:"template,omitempty"`        // 视频特效模板
+	Prompt         string          `json:"prompt,omitempty"`          // 文本提示词
+	ImgURL         string          `json:"img_url,omitempty"`         // 首帧图像URL或Base64（图生视频）
+	FirstFrameURL  string          `json:"first_frame_url,omitempty"` // 首帧图片URL（首尾帧生视频）
+	LastFrameURL   string          `json:"last_frame_url,omitempty"`  // 尾帧图片URL（首尾帧生视频）
+	AudioURL       string          `json:"audio_url,omitempty"`       // 音频URL（wan2.5支持）
+	NegativePrompt string          `json:"negative_prompt,omitempty"` // 反向提示词
+	Template       string          `json:"template,omitempty"`        // 视频特效模板
+	Media          []AliVideoMedia `json:"media,omitempty"`           // 万相3.0 media 数组（文生/图生/首尾帧/参考生视频）
+}
+
+// AliVideoMedia 万相3.0 的输入媒体单元，type 决定语义：
+// first_frame / last_frame / reference_image / reference_video / reference_audio / file / link。
+// 文档约定每个媒体对象只包含 type 与 url 两个字段。
+type AliVideoMedia struct {
+	Type string `json:"type"`          // 媒体类型
+	URL  string `json:"url,omitempty"` // 媒体URL或Base64编码数据
 }
 
 // AliVideoParameters 视频参数
@@ -53,6 +62,7 @@ type AliVideoParameters struct {
 	Watermark    bool   `json:"watermark,omitempty"`     // 是否添加水印
 	Audio        *bool  `json:"audio,omitempty"`         // 是否添加音频（wan2.5）
 	Seed         int    `json:"seed,omitempty"`          // 随机数种子
+	Ratio        string `json:"ratio,omitempty"`         // 万相3.0 宽高比: adaptive/16:9/4:3/1:1/3:4/9:16
 }
 
 // AliVideoResponse 阿里通义万相响应
@@ -190,9 +200,67 @@ func sizeToResolution(size string) (string, error) {
 	return "", fmt.Errorf("invalid size: %s", size)
 }
 
+// applyWanFlatMetadata 兼容 wan2.6/wan2.5 等模型的扁平 metadata 传参：
+// 将顶层 key（如 negative_prompt / audio_url / shot_type / audio / template / seed）映射到对应的 input/parameters 层。
+func applyWanFlatMetadata(metadata map[string]any, aliReq *AliVideoRequest) {
+	inputKeys := map[string]string{
+		"negative_prompt": "negative_prompt",
+		"audio_url":       "audio_url",
+		"template":        "template",
+	}
+	paramKeys := map[string]string{
+		"audio": "audio",
+		"seed":  "seed",
+	}
+	for k, v := range metadata {
+		if target, ok := inputKeys[k]; ok {
+			applyWanInputValue(aliReq, target, v)
+		} else if target, ok := paramKeys[k]; ok {
+			applyWanParamValue(aliReq, target, v)
+		}
+	}
+}
+
+func applyWanInputValue(aliReq *AliVideoRequest, field string, v any) {
+	switch field {
+	case "negative_prompt":
+		if s, ok := v.(string); ok {
+			aliReq.Input.NegativePrompt = s
+		}
+	case "audio_url":
+		if s, ok := v.(string); ok {
+			aliReq.Input.AudioURL = s
+		}
+	case "template":
+		if s, ok := v.(string); ok {
+			aliReq.Input.Template = s
+		}
+	}
+}
+
+func applyWanParamValue(aliReq *AliVideoRequest, field string, v any) {
+	if aliReq.Parameters == nil {
+		aliReq.Parameters = &AliVideoParameters{}
+	}
+	switch field {
+	case "audio":
+		if b, ok := v.(bool); ok {
+			aliReq.Parameters.Audio = lo.ToPtr(b)
+		}
+	case "seed":
+		if n, ok := v.(float64); ok {
+			aliReq.Parameters.Seed = int(n)
+		}
+	}
+}
+
 func ProcessAliOtherRatios(aliReq *AliVideoRequest) (map[string]float64, error) {
 	otherRatios := make(map[string]float64)
 	aliRatios := map[string]map[string]float64{
+		"wan2.6-i2v-flash": {
+			"720P":  1,
+			"1080P": 1 / 0.6,
+		},
 		"wan2.6-i2v": {
 			"720P":  1,
 			"1080P": 1 / 0.6,
@@ -257,11 +325,22 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 	if info.IsModelMapped {
 		upstreamModel = info.UpstreamModelName
 	}
+	// 万相3.0（wan3.0-video）使用 media 数组格式，与其他万相模型分开处理
+	if upstreamModel == "wan3.0-video" {
+		return a.convertToWan3Request(req, upstreamModel)
+	}
+	// 首帧图片输入：优先取 images[0]，其次兼容 input_reference / image 字段
+	imgURL := req.InputReference
+	if len(req.Images) > 0 {
+		imgURL = req.Images[0]
+	} else if req.Image != "" {
+		imgURL = req.Image
+	}
 	aliReq := &AliVideoRequest{
 		Model: upstreamModel,
 		Input: AliVideoInput{
 			Prompt: req.Prompt,
-			ImgURL: req.InputReference,
+			ImgURL: imgURL,
 		},
 		Parameters: &AliVideoParameters{
 			PromptExtend: true, // 默认开启智能改写
@@ -287,7 +366,7 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 		}
 	} else {
 		// 根据模型设置默认分辨率
-		if strings.Contains(req.Model, "t2v") { // image to video
+		if strings.Contains(req.Model, "t2v") { // text to video
 			if strings.HasPrefix(req.Model, "wan2.5") {
 				aliReq.Parameters.Size = "1920*1080"
 			} else if strings.HasPrefix(req.Model, "wan2.2") {
@@ -334,6 +413,8 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 		} else {
 			return nil, errors.Wrap(err, "marshal metadata failed")
 		}
+		// 兼容 wan2.6/wan2.5 等模型的扁平参数：自动将顶层 key 映射到 input/parameters 层
+		applyWanFlatMetadata(req.Metadata, aliReq)
 	}
 
 	if aliReq.Model != upstreamModel {
@@ -341,6 +422,111 @@ func (a *TaskAdaptor) convertToAliRequest(info *relaycommon.RelayInfo, req relay
 	}
 
 	return aliReq, nil
+}
+
+// convertToWan3Request 将统一的 TaskSubmitReq 转换为万相3.0（wan3.0-video）media 数组请求。
+// 万相3.0 为 All-in-One 模型：文生视频（仅 prompt）、图生视频（first_frame）、
+// 首尾帧（first_frame + last_frame）、参考生视频（reference_image/video/audio）均由 media 数组表达。
+func (a *TaskAdaptor) convertToWan3Request(req relaycommon.TaskSubmitReq, upstreamModel string) (*AliVideoRequest, error) {
+	aliReq := &AliVideoRequest{
+		Model: upstreamModel,
+		Input: AliVideoInput{
+			Prompt: req.Prompt,
+			Media:  buildWan3Media(req),
+		},
+		Parameters: &AliVideoParameters{
+			PromptExtend: true, // 默认开启智能改写
+			Watermark:    false,
+		},
+	}
+
+	// 时长（默认 5 秒）
+	if req.Duration > 0 {
+		aliReq.Parameters.Duration = req.Duration
+	} else if req.Seconds != "" {
+		if sec, err := strconv.Atoi(req.Seconds); err == nil && sec > 0 {
+			aliReq.Parameters.Duration = sec
+		}
+	} else {
+		aliReq.Parameters.Duration = 5
+	}
+
+	// 宽高比：缺省 adaptive（模型根据输入媒体自动选择），用户可通过 metadata.ratio 指定
+	aliReq.Parameters.Ratio = "adaptive"
+	if req.Metadata != nil {
+		if r, ok := req.Metadata["ratio"].(string); ok && r != "" {
+			aliReq.Parameters.Ratio = normalizeWan3Ratio(r)
+		}
+	}
+
+	// 兼容扁平 metadata 传参（seed / audio / watermark），wan3.0 仅支持文档定义的参数
+	if req.Metadata != nil {
+		if v, ok := req.Metadata["seed"].(float64); ok {
+			aliReq.Parameters.Seed = int(v)
+		}
+		if v, ok := req.Metadata["audio"].(bool); ok {
+			aliReq.Parameters.Audio = &v
+		}
+		if v, ok := req.Metadata["watermark"].(bool); ok {
+			aliReq.Parameters.Watermark = v
+		}
+	}
+
+	return aliReq, nil
+}
+
+// buildWan3Media 根据 TaskSubmitReq 中的图片/参考素材组装万相3.0 media 数组：
+//   - image / images[0]            -> first_frame（图生视频首帧）
+//   - images[1]                    -> last_frame（首尾帧生视频尾帧）
+//   - metadata.references          -> reference_image / reference_video / reference_audio / file
+func buildWan3Media(req relaycommon.TaskSubmitReq) []AliVideoMedia {
+	media := make([]AliVideoMedia, 0, 2)
+
+	first := req.InputReference
+	if len(req.Images) > 0 {
+		first = req.Images[0]
+	} else if req.Image != "" {
+		first = req.Image
+	}
+	if first != "" {
+		media = append(media, AliVideoMedia{Type: "first_frame", URL: first})
+	}
+	if len(req.Images) > 1 && req.Images[1] != "" {
+		media = append(media, AliVideoMedia{Type: "last_frame", URL: req.Images[1]})
+	}
+
+	// metadata.references：参考图/视频/音频/文件
+	if req.Metadata != nil {
+		if refs, ok := req.Metadata["references"].([]any); ok {
+			for _, r := range refs {
+				m, ok := r.(map[string]any)
+				if !ok {
+					continue
+				}
+				t, _ := m["type"].(string)
+				url, _ := m["url"].(string)
+				switch t {
+				case "reference_image", "reference_video", "reference_audio", "file", "link":
+					if url != "" {
+						media = append(media, AliVideoMedia{Type: t, URL: url})
+					}
+				}
+			}
+		}
+	}
+	return media
+}
+
+// normalizeWan3Ratio 将 "16:9" "16x9" "16*9" 归一化为 "16:9"。
+func normalizeWan3Ratio(r string) string {
+	r = strings.ReplaceAll(r, "*", ":")
+	r = strings.ReplaceAll(r, "x", ":")
+	r = strings.ReplaceAll(r, "X", ":")
+	parts := strings.Split(r, ":")
+	if len(parts) == 2 {
+		return fmt.Sprintf("%s:%s", strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]))
+	}
+	return r
 }
 
 // EstimateBilling 根据用户请求参数计算 OtherRatios（时长、分辨率等）。

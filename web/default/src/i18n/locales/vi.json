@@ -1444,6 +1444,7 @@
     "Drawing Logs": "Nhật ký bản vẽ",
     "Drawing task records": "Lịch sử tác vụ vẽ",
     "Drawing task polling": "Thăm dò tác vụ vẽ",
+    "Drop images here to attach": "Thả hình ảnh vào đây để đính kèm",
     "Duplicate": "Nhân bản",
     "Duplicate group names: {{names}}": "Tên nhóm bị trùng: {{names}}",
     "Duplicate source model mappings are not allowed": "Không cho phép ánh xạ mô hình nguồn trùng lặp",
@@ -4590,6 +4591,7 @@
     "Untrusted upstream data:": "Dữ liệu nguồn không đáng tin cậy:",
     "Unused": "Chưa sử dụng",
     "Up to 4 strings that stop generation": "Tối đa 4 chuỗi để dừng sinh",
+    "Up to {{count}} images, {{size}} MB each": "Tối đa {{count}} hình ảnh, mỗi hình {{size}} MB",
     "Update": "Cập nhật",
     "Update All Balances": "Cập nhật tất cả số dư",
     "Update API Key": "Cập nhật Khóa API",
@@ -4971,6 +4973,14 @@
     "Zero retention": "Không lưu dữ liệu",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "SMS Login": "Đăng nhập bằng SMS",
+    "Allow users to log in with SMS verification codes": "Cho phép người dùng đăng nhập bằng mã xác minh SMS",
+    "SMS Auto Registration": "Tự động đăng ký qua SMS",
+    "Automatically create an account after verifying an unregistered phone number": "Tự động tạo tài khoản sau khi xác minh số điện thoại chưa đăng ký",
+    "Unregistered phone numbers will create an account after verification.": "Số điện thoại chưa đăng ký sẽ tạo tài khoản sau khi xác minh.",
+    "Only registered phone numbers can sign in.": "Chỉ số điện thoại đã đăng ký mới có thể đăng nhập.",
+    "Account created and signed in!": "Đã tạo tài khoản và đăng nhập!",
+    "Password and SMS login are currently unavailable.": "Đăng nhập bằng mật khẩu và SMS hiện không khả dụng."
   }
 }

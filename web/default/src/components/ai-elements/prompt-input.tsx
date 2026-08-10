@@ -19,6 +19,18 @@ For commercial licensing, please contact support@quantumnous.com
 /* eslint-disable react-refresh/only-export-components */
 'use client'
 
+import type { ChatStatus, FileUIPart } from 'ai'
+import {
+  ImageIcon,
+  Loader2Icon,
+  MicIcon,
+  PaperclipIcon,
+  PlusIcon,
+  SendIcon,
+  SquareIcon,
+  XIcon,
+} from 'lucide-react'
+import { nanoid } from 'nanoid'
 import {
   type ChangeEvent,
   type ChangeEventHandler,
@@ -41,20 +53,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ChatStatus, FileUIPart } from 'ai'
-import {
-  ImageIcon,
-  Loader2Icon,
-  MicIcon,
-  PaperclipIcon,
-  PlusIcon,
-  SendIcon,
-  SquareIcon,
-  XIcon,
-} from 'lucide-react'
-import { nanoid } from 'nanoid'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/lib/utils'
+
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -89,6 +89,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 
 // ============================================================================
 // Provider Context & Types
@@ -487,6 +488,11 @@ export const PromptInput = ({
   // ----- Local attachments (only used when no provider)
   const [items, setItems] = useState<(FileUIPart & { id: string })[]>([])
   const files = usingProvider ? controller.attachments.files : items
+  const localItemsRef = useRef(items)
+
+  useEffect(() => {
+    localItemsRef.current = items
+  }, [items])
 
   const openFileDialogLocal = useCallback(() => {
     inputRef.current?.click()
@@ -670,13 +676,11 @@ export const PromptInput = ({
 
   useEffect(
     () => () => {
-      if (!usingProvider) {
-        for (const f of files) {
-          if (f.url) URL.revokeObjectURL(f.url)
-        }
+      for (const file of localItemsRef.current) {
+        if (file.url) URL.revokeObjectURL(file.url)
       }
     },
-    [usingProvider, files]
+    []
   )
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {

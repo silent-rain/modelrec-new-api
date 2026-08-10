@@ -26,7 +26,7 @@ func getGeminiVideoURL(channel *model.Channel, task *model.Task, apiKey string) 
 		baseURL = channel.GetBaseURL()
 	}
 
-	adaptor := relay.GetTaskAdaptor(constant.TaskPlatform(strconv.Itoa(channel.Type)))
+	adaptor := relay.GetTaskAdaptor(constant.TaskPlatform(strconv.Itoa(channel.Type)), task.Properties.OriginModelName)
 	if adaptor == nil {
 		return "", fmt.Errorf("gemini task adaptor not found")
 	}
@@ -161,7 +161,7 @@ func getVertexVideoURL(channel *model.Channel, task *model.Task) (string, error)
 		baseURL = channel.GetBaseURL()
 	}
 
-	adaptor := relay.GetTaskAdaptor(constant.TaskPlatform(strconv.Itoa(channel.Type)))
+	adaptor := relay.GetTaskAdaptor(constant.TaskPlatform(strconv.Itoa(channel.Type)), task.Properties.OriginModelName)
 	if adaptor == nil {
 		return "", fmt.Errorf("vertex task adaptor not found")
 	}

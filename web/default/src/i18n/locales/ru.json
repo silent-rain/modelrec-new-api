@@ -1444,6 +1444,7 @@
     "Drawing Logs": "Журнал рисования",
     "Drawing task records": "Записи задач рисования",
     "Drawing task polling": "Опрос задач рисования",
+    "Drop images here to attach": "Перетащите изображения сюда, чтобы прикрепить",
     "Duplicate": "Дублировать",
     "Duplicate group names: {{names}}": "Повторяющиеся имена групп: {{names}}",
     "Duplicate source model mappings are not allowed": "Повторяющиеся сопоставления исходных моделей не допускаются",
@@ -4590,6 +4591,7 @@
     "Untrusted upstream data:": "Недоверенные вышестоящие данные:",
     "Unused": "Неиспользованные",
     "Up to 4 strings that stop generation": "До 4 строк, останавливающих генерацию",
+    "Up to {{count}} images, {{size}} MB each": "До {{count}} изображений, не более {{size}} МБ каждое",
     "Update": "Обновить",
     "Update All Balances": "Обновить все балансы",
     "Update API Key": "Обновить API-ключ",
@@ -4971,6 +4973,14 @@
     "Zero retention": "Без хранения данных",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "SMS Login": "Вход по SMS",
+    "Allow users to log in with SMS verification codes": "Разрешить пользователям входить с помощью кодов подтверждения из SMS",
+    "SMS Auto Registration": "Автоматическая регистрация по SMS",
+    "Automatically create an account after verifying an unregistered phone number": "Автоматически создавать аккаунт после подтверждения незарегистрированного номера телефона",
+    "Unregistered phone numbers will create an account after verification.": "Для незарегистрированного номера телефона после подтверждения будет создан аккаунт.",
+    "Only registered phone numbers can sign in.": "Войти могут только пользователи с зарегистрированными номерами телефонов.",
+    "Account created and signed in!": "Аккаунт создан, вход выполнен!",
+    "Password and SMS login are currently unavailable.": "Вход по паролю и SMS сейчас недоступен."
   }
 }

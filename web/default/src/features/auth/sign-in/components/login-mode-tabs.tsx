@@ -24,6 +24,7 @@ import type { LoginMode } from '../lib/login-page-options'
 
 interface LoginModeTabsProps {
   mode: LoginMode
+  modes?: LoginMode[]
   onModeChange: (mode: LoginMode) => void
 }
 
@@ -38,7 +39,7 @@ export function LoginModeTabs(props: LoginModeTabsProps) {
       aria-label={t('Authentication navigation')}
       className='flex items-center gap-7'
     >
-      {LOGIN_MODES.map((mode) => {
+      {(props.modes ?? LOGIN_MODES).map((mode) => {
         const selected = props.mode === mode
         const label = mode === 'sms' ? t('Phone Login') : t('Password Login')
 

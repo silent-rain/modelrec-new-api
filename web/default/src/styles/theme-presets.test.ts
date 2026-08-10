@@ -38,3 +38,45 @@ describe('orange-green button theme selectors', () => {
     )
   })
 })
+
+describe('orange-green floating surface isolation', () => {
+  test('marks shared floating surface primitives explicitly', () => {
+    const floatingSurfaceFiles = [
+      '../components/ui/combobox.tsx',
+      '../components/ui/combobox-input.tsx',
+      '../components/ui/context-menu.tsx',
+      '../components/ui/dropdown-menu.tsx',
+      '../components/ui/hover-card.tsx',
+      '../components/ui/navigation-menu.tsx',
+      '../components/ui/popover.tsx',
+      '../components/ui/select.tsx',
+      '../components/ui/tooltip.tsx',
+    ]
+
+    for (const file of floatingSurfaceFiles) {
+      const source = readFileSync(new URL(file, import.meta.url), 'utf8')
+      assert.match(source, /data-theme-surface='floating'/, file)
+    }
+  })
+
+  test('keeps broad card selectors away from floating surfaces', () => {
+    const broadCardSelectors = themePresetsCss
+      .split('\n')
+      .filter(
+        (line) =>
+          line.includes('[class*="rounded-lg"][class*="border"]') &&
+          line.includes(":not([data-slot='popover-content'])") &&
+          !line.includes('[data-topup-amount-card]') &&
+          !line.includes('[data-payment-method]')
+      )
+
+    assert.ok(broadCardSelectors.length > 0)
+    for (const selector of broadCardSelectors) {
+      assert.match(
+        selector,
+        /:not\(\[data-theme-surface='floating'\]\)/,
+        selector
+      )
+    }
+  })
+})

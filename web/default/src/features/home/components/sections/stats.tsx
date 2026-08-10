@@ -21,8 +21,9 @@ import { useTranslation } from 'react-i18next'
 const HOME_STATS = [
   { value: '400+', label: 'Models', accent: true },
   { value: '60+', label: 'Providers', accent: false },
-  { value: '8M+', label: 'Global Users', accent: false },
-  { value: '100T', label: 'Monthly Tokens', accent: true },
+  // TODO: Restore after these values are backed by verified production data.
+  // { value: '8M+', label: 'Global Users', accent: false },
+  // { value: '100T', label: 'Monthly Tokens', accent: true },
 ] as const
 
 export function Stats() {

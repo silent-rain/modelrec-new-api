@@ -17,9 +17,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { isSidebarModuleEnabled } from '@/lib/nav-modules'
+import { z } from 'zod'
+
 import { Main } from '@/components/layout'
-import { Playground } from '@/features/playground'
+import { Playground, type PlaygroundMode } from '@/features/playground'
+import { isSidebarModuleEnabled } from '@/lib/nav-modules'
+
+const playgroundSearchSchema = z.object({
+  mode: z.enum(['chat', 'video']).optional().catch(undefined),
+  task: z.enum(['image-to-video']).optional().catch(undefined),
+})
 
 export const Route = createFileRoute('/_authenticated/playground/')({
   beforeLoad: () => {
@@ -27,13 +34,28 @@ export const Route = createFileRoute('/_authenticated/playground/')({
       throw redirect({ to: '/dashboard' })
     }
   },
+  validateSearch: playgroundSearchSchema,
   component: PlaygroundPage,
 })
 
 function PlaygroundPage() {
+  const search = Route.useSearch()
+  const navigate = Route.useNavigate()
+  const mode = search.mode ?? 'chat'
+
+  const handleModeChange = (nextMode: PlaygroundMode) => {
+    void navigate({
+      search: (previous) => ({
+        ...previous,
+        mode: nextMode === 'chat' ? undefined : nextMode,
+        task: nextMode === 'video' ? 'image-to-video' : undefined,
+      }),
+    })
+  }
+
   return (
     <Main className='p-0'>
-      <Playground />
+      <Playground mode={mode} onModeChange={handleModeChange} />
     </Main>
   )
 }

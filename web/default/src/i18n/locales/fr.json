@@ -1444,6 +1444,7 @@
     "Drawing Logs": "Journaux de dessin",
     "Drawing task records": "Historique des tâches de dessin",
     "Drawing task polling": "Interrogation des tâches de dessin",
+    "Drop images here to attach": "Déposez les images ici pour les joindre",
     "Duplicate": "Dupliquer",
     "Duplicate group names: {{names}}": "Noms de groupe en double : {{names}}",
     "Duplicate source model mappings are not allowed": "Les mappages de modèles source en double ne sont pas autorisés",
@@ -4590,6 +4591,7 @@
     "Untrusted upstream data:": "Données amont non fiables :",
     "Unused": "Inutilisé",
     "Up to 4 strings that stop generation": "Jusqu'à 4 chaînes qui arrêtent la génération",
+    "Up to {{count}} images, {{size}} MB each": "Jusqu’à {{count}} images de {{size}} Mo chacune",
     "Update": "Mettre à jour",
     "Update All Balances": "Mettre à jour tous les soldes",
     "Update API Key": "Mettre à jour la clé API",
@@ -4971,6 +4973,14 @@
     "Zero retention": "Aucune rétention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "SMS Login": "Connexion par SMS",
+    "Allow users to log in with SMS verification codes": "Autoriser les utilisateurs à se connecter avec des codes de vérification par SMS",
+    "SMS Auto Registration": "Inscription automatique par SMS",
+    "Automatically create an account after verifying an unregistered phone number": "Créer automatiquement un compte après vérification d'un numéro de téléphone non enregistré",
+    "Unregistered phone numbers will create an account after verification.": "Les numéros de téléphone non enregistrés créeront un compte après vérification.",
+    "Only registered phone numbers can sign in.": "Seuls les numéros de téléphone enregistrés peuvent se connecter.",
+    "Account created and signed in!": "Compte créé et connexion réussie !",
+    "Password and SMS login are currently unavailable.": "La connexion par mot de passe et par SMS est actuellement indisponible."
   }
 }

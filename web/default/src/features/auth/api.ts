@@ -20,6 +20,7 @@ import { api } from '@/lib/api'
 
 import type {
   LoginPayload,
+  SmsLoginPayload,
   LoginResponse,
   Login2FAResponse,
   TwoFAPayload,
@@ -52,6 +53,11 @@ export async function login(payload: LoginPayload) {
       },
     }
   )
+  return res.data
+}
+
+export async function loginWithSms(payload: SmsLoginPayload) {
+  const res = await api.post<LoginResponse>('/api/user/login/sms', payload)
   return res.data
 }
 
@@ -148,19 +154,15 @@ export async function bindEmail(
 // Send SMS verification code
 export async function sendSmsCode(
   phoneNumber: string,
-  signName?: string,
-  templateCode?: string,
-  turnstile?: string
+  verification?: HumanVerificationPayload
 ): Promise<SmsApiResponse> {
   const res = await api.post(
-    '/api/v2/auth/sms/send',
+    '/api/user/login/sms/send',
     {
-      phone_number: phoneNumber,
-      sign_name: signName || '速通互联验证码',
-      template_code: templateCode || '100001',
+      phone: phoneNumber,
     },
     {
-      params: { turnstile },
+      params: verification,
     }
   )
   return res.data

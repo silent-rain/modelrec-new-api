@@ -26,10 +26,16 @@ export interface MessageVersion {
   content: string
 }
 
+export interface MessageImage {
+  id: string
+  url: string
+}
+
 export interface Message {
   key: string
   from: MessageRole
   versions: MessageVersion[]
+  images?: MessageImage[]
   sources?: { href: string; title: string }[]
   reasoning?: {
     content: string

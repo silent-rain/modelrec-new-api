@@ -124,8 +124,8 @@ func main() {
 	// Wire task polling adaptor factory (breaks service -> relay import cycle).
 	// Must run before the system task runner starts: the async_task_poll handler
 	// calls service.RunTaskPollingOnce, which needs this factory set.
-	service.GetTaskAdaptorFunc = func(platform constant.TaskPlatform) service.TaskPollingAdaptor {
-		a := relay.GetTaskAdaptor(platform)
+	service.GetTaskAdaptorFunc = func(platform constant.TaskPlatform, model string) service.TaskPollingAdaptor {
+		a := relay.GetTaskAdaptor(platform, model)
 		if a == nil {
 			return nil
 		}
