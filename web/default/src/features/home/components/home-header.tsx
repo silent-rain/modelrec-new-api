@@ -22,8 +22,10 @@ import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { HeaderLogo } from '@/components/layout'
 import { ProfileDropdown } from '@/components/profile-dropdown'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { formatQuota } from '@/lib/format'
@@ -54,7 +56,7 @@ export function HomeHeader() {
           <div className='flex shrink-0 items-center gap-1.5'>
             <Link
               to='/'
-              className='flex items-center gap-0.5 text-xl font-bold tracking-tight text-[#ff8700]'
+              className='flex items-center gap-0 text-xl font-bold tracking-tight text-[#ff8700]'
             >
               <HeaderLogo
                 src={logo}
@@ -103,51 +105,61 @@ export function HomeHeader() {
             )}
           </div>
 
-          <div className='hidden shrink-0 items-center gap-3 border-l border-[#e5e7eb] pl-4 lg:flex dark:border-white/10'>
-            {user && (
-              <Link to='/wallet' className='text-right leading-tight'>
-                <span className='block text-[10px] font-medium tracking-wide text-[#9ca3af] uppercase'>
-                  {t('Balance')}
-                </span>
-                <span className='block text-xs font-bold text-[#047857]'>
-                  {formatQuota(user.quota ?? 0)}
-                </span>
-              </Link>
-            )}
+          <div className='hidden shrink-0 items-center border-l border-[#e5e7eb] pl-3 lg:flex dark:border-white/10'>
+            <LanguageSwitcher />
+            <ThemeSwitch />
+            <div className='mx-2 h-5 w-px bg-[#e5e7eb] dark:bg-white/10' />
 
-            {!user && (
-              <Link
-                to='/sign-up'
-                className='sf-btn-primary inline-flex h-9 items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
-              >
-                {t('Register')}
-              </Link>
-            )}
+            <div className='flex items-center gap-3'>
+              {user && (
+                <Link to='/wallet' className='text-right leading-tight'>
+                  <span className='block text-[10px] font-medium tracking-wide text-[#9ca3af] uppercase'>
+                    {t('Balance')}
+                  </span>
+                  <span className='block text-xs font-bold text-[#047857]'>
+                    {formatQuota(user.quota ?? 0)}
+                  </span>
+                </Link>
+              )}
 
-            {user ? (
-              <ProfileDropdown />
-            ) : (
-              <Link
-                to='/sign-in'
-                className='inline-flex h-9 items-center justify-center rounded-lg border border-[#d8d9dd] bg-white px-5 text-sm font-semibold text-[#374151] transition-colors hover:border-[#ff8700] hover:text-[#ff8700] dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-[#ff8700] dark:hover:text-[#ff9f33]'
-              >
-                {t('Sign in')}
-              </Link>
-            )}
+              {!user && (
+                <Link
+                  to='/sign-up'
+                  className='sf-btn-primary inline-flex h-9 items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
+                >
+                  {t('Register')}
+                </Link>
+              )}
+
+              {user ? (
+                <ProfileDropdown />
+              ) : (
+                <Link
+                  to='/sign-in'
+                  className='inline-flex h-9 items-center justify-center rounded-lg border border-[#d8d9dd] bg-white px-5 text-sm font-semibold text-[#374151] transition-colors hover:border-[#ff8700] hover:text-[#ff8700] dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-[#ff8700] dark:hover:text-[#ff9f33]'
+                >
+                  {t('Sign in')}
+                </Link>
+              )}
+            </div>
           </div>
 
-          <button
-            type='button'
-            onClick={() => setMobileOpen((open) => !open)}
-            className='sf-home-menu-trigger dark:text-foreground ml-auto size-9 items-center justify-center rounded-lg text-[#111827] transition-colors hover:bg-black/5 dark:hover:bg-white/10'
-            aria-label={t('Toggle navigation menu')}
-            aria-expanded={mobileOpen}
-          >
-            <HugeiconsIcon
-              icon={mobileOpen ? Cancel01Icon : Menu01Icon}
-              className='size-5'
-            />
-          </button>
+          <div className='sf-home-mobile-actions ml-auto shrink-0 items-center gap-1'>
+            <LanguageSwitcher />
+            <ThemeSwitch />
+            <button
+              type='button'
+              onClick={() => setMobileOpen((open) => !open)}
+              className='sf-home-menu-trigger dark:text-foreground size-9 items-center justify-center rounded-lg text-[#111827] transition-colors hover:bg-black/5 dark:hover:bg-white/10'
+              aria-label={t('Toggle navigation menu')}
+              aria-expanded={mobileOpen}
+            >
+              <HugeiconsIcon
+                icon={mobileOpen ? Cancel01Icon : Menu01Icon}
+                className='size-5'
+              />
+            </button>
+          </div>
         </nav>
       </header>
 
