@@ -43,6 +43,7 @@ import (
 	"github.com/QuantumNous/new-api/relay/channel/task/suno"
 	taskvertex "github.com/QuantumNous/new-api/relay/channel/task/vertex"
 	taskVidu "github.com/QuantumNous/new-api/relay/channel/task/vidu"
+	taskzhipu "github.com/QuantumNous/new-api/relay/channel/task/zhipu"
 	"github.com/QuantumNous/new-api/relay/channel/tencent"
 	"github.com/QuantumNous/new-api/relay/channel/vertex"
 	"github.com/QuantumNous/new-api/relay/channel/volcengine"
@@ -171,6 +172,9 @@ func GetTaskAdaptor(platform constant.TaskPlatform, model string) channel.TaskAd
 				return &minimaxh3.TaskAdaptor{}
 			}
 			return &hailuo.TaskAdaptor{}
+		case constant.ChannelTypeZhipu_v4, constant.ChannelTypeZhipu:
+			// 智谱视频生成（CogVideoX / Vidu）统一走 /api/paas/v4/videos/generations 异步接口。
+			return &taskzhipu.TaskAdaptor{}
 		}
 	}
 	return nil

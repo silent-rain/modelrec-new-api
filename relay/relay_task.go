@@ -17,6 +17,7 @@ import (
 	"github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
+	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/relay/helper"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
@@ -223,6 +224,12 @@ func RelayTaskSubmit(c *gin.Context, info *relaycommon.RelayInfo) (*TaskSubmitRe
 	}
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		responseBody, _ := io.ReadAll(resp.Body)
+		bodyStr := string(responseBody)
+		if len(bodyStr) > 1024 {
+			bodyStr = bodyStr[:1024] + "..."
+		}
+		logger.LogError(c, fmt.Sprintf("task relay upstream error: channel_id=%d channel_type=%d model=%s upstream_model=%s status_code=%d body=%s",
+			info.ChannelId, info.ChannelType, info.OriginModelName, info.UpstreamModelName, resp.StatusCode, bodyStr))
 		return nil, service.TaskErrorWrapper(fmt.Errorf("%s", string(responseBody)), "fail_to_fetch_task", resp.StatusCode)
 	}
 
